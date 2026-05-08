@@ -55,11 +55,11 @@ function mdToHtml(md: string): string {
       if (i < lines.length) i++; // 닫는 ``` 스킵
       const escaped = codeLines.join('\n')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-      const badge = lang
-        ? `<span style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.5em;font-family:monospace">${lang}</span>`
+      const header = lang
+        ? `<div style="background:#2d2d2d;padding:5px 14px;font-size:0.72rem;color:#858585;font-family:ui-monospace,monospace;border-bottom:1px solid #3d3d3d">${lang}</div>`
         : '';
       const key = `\x02${codeBlocks.length}\x03`;
-      codeBlocks.push(`<pre style="background:#1e293b;color:#e2e8f0;padding:1em 1.2em;border-radius:8px;overflow-x:auto;font-size:0.82rem;line-height:1.6;margin:0.8em 0;font-family:ui-monospace,monospace">${badge}<code>${escaped}</code></pre>`);
+      codeBlocks.push(`<div style="border-radius:8px;overflow:hidden;margin:0.8em 0;border:1px solid #3d3d3d">${header}<pre style="background:#1e1e1e;color:#d4d4d4;padding:1em 1.2em;margin:0;overflow-x:auto;font-size:0.82rem;line-height:1.6;font-family:ui-monospace,monospace"><code>${escaped}</code></pre></div>`);
       out.push('', key, ''); // 앞뒤 빈 줄로 분리 보장
       continue;
     }
