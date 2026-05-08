@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return CATEGORIES.map(cat => ({ category: encodeURIComponent(cat) }));
+  return CATEGORIES.map(cat => ({ category: cat }));
 }
 
 export default async function CategoryPage({ params }: Props) {
