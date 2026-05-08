@@ -20,46 +20,48 @@ const CATEGORY_ICONS: Record<Category, string> = {
   '스타트업 AI 적용': '🏢',
 };
 
+function isSeparatorRow(line: string): boolean {
+  // | --- | --- | 형태인지 확인 (공백·하이픈·콜론·파이프만 있으면 구분선)
+  return line.startsWith('|') && /^[\|\s\-:]+$/.test(line) && line.includes('-');
+}
+
+function parseRow(line: string): string[] {
+  return line.split('|').slice(1, -1).map(c => c.trim());
+}
+
 function mdToHtml(md: string): string {
-  // 1단계: 줄 단위로 표를 먼저 처리
-  const lines = md.split('\n').map(l => l.trim());
+  // 줄바꿈 정규화 후 줄 단위 처리
+  const lines = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const out: string[] = [];
   let i = 0;
 
   while (i < lines.length) {
-    const line = lines[i];
+    const cur  = lines[i].trim();
+    const next = i + 1 < lines.length ? lines[i + 1].trim() : '';
 
-    // 표 시작: 현재 줄이 | 로 시작하고, 다음 비어있지 않은 줄이 구분선(|---|)인 경우
-    const nextNonEmpty = lines.slice(i + 1).find(l => l !== '');
-    if (line.startsWith('|') && nextNonEmpty && /^\|[\s\-:|]+\|$/.test(nextNonEmpty)) {
-      const tableLines: string[] = [line];
-      i++;
-      tableLines.push(lines[i]); // 구분선
-      i++;
-      // 이어지는 | 로 시작하는 줄 수집 (빈 줄 무시)
+    // 표 감지: 현재 줄이 | 포함 + 다음 줄이 구분선
+    if (cur.includes('|') && isSeparatorRow(next)) {
+      const headerCells = parseRow(cur);
+      i += 2; // 헤더 + 구분선 스킵
+
+      const bodyRows: string[][] = [];
       while (i < lines.length) {
-        if (lines[i] === '') { i++; continue; }
-        if (!lines[i].startsWith('|')) break;
-        tableLines.push(lines[i]);
+        const row = lines[i].trim();
+        if (!row.startsWith('|')) break;
+        bodyRows.push(parseRow(row));
         i++;
       }
 
-      const parseRow = (l: string) =>
-        l.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
-
-      const headers = parseRow(tableLines[0]);
-      const rows = tableLines.slice(2).map(parseRow);
-      const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
-      const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      const thead = `<thead><tr>${headerCells.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${bodyRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
       out.push(`<table>${thead}${tbody}</table>`);
       continue;
     }
 
-    out.push(line);
+    out.push(lines[i]);
     i++;
   }
 
-  // 2단계: 나머지 마크다운 처리
   return out.join('\n')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
