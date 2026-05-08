@@ -63,10 +63,9 @@ function mdToHtml(md: string): string {
     .replace(/`(.+?)`/g, '<code>$1</code>')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
     .split('\n\n')
     .map(p => {
-      if (p.startsWith('<h') || p.startsWith('<ul') || p.startsWith('<blockquote')) return p;
+      if (p.startsWith('<h') || p.startsWith('<li') || p.startsWith('<blockquote')) return p;
       return p.trim() ? `<p>${p.replace(/\n/g, '<br />')}</p>` : '';
     })
     .join('\n');
