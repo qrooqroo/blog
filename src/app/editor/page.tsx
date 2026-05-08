@@ -62,31 +62,27 @@ function mdToHtml(md: string): string {
     i++;
   }
 
-  const H1 = 'style="font-size:1.4rem;font-weight:900;color:#0f172a;margin:0.7em 0 0.15em;display:block"';
-  const H2 = 'style="font-size:1.15rem;font-weight:800;color:#1e293b;margin:0.8em 0 0.15em;border-bottom:2px solid #e2e8f0;padding-bottom:0.2em;display:block"';
-  const H3 = 'style="font-size:1rem;font-weight:700;color:#334155;margin:0.6em 0 0.1em;display:block"';
-  const LI = 'style="margin:0;padding:1px 0 1px 1.3em;line-height:1.4;list-style:none;position:relative;display:block;color:#334155;font-size:0.95rem"';
-  const UL = 'style="padding:0;margin:0.3em 0 0.6em;list-style:none"';
+  const H1S = 'font-size:1.4rem;font-weight:900;color:#0f172a;margin:0.7em 0 0.15em;display:block';
+  const H2S = 'font-size:1.15rem;font-weight:800;color:#1e293b;margin:0.8em 0 0.15em;border-bottom:2px solid #e2e8f0;padding-bottom:0.2em;display:block';
+  const H3S = 'font-size:1rem;font-weight:700;color:#334155;margin:0.6em 0 0.1em;display:block';
 
   return out.join('\n')
-    .replace(/^### (.+)$/gm, `<h3 ${H3}>$1</h3>`)
-    .replace(/^## (.+)$/gm, `<h2 ${H2}>$1</h2>`)
-    .replace(/^# (.+)$/gm, `<h1 ${H1}>$1</h1>`)
+    .replace(/^### (.+)$/gm, `<div style="${H3S}">$1</div>`)
+    .replace(/^## (.+)$/gm, `<div style="${H2S}">$1</div>`)
+    .replace(/^# (.+)$/gm, `<div style="${H1S}">$1</div>`)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/[ \t]*---+[ \t]*/gm, '\n\n<hr />\n\n')
-    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/<\/li>\s*\n\s*\n\s*<li>/g, '</li>\n<li>')
-    .replace(/((?:<li>[^\n]*<\/li>\n?)+)/g, m => `<ul ${UL}>${m.trim()}</ul>`)
-    .replace(/<li>/g, `<li ${LI}>`)
+    .replace(/[ \t]*---+[ \t]*/gm, '\n\n<hr style="border:none;border-top:2px solid #e2e8f0;margin:1em 0" />\n\n')
+    .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #6366f1;padding:0.5em 1em;background:#f5f3ff;margin:0.8em 0;border-radius:0 6px 6px 0;color:#4338ca">$1</blockquote>')
+    .replace(/^- (.+)$/gm, '<div class="_li" style="position:relative;padding:0 0 0 1.2em;margin:0;line-height:1.35;font-size:0.95rem;color:#334155"><span style="position:absolute;left:0;color:#6366f1;font-weight:700">•</span>$1</div>')
+    .replace(/(<\/div>)\n\n(<div class="_li")/g, '$1\n$2')
     .split('\n\n')
     .map(p => {
       const t = p.trim();
       if (!t) return '';
-      if (t.startsWith('<h') || t.startsWith('<ul') || t.startsWith('<li') || t.startsWith('<blockquote') || t.startsWith('<table') || t === '<hr />') return t;
-      return `<p style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">${t.replace(/\n/g, '<br />')}</p>`;
+      if (t.startsWith('<div') || t.startsWith('<blockquote') || t.startsWith('<table') || t.startsWith('<hr')) return t;
+      return `<div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">${t.replace(/\n/g, '<br />')}</div>`;
     })
     .join('\n');
 }
