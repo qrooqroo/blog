@@ -75,14 +75,17 @@ function mdToHtml(md: string): string {
     .replace(/`(.+?)`/g, '<code>$1</code>')
     .replace(/[ \t]*---+[ \t]*/gm, '\n\n<hr style="border:none;border-top:2px solid #e2e8f0;margin:1em 0" />\n\n')
     .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #6366f1;padding:0.5em 1em;background:#f5f3ff;margin:0.8em 0;border-radius:0 6px 6px 0;color:#4338ca">$1</blockquote>')
-    .replace(/^- (.+)$/gm, '<div class="_li" style="position:relative;padding:0 0 0 1.2em;margin:0;line-height:1.35;font-size:0.95rem;color:#334155"><span style="position:absolute;left:0;color:#6366f1;font-weight:700">•</span>$1</div>')
-    .replace(/(<\/div>)\n\n(<div class="_li")/g, '$1\n$2')
+    .replace(/^- (.+)$/gm, '<div class="_li" style="position:relative;padding:0 0 0 1.2em;margin:0 0 3px 0;line-height:1.4;font-size:0.95rem;color:#334155"><span style="position:absolute;left:0;color:#6366f1;font-weight:700">•</span>$1</div>')
     .split('\n\n')
     .map(p => {
       const t = p.trim();
       if (!t) return '';
       if (t.startsWith('<div') || t.startsWith('<blockquote') || t.startsWith('<table') || t.startsWith('<hr')) return t;
-      return `<div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">${t.replace(/\n/g, '<br />')}</div>`;
+      // _li div 앞뒤로 <br> 삽입하지 않음
+      const html = t.replace(/\n/g, '<br />')
+        .replace(/<br \/>(<div class="_li")/g, '$1')
+        .replace(/(<\/div>)<br \/>/g, '$1');
+      return `<div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">${html}</div>`;
     })
     .join('\n');
 }
