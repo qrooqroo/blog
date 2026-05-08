@@ -22,12 +22,14 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-6">
-        <span className="w-1 h-6 bg-red-600 rounded-full" />
-        <h1 className="text-2xl font-black text-gray-900">{decoded}</h1>
-        <span className="text-sm text-gray-400">총 {articles.length}개 기사</span>
+      <div className="flex items-center gap-3 mb-8">
+        <span className="w-1 h-7 bg-indigo-500 rounded-full" />
+        <div>
+          <h1 className="text-2xl font-black text-slate-900">{decoded}</h1>
+          <p className="text-sm text-slate-400 mt-0.5">총 {articles.length}개의 노트</p>
+        </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {articles.map(a => (
           <ArticleCard key={a.id} article={a} />
         ))}

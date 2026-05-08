@@ -11,31 +11,36 @@ export default function HomePage() {
 
   const byCategory = CATEGORIES.map(cat => ({
     cat,
-    articles: allArticles.filter(a => a.category === cat).slice(0, 4),
+    articles: allArticles.filter(a => a.category === cat).slice(0, 3),
   }));
 
   return (
-    <div className="space-y-10">
-      {/* 주요 뉴스 */}
+    <div className="space-y-12">
+
+      {/* 히어로: 블로그 소개 */}
+      <section className="text-center py-8">
+        <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+          <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
+          AI와 함께 기록하는 인사이트 노트
+        </div>
+        <h1 className="text-3xl font-black text-slate-900 mb-2">AI Insight Note</h1>
+        <p className="text-slate-500 text-sm max-w-md mx-auto">
+          AI와 나눈 대화, 발견한 인사이트, 기록할 가치 있는 생각들을 모아둔 공간입니다.
+        </p>
+        <div className="flex items-center justify-center gap-6 mt-5 text-sm text-slate-400">
+          <span><strong className="text-slate-700">{allArticles.length}</strong>개의 노트</span>
+          <span><strong className="text-slate-700">{CATEGORIES.length}</strong>개의 카테고리</span>
+        </div>
+      </section>
+
+      {/* 최신 노트 (피처드) */}
       <section>
-        <SectionTitle title="주요 뉴스" href="/" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2">
-            <FeaturedArticle article={featured} />
-          </div>
-          <div className="flex flex-col gap-3">
+        <SectionTitle title="최신 노트" href="/" />
+        <div className="space-y-4">
+          <FeaturedArticle article={featured} />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {rest.slice(0, 3).map(a => (
-              <Link key={a.id} href={`/post/${a.slug}`}
-                className="group flex gap-3 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={a.image} alt={a.title} className="w-20 h-16 object-cover rounded flex-shrink-0" />
-                <div className="min-w-0">
-                  <span className="text-xs text-red-600 font-bold">{a.category}</span>
-                  <p className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug group-hover:text-red-600 transition-colors mt-0.5">
-                    {a.title}
-                  </p>
-                </div>
-              </Link>
+              <ArticleCard key={a.id} article={a} size="small" />
             ))}
           </div>
         </div>
@@ -45,9 +50,9 @@ export default function HomePage() {
       {byCategory.map(({ cat, articles }) => (
         <section key={cat}>
           <SectionTitle title={cat} href={`/category/${encodeURIComponent(cat)}`} />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {articles.map(a => (
-              <ArticleCard key={a.id} article={a} size="small" />
+              <ArticleCard key={a.id} article={a} />
             ))}
           </div>
         </section>
@@ -59,12 +64,12 @@ export default function HomePage() {
 function SectionTitle({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        <span className="w-1 h-5 bg-red-600 rounded-full inline-block" />
-        <h2 className="text-lg font-black text-gray-900">{title}</h2>
+      <div className="flex items-center gap-2.5">
+        <span className="w-1 h-5 bg-indigo-500 rounded-full inline-block" />
+        <h2 className="text-base font-black text-slate-800">{title}</h2>
       </div>
-      <Link href={href} className="text-xs text-gray-400 hover:text-red-600 transition-colors">
-        더보기 →
+      <Link href={href} className="text-xs text-slate-400 hover:text-indigo-500 transition-colors">
+        전체 보기 →
       </Link>
     </div>
   );

@@ -1,12 +1,8 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-body {
-  -webkit-font-smoothing: antialiased;
-}
+body { -webkit-font-smoothing: antialiased; }
 
 .line-clamp-2 {
   display: -webkit-box;
@@ -14,19 +10,35 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-.prose p {
-  margin-bottom: 1.2em;
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+.prose p { margin-bottom: 1.4em; line-height: 1.9; }
 .prose h2 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  color: #111827;
+  margin-top: 2em;
+  margin-bottom: 0.6em;
+  color: #1e293b;
 }
 
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* AI 대화 말풍선 효과 */
+.ai-bubble {
+  position: relative;
+}
+.ai-bubble::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+  border-radius: 2px;
 }

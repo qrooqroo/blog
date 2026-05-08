@@ -19,8 +19,13 @@ export async function generateMetadata({ params }: Props) {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  '경제': 'bg-blue-600', '정치': 'bg-red-600', '사회': 'bg-green-600',
-  '건강': 'bg-teal-600', '스포츠': 'bg-orange-500', 'IT': 'bg-purple-600', '문화': 'bg-pink-600',
+  '경제': 'bg-blue-50 text-blue-700',
+  '정치': 'bg-red-50 text-red-700',
+  '사회': 'bg-green-50 text-green-700',
+  '건강': 'bg-teal-50 text-teal-700',
+  '스포츠': 'bg-orange-50 text-orange-700',
+  'IT': 'bg-violet-50 text-violet-700',
+  '문화': 'bg-pink-50 text-pink-700',
 };
 
 export default async function PostPage({ params }: Props) {
@@ -30,62 +35,70 @@ export default async function PostPage({ params }: Props) {
 
   const related = getAllArticles()
     .filter(a => a.category === article.category && a.id !== article.id)
-    .slice(0, 4);
+    .slice(0, 3);
 
-  const badgeColor = CATEGORY_COLORS[article.category] ?? 'bg-gray-600';
+  const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 
   return (
     <div className="max-w-3xl mx-auto">
       {/* 브레드크럼 */}
-      <nav className="text-sm text-gray-400 mb-4 flex items-center gap-1.5">
-        <Link href="/" className="hover:text-red-600">홈</Link>
+      <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6">
+        <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
         <span>›</span>
-        <Link href={`/category/${encodeURIComponent(article.category)}`} className="hover:text-red-600">{article.category}</Link>
+        <Link href={`/category/${encodeURIComponent(article.category)}`} className="hover:text-indigo-500 transition-colors">
+          {article.category}
+        </Link>
         <span>›</span>
-        <span className="text-gray-600 truncate">{article.title}</span>
+        <span className="text-slate-600 truncate">{article.title}</span>
       </nav>
 
-      {/* 기사 헤더 */}
-      <article className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* 기사 */}
+      <article className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         {/* 히어로 이미지 */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={article.image} alt={article.title} className="w-full h-64 object-cover" />
+        <img
+          src={article.image}
+          alt={article.title}
+          className="w-full h-64 object-cover"
+        />
 
         <div className="p-6 md:p-8">
-          {/* 카테고리 + 날짜 */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`text-xs font-bold text-white px-2.5 py-1 rounded ${badgeColor}`}>
+          {/* 메타 */}
+          <div className="flex items-center gap-2.5 mb-4">
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tagColor}`}>
               {article.category}
             </span>
-            <time className="text-sm text-gray-400">{formatDate(article.date)}</time>
+            <time className="text-sm text-slate-400">{formatDate(article.date)}</time>
           </div>
 
           {/* 제목 */}
-          <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-4">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-5">
             {article.title}
           </h1>
 
-          {/* 요약 */}
-          <p className="text-base text-gray-500 leading-relaxed border-l-4 border-red-500 pl-4 mb-8 bg-red-50 py-3 rounded-r">
-            {article.excerpt}
-          </p>
+          {/* 요약 — AI 말풍선 스타일 */}
+          <div className="ai-bubble pl-5 mb-8 py-3 bg-indigo-50 rounded-r-xl">
+            <p className="text-sm text-indigo-800 leading-relaxed font-medium">
+              {article.excerpt}
+            </p>
+          </div>
 
           {/* 본문 */}
           <div
-            className="prose prose-gray max-w-none text-base leading-8 text-gray-700"
+            className="prose text-slate-700 text-[0.95rem] leading-8"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </div>
       </article>
 
-      {/* 관련 기사 */}
+      {/* 관련 노트 */}
       {related.length > 0 && (
         <section className="mt-10">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-1 h-5 bg-red-600 rounded-full" />
-            <h2 className="text-lg font-black text-gray-900">관련 기사</h2>
+          <div className="flex items-center gap-2.5 mb-4">
+            <span className="w-1 h-5 bg-indigo-500 rounded-full" />
+            <h2 className="text-base font-black text-slate-800">관련 노트</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {related.map(a => (
               <ArticleCard key={a.id} article={a} size="small" />
             ))}

@@ -11,16 +11,16 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Insight Note - 세상의 온갖 잡지식을 담다',
-  description: '경제, 정치, 사회, 건강, 스포츠, IT, 문화 등 최신 뉴스를 전달합니다.',
+  title: 'AI Insight Note',
+  description: 'AI와 나눈 대화, 발견한 인사이트, 기록할 가치 있는 생각들을 모아둔 노트입니다.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body className={`${notoSansKR.className} bg-gray-50 min-h-screen`}>
+      <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
         <Header />
-        <main className="max-w-6xl mx-auto px-4 py-8">
+        <main className="max-w-5xl mx-auto px-4 py-10">
           {children}
         </main>
         <Footer />
