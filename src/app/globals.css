@@ -55,7 +55,19 @@ body { -webkit-font-smoothing: antialiased; }
 .prose-ai h3 { font-size: 1rem;   font-weight: 700; color: #334155; margin: 1.2em 0 0.3em; }
 .prose-ai p  { font-size: 0.95rem; line-height: 1.85; color: #334155; margin-bottom: 1em; }
 .prose-ai ul { padding-left: 1.4em; margin-bottom: 1em; }
-.prose-ai li { font-size: 0.95rem; line-height: 1.75; color: #334155; margin-bottom: 0.3em; }
+.prose-ai li {
+  font-size: 0.95rem; line-height: 1.75; color: #334155; margin-bottom: 0.3em;
+  padding-left: 1.6em;
+  position: relative;
+  list-style: none;
+}
+.prose-ai li::before {
+  content: '•';
+  position: absolute;
+  left: 0.4em;
+  color: #6366f1;
+  font-weight: 700;
+}
 .prose-ai blockquote { border-left: 3px solid #6366f1; padding: 0.6em 1em; background: #f5f3ff; border-radius: 0 8px 8px 0; margin: 1em 0; }
 .prose-ai blockquote p { color: #4338ca; margin: 0; }
 .prose-ai code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #6366f1; }
