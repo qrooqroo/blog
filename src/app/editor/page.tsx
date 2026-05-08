@@ -70,10 +70,12 @@ export default function EditorPage() {
   const [category, setCategory] = useState<Category>('AI 대화');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
-  const [showPreview, setShowPreview]   = useState(false);
-  const [showExport, setShowExport]     = useState(false);
-  const [copied, setCopied]             = useState(false);
-  const [savedAt, setSavedAt]           = useState('');
+  const [showPreview, setShowPreview]     = useState(false);
+  const [showExport, setShowExport]       = useState(false);
+  const [copied, setCopied]               = useState(false);
+  const [savedAt, setSavedAt]             = useState('');
+  const [publishing, setPublishing]       = useState(false);
+  const [publishResult, setPublishResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   // 초안 불러오기
   useEffect(() => {
@@ -102,6 +104,39 @@ export default function EditorPage() {
     return () => clearTimeout(t);
   }, [save]);
 
+  const publish = async () => {
+    if (!title.trim()) { alert('제목을 입력해주세요.'); return; }
+    if (!excerpt.trim()) { alert('요약을 입력해주세요.'); return; }
+    if (!content.trim()) { alert('내용을 입력해주세요.'); return; }
+    if (!confirm(`"${title}" 글을 발행하시겠습니까?\n\n발행 후 1~2분 내에 블로그에 반영됩니다.`)) return;
+
+    setPublishing(true);
+    setPublishResult(null);
+
+    const slug = generateSlug(title);
+    const html = mdToHtml(content);
+    const date = new Date().toISOString().split('T')[0];
+
+    try {
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, slug, category, excerpt, content: html, date }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPublishResult({ ok: true, msg: `발행 완료! 1~2분 후 블로그에 반영됩니다.` });
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        setPublishResult({ ok: false, msg: data.error ?? '발행 실패' });
+      }
+    } catch {
+      setPublishResult({ ok: false, msg: '네트워크 오류가 발생했습니다.' });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const resetDraft = () => {
     if (!confirm('초안을 초기화하시겠습니까?')) return;
     setTitle(''); setCategory('AI 대화'); setExcerpt(''); setContent('');
@@ -109,6 +144,7 @@ export default function EditorPage() {
     setSavedAt('');
   };
 
+  // 내보내기 (fallback용 유지)
   const copyCode = () => {
     navigator.clipboard.writeText(generateArticleCode({ title, category, excerpt, content, savedAt }));
     setCopied(true);
@@ -130,15 +166,16 @@ export default function EditorPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${showPreview ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${showPreview ? 'bg-slate-700 text-white border-slate-700' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
             >
               {showPreview ? '✏️ 편집' : '👁️ 미리보기'}
             </button>
             <button
-              onClick={() => setShowExport(true)}
-              className="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+              onClick={publish}
+              disabled={publishing}
+              className="px-4 py-1.5 text-sm font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              📤 내보내기
+              {publishing ? '발행 중...' : '🚀 발행하기'}
             </button>
             <button
               onClick={resetDraft}
@@ -149,6 +186,14 @@ export default function EditorPage() {
           </div>
         </div>
       </div>
+
+      {/* 발행 결과 알림 */}
+      {publishResult && (
+        <div className={`px-4 py-3 text-sm font-medium flex items-center justify-between ${publishResult.ok ? 'bg-green-50 text-green-700 border-b border-green-200' : 'bg-red-50 text-red-700 border-b border-red-200'}`}>
+          <span>{publishResult.ok ? '✅' : '❌'} {publishResult.msg}</span>
+          <button onClick={() => setPublishResult(null)} className="ml-4 opacity-60 hover:opacity-100 text-lg leading-none">×</button>
+        </div>
+      )}
 
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-5">
 
