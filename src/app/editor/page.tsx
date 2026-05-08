@@ -59,7 +59,7 @@ function mdToHtml(md: string): string {
         ? `<div style="background:#2d2d2d;padding:5px 14px;font-size:0.72rem;color:#858585;font-family:ui-monospace,monospace;border-bottom:1px solid #3d3d3d">${lang}</div>`
         : '';
       const key = `\x02${codeBlocks.length}\x03`;
-      codeBlocks.push(`<div style="border-radius:8px;overflow:hidden;margin:0.8em 0;border:1px solid #3d3d3d">${header}<pre style="background:#1e1e1e;color:#d4d4d4;padding:1em 1.2em;margin:0;overflow-x:auto;font-size:0.82rem;line-height:1.6;font-family:ui-monospace,monospace"><code style="color:#d4d4d4;background:none;padding:0;border-radius:0;font-size:inherit;font-family:inherit">${escaped}</code></pre></div>`);
+      codeBlocks.push(`<div style="border-radius:8px;overflow:hidden;margin:0.8em 0;border:1px solid #3d3d3d">${header}<pre style="background:#1e1e1e;color:#d4d4d4;padding:1em 1.2em;margin:0;overflow-x:auto;font-size:0.82rem;line-height:1.6;font-family:ui-monospace,monospace"><code style="color:#d4d4d4;background:none;padding:0;border-radius:0;font-size:inherit;font-family:inherit;font-weight:500">${escaped}</code></pre></div>`);
       out.push('', key, ''); // 앞뒤 빈 줄로 분리 보장
       continue;
     }
