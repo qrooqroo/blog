@@ -51,7 +51,7 @@ function mdToHtml(md: string): string {
       const bodyRows: string[][] = [];
       while (i < lines.length) {
         const row = lines[i].trim();
-        if (!row.startsWith('|')) break;
+        if (!row.startsWith('|') && !row.startsWith('│')) break;
         bodyRows.push(parseRow(row));
         i++;
       }
