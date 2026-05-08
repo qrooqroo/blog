@@ -61,6 +61,8 @@ body { -webkit-font-smoothing: antialiased; }
 .prose-ai code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #6366f1; }
 .prose-ai strong { font-weight: 700; color: #0f172a; }
 
+.prose-ai hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
+
 .prose-ai table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
 .prose-ai thead tr { background: #f1f5f9; }
 .prose-ai th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
