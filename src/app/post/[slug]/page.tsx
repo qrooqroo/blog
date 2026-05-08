@@ -45,7 +45,7 @@ export default async function PostPage({ params }: Props) {
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6">
         <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
         <span>›</span>
-        <Link href={`/category/${encodeURIComponent(article.category)}`} className="hover:text-indigo-500 transition-colors">
+        <Link href={`/news/category/${encodeURIComponent(article.category)}`} className="hover:text-indigo-500 transition-colors">
           {article.category}
         </Link>
         <span>›</span>

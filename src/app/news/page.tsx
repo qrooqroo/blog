@@ -49,7 +49,7 @@ export default function NewsPage() {
       {/* 카테고리별 섹션 */}
       {byCategory.map(({ cat, articles }) => (
         <section key={cat}>
-          <SectionTitle title={cat} href={`/category/${encodeURIComponent(cat)}`} />
+          <SectionTitle title={cat} href={`/news/category/${encodeURIComponent(cat)}`} />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {articles.map(a => (
               <ArticleCard key={a.id} article={a} />

@@ -30,7 +30,7 @@ export default function Footer() {
               {CATEGORIES.map(cat => (
                 <Link
                   key={cat}
-                  href={`/category/${encodeURIComponent(cat)}`}
+                  href={`/news/category/${encodeURIComponent(cat)}`}
                   className="text-xs px-3 py-1.5 bg-slate-100 text-slate-600 rounded-full hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
                 >
                   {cat}

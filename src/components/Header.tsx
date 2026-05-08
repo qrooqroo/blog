@@ -33,7 +33,7 @@ export default function Header() {
           {CATEGORIES.map(cat => (
             <Link
               key={cat}
-              href={`/category/${encodeURIComponent(cat)}`}
+              href={`/news/category/${encodeURIComponent(cat)}`}
               className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
             >
               {cat}
