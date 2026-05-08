@@ -21,9 +21,9 @@ const CATEGORY_ICONS: Record<Category, string> = {
 };
 
 function parseTable(block: string): string | null {
-  const lines = block.split('\n').filter(l => l.trim());
+  const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   if (lines.length < 3) return null;
-  if (!lines[0].includes('|') || !lines[1].match(/^\|[\s\-|]+\|$/)) return null;
+  if (!lines[0].startsWith('|') || !lines[1].match(/^\|[\s\-:|]+\|$/)) return null;
 
   const parseRow = (line: string) =>
     line.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
