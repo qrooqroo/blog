@@ -20,6 +20,22 @@ const CATEGORY_ICONS: Record<Category, string> = {
   '스타트업 AI 적용': '🏢',
 };
 
+function parseTable(block: string): string | null {
+  const lines = block.split('\n').filter(l => l.trim());
+  if (lines.length < 3) return null;
+  if (!lines[0].includes('|') || !lines[1].match(/^\|[\s\-|]+\|$/)) return null;
+
+  const parseRow = (line: string) =>
+    line.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+
+  const headers = parseRow(lines[0]);
+  const rows    = lines.slice(2).map(parseRow);
+
+  const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  return `<table>${thead}${tbody}</table>`;
+}
+
 function mdToHtml(md: string): string {
   return md
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -33,6 +49,8 @@ function mdToHtml(md: string): string {
     .split('\n\n')
     .map(p => {
       if (p.startsWith('<h') || p.startsWith('<li') || p.startsWith('<blockquote')) return p;
+      const table = parseTable(p);
+      if (table) return table;
       return p.trim() ? `<p>${p.replace(/\n/g, '<br />')}</p>` : '';
     })
     .join('\n');
