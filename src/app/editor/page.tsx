@@ -20,13 +20,17 @@ const CATEGORY_ICONS: Record<Category, string> = {
   '스타트업 AI 적용': '🏢',
 };
 
+function normalizeBar(s: string): string {
+  return s.replace(/│/g, '|');
+}
+
 function isSeparatorRow(line: string): boolean {
-  // | --- | --- | 형태인지 확인 (공백·하이픈·콜론·파이프만 있으면 구분선)
-  return line.startsWith('|') && /^[\|\s\-:]+$/.test(line) && line.includes('-');
+  const n = normalizeBar(line);
+  return n.startsWith('|') && /^[\|\s\-:]+$/.test(n) && n.includes('-');
 }
 
 function parseRow(line: string): string[] {
-  return line.split('|').slice(1, -1).map(c => c.trim());
+  return normalizeBar(line).split('|').slice(1, -1).map(c => c.trim());
 }
 
 function mdToHtml(md: string): string {
@@ -40,7 +44,7 @@ function mdToHtml(md: string): string {
     const next = i + 1 < lines.length ? lines[i + 1].trim() : '';
 
     // 표 감지: 현재 줄이 | 포함 + 다음 줄이 구분선
-    if (cur.includes('|') && isSeparatorRow(next)) {
+    if ((cur.includes('|') || cur.includes('│')) && isSeparatorRow(next)) {
       const headerCells = parseRow(cur);
       i += 2; // 헤더 + 구분선 스킵
 
