@@ -309,7 +309,7 @@ export default function EditorPage() {
             {title && <h1 className="text-2xl font-black text-slate-900 mb-4">{title}</h1>}
             {excerpt && (
               <div className="ai-bubble pl-5 mb-8 py-3 bg-indigo-50 rounded-r-xl">
-                <p className="text-sm text-indigo-800 font-medium">{excerpt}</p>
+                <p className="text-sm text-indigo-800 font-medium whitespace-pre-wrap">{excerpt}</p>
               </div>
             )}
             <div className="prose-ai" dangerouslySetInnerHTML={{ __html: mdToHtml(content) }} />
