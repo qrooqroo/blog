@@ -67,9 +67,9 @@ function mdToHtml(md: string): string {
   const H3S = 'font-size:1rem;font-weight:700;color:#334155;margin:0.6em 0 0.1em;display:block';
 
   return out.join('\n')
-    .replace(/^### (.+)$/gm, `<div style="${H3S}">$1</div>`)
-    .replace(/^## (.+)$/gm, `<div style="${H2S}">$1</div>`)
-    .replace(/^# (.+)$/gm, `<div style="${H1S}">$1</div>`)
+    .replace(/^###\s*(.+)$/gm, `<div style="${H3S}">$1</div>`)
+    .replace(/^##\s*(.+)$/gm, `<div style="${H2S}">$1</div>`)
+    .replace(/^#\s*(.+)$/gm, `<div style="${H1S}">$1</div>`)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
