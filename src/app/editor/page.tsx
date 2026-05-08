@@ -20,24 +20,47 @@ const CATEGORY_ICONS: Record<Category, string> = {
   '스타트업 AI 적용': '🏢',
 };
 
-function parseTable(block: string): string | null {
-  const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  if (lines.length < 3) return null;
-  if (!lines[0].startsWith('|') || !lines[1].match(/^\|[\s\-:|]+\|$/)) return null;
-
-  const parseRow = (line: string) =>
-    line.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
-
-  const headers = parseRow(lines[0]);
-  const rows    = lines.slice(2).map(parseRow);
-
-  const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
-  const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
-  return `<table>${thead}${tbody}</table>`;
-}
-
 function mdToHtml(md: string): string {
-  return md
+  // 1단계: 줄 단위로 표를 먼저 처리
+  const lines = md.split('\n').map(l => l.trim());
+  const out: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // 표 시작: 현재 줄이 | 로 시작하고, 다음 비어있지 않은 줄이 구분선(|---|)인 경우
+    const nextNonEmpty = lines.slice(i + 1).find(l => l !== '');
+    if (line.startsWith('|') && nextNonEmpty && /^\|[\s\-:|]+\|$/.test(nextNonEmpty)) {
+      const tableLines: string[] = [line];
+      i++;
+      tableLines.push(lines[i]); // 구분선
+      i++;
+      // 이어지는 | 로 시작하는 줄 수집 (빈 줄 무시)
+      while (i < lines.length) {
+        if (lines[i] === '') { i++; continue; }
+        if (!lines[i].startsWith('|')) break;
+        tableLines.push(lines[i]);
+        i++;
+      }
+
+      const parseRow = (l: string) =>
+        l.split('|').map(c => c.trim()).filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+
+      const headers = parseRow(tableLines[0]);
+      const rows = tableLines.slice(2).map(parseRow);
+      const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+      out.push(`<table>${thead}${tbody}</table>`);
+      continue;
+    }
+
+    out.push(line);
+    i++;
+  }
+
+  // 2단계: 나머지 마크다운 처리
+  return out.join('\n')
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
@@ -48,9 +71,7 @@ function mdToHtml(md: string): string {
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .split('\n\n')
     .map(p => {
-      if (p.startsWith('<h') || p.startsWith('<li') || p.startsWith('<blockquote')) return p;
-      const table = parseTable(p);
-      if (table) return table;
+      if (p.startsWith('<h') || p.startsWith('<li') || p.startsWith('<blockquote') || p.startsWith('<table')) return p;
       return p.trim() ? `<p>${p.replace(/\n/g, '<br />')}</p>` : '';
     })
     .join('\n');
