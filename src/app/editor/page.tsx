@@ -60,7 +60,7 @@ function mdToHtml(md: string): string {
         : '';
       const key = `\x02${codeBlocks.length}\x03`;
       codeBlocks.push(`<pre style="background:#1e293b;color:#e2e8f0;padding:1em 1.2em;border-radius:8px;overflow-x:auto;font-size:0.82rem;line-height:1.6;margin:0.8em 0;font-family:ui-monospace,monospace">${badge}<code>${escaped}</code></pre>`);
-      out.push(key);
+      out.push('', key, ''); // 앞뒤 빈 줄로 분리 보장
       continue;
     }
 
