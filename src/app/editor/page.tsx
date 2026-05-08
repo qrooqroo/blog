@@ -34,14 +34,35 @@ function parseRow(line: string): string[] {
 }
 
 function mdToHtml(md: string): string {
-  // 줄바꿈 정규화 후 줄 단위 처리
   const lines = md.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const out: string[] = [];
+  const codeBlocks: string[] = [];
   let i = 0;
 
   while (i < lines.length) {
     const cur  = lines[i].trim();
     const next = i + 1 < lines.length ? lines[i + 1].trim() : '';
+
+    // 코드 블록 감지: ``` 로 시작
+    if (cur.startsWith('```')) {
+      const lang = cur.slice(3).trim();
+      i++;
+      const codeLines: string[] = [];
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length) i++; // 닫는 ``` 스킵
+      const escaped = codeLines.join('\n')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const badge = lang
+        ? `<span style="display:block;font-size:0.7rem;color:#94a3b8;margin-bottom:0.5em;font-family:monospace">${lang}</span>`
+        : '';
+      const key = `\x02${codeBlocks.length}\x03`;
+      codeBlocks.push(`<pre style="background:#1e293b;color:#e2e8f0;padding:1em 1.2em;border-radius:8px;overflow-x:auto;font-size:0.82rem;line-height:1.6;margin:0.8em 0;font-family:ui-monospace,monospace">${badge}<code>${escaped}</code></pre>`);
+      out.push(key);
+      continue;
+    }
 
     // 표 감지: 현재 줄이 | 포함 + 다음 줄이 구분선
     if ((cur.includes('|') || cur.includes('│')) && isSeparatorRow(next)) {
@@ -70,7 +91,7 @@ function mdToHtml(md: string): string {
   const H2S = 'font-size:1.15rem;font-weight:800;color:#1e293b;margin:0.8em 0 0.15em;border-bottom:2px solid #e2e8f0;padding-bottom:0.2em;display:block';
   const H3S = 'font-size:1rem;font-weight:700;color:#334155;margin:0.6em 0 0.1em;display:block';
 
-  return out.join('\n')
+  const raw = out.join('\n')
     .replace(/^###\s*(.+)$/gm, `<div style="${H3S}">$1</div>`)
     .replace(/^##\s*(.+)$/gm, `<div style="${H2S}">$1</div>`)
     .replace(/^#\s*(.+)$/gm, `<div style="${H1S}">$1</div>`)
@@ -85,14 +106,16 @@ function mdToHtml(md: string): string {
     .map(p => {
       const t = p.trim();
       if (!t) return '';
-      if (t.startsWith('<div') || t.startsWith('<blockquote') || t.startsWith('<table') || t.startsWith('<hr')) return t;
-      // _li/_ol div 앞뒤로 <br> 삽입하지 않음
+      if (t.startsWith('<div') || t.startsWith('<blockquote') || t.startsWith('<table') || t.startsWith('<hr') || /^\x02\d+\x03$/.test(t)) return t;
       const html = t.replace(/\n/g, '<br />')
         .replace(/<br \/>(<div class="_li"|<div class="_ol")/g, '$1')
         .replace(/(<\/div>)<br \/>/g, '$1');
       return `<div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">${html}</div>`;
     })
     .join('\n');
+
+  // 코드 블록 플레이스홀더 복원
+  return raw.replace(/\x02(\d+)\x03/g, (_, idx) => codeBlocks[parseInt(idx)]);
 }
 
 function generateSlug(title: string): string {
