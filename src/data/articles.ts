@@ -1,5 +1,6 @@
 import { Article, Category } from '@/types';
 
+// 카테고리 기본 이미지 (fallback)
 const IMAGES: Record<Category, string> = {
   '경제': 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&fit=crop',
   '정치': 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80&fit=crop',
@@ -8,6 +9,87 @@ const IMAGES: Record<Category, string> = {
   '스포츠': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80&fit=crop',
   'IT': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&fit=crop',
   '문화': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&fit=crop',
+};
+
+// 기사별 개별 이미지 (주제에 맞게 선별)
+const ARTICLE_IMAGES: Record<string, string> = {
+  // 경제
+  'kospi-7300-high':      'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&fit=crop', // 주식 거래 화면
+  'bok-rate-hike':        'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80&fit=crop', // 동전/금리
+  'samsung-q1-profit':    'https://images.unsplash.com/photo-1569605803663-e9337d901ff9?w=800&q=80&fit=crop', // 반도체 웨이퍼
+  'real-estate-gap':      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80&fit=crop', // 아파트 단지
+  'oil-price-drop':       'https://images.unsplash.com/photo-1518544969827-d07b30aa3af7?w=800&q=80&fit=crop', // 유조선
+  'youth-savings-close':  'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&q=80&fit=crop', // 저금통/저축
+  'export-record':        'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=800&q=80&fit=crop', // 컨테이너 항구
+  'won-dollar-exchange':  'https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=800&q=80&fit=crop', // 환율/외화
+  'consumer-price':       'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80&fit=crop', // 마트/물가
+  'skhynix-hbm':          'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&fit=crop', // 회로기판
+  // 정치
+  'local-election-26days': 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&q=80&fit=crop', // 투표함
+  'constitutional-amendment': 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80&fit=crop', // 국회의사당
+  'busan-election':       'https://images.unsplash.com/photo-1494172961521-33799ddd43a5?w=800&q=80&fit=crop', // 투표 용지
+  'nk-constitution':      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&fit=crop', // 철조망/국경
+  'hormuz-attack':        'https://images.unsplash.com/photo-1559941727-6fb446e7e8ae?w=800&q=80&fit=crop', // 해상 선박
+  'ukraine-ceasefire':    'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=800&q=80&fit=crop', // 외교 협상
+  'approval-rating':      'https://images.unsplash.com/photo-1507036066871-b7e8032b3dea?w=800&q=80&fit=crop', // 설문조사
+  'democratic-local-candidates': 'https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=800&q=80&fit=crop', // 선거 집회
+  'korea-us-summit':      'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80&fit=crop', // 악수/정상회담
+  'corruption-probe':     'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80&fit=crop', // 법원/망치
+  // 사회
+  'gwangju-stabbing':     'https://images.unsplash.com/photo-1593697821028-7cc59cfd7399?w=800&q=80&fit=crop', // 경찰차
+  'childrens-day-charity': 'https://images.unsplash.com/photo-1484820540004-14229fe36ca4?w=800&q=80&fit=crop', // 아이들
+  'birth-rate-low':       'https://images.unsplash.com/photo-1491013516836-7db643ee125a?w=800&q=80&fit=crop', // 신생아
+  'single-household':     'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80&fit=crop', // 1인 아파트
+  'youth-unemployment':   'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80&fit=crop', // 구직/노트북
+  'nursing-home-antibiotic': 'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&q=80&fit=crop', // 노인 요양
+  'heat-wave-may':        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&fit=crop', // 폭염/태양
+  'pet-industry':         'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80&fit=crop', // 반려견
+  'foreign-workers':      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80&fit=crop', // 다문화 노동자
+  'school-violence':      'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80&fit=crop', // 학교 복도
+  // 건강
+  '5th-insurance':        'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop', // 보험 서류
+  'kcell-bank':           'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=800&q=80&fit=crop', // 연구실/현미경
+  'glp1-obesity':         'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80&fit=crop', // 의약품
+  'youth-depression':     'https://images.unsplash.com/photo-1509475826633-fed4a6f28d84?w=800&q=80&fit=crop', // 우울/청년
+  'dementia-policy':      'https://images.unsplash.com/photo-1568079636092-81e1b7cd56c2?w=800&q=80&fit=crop', // 노인 케어
+  'cancer-ai':            'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&q=80&fit=crop', // MRI/의료 영상
+  'terminal-care':        'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80&fit=crop', // 병원 복도
+  'heatstroke':           'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=800&q=80&fit=crop', // 뙤약볕
+  'maternal-health':      'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800&q=80&fit=crop', // 임산부/육아
+  'medical-fee':          'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&q=80&fit=crop', // 청진기/의사
+  // 스포츠
+  'kbo-record':           'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80&fit=crop', // 야구장
+  'son-heung-min':        'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&q=80&fit=crop', // 축구
+  'lee-jung-hoo':         'https://images.unsplash.com/photo-1499096816390-44fa6c9d4b30?w=800&q=80&fit=crop', // 야구 배팅
+  'ahn-se-young':         'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80&fit=crop', // 배드민턴
+  'lee-kang-in':          'https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80&fit=crop', // 축구 경기
+  'kim-do-young':         'https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=800&q=80&fit=crop', // 야구 필드
+  'world-cup-qualify':    'https://images.unsplash.com/photo-1508098682722-e99c643e7f0b?w=800&q=80&fit=crop', // 월드컵 스타디움
+  'kleague':              'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&q=80&fit=crop', // K리그 축구
+  'hur-woong':            'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80&fit=crop', // 농구
+  'kim-joo-hyung':        'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=800&q=80&fit=crop', // 골프
+  // IT
+  'samsung-hbm4':         'https://images.unsplash.com/photo-1569605803663-e9337d901ff9?w=800&q=80&fit=crop', // 반도체 칩
+  'agentic-ai':           'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&fit=crop', // AI 시각화
+  'upstage-daum':         'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80&fit=crop', // 웹 포털
+  'naver-hyperclova':     'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80&fit=crop', // AI/코드
+  'skt-aidot':            'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80&fit=crop', // AI 스마트폰
+  'cybersecurity':        'https://images.unsplash.com/photo-1550751827-4bd374173312?w=800&q=80&fit=crop', // 사이버 보안
+  'galaxy-s26':           'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80&fit=crop', // 스마트폰
+  '5g-6g':                'https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?w=800&q=80&fit=crop', // 5G 네트워크
+  'sovereign-ai':         'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80&fit=crop', // 데이터센터
+  'ai-startup':           'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop', // 스타트업 오피스
+  // 문화
+  'choi-yena':            'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&fit=crop', // K팝 콘서트
+  'lim-young-woong':      'https://images.unsplash.com/photo-1501386761578-eaa54b1a4515?w=800&q=80&fit=crop', // 콘서트 공연
+  'ive-heya':             'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80&fit=crop', // K팝 퍼포먼스
+  'movie-exhuma':         'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80&fit=crop', // 영화관
+  'queen-of-tears':       'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=800&q=80&fit=crop', // 드라마/TV
+  'squid-game-2':         'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80&fit=crop', // 넷플릭스
+  'bts-comeback':         'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80&fit=crop', // 콘서트 팬
+  'webtoon-global':       'https://images.unsplash.com/photo-1626785774625-ddcddc3445e9?w=800&q=80&fit=crop', // 웹툰/일러스트
+  'crime-city-5':         'https://images.unsplash.com/photo-1535016120720-40c646be5580?w=800&q=80&fit=crop', // 액션 영화
+  'seoul-concerts':       'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&fit=crop', // 서울 공연
 };
 
 const raw: Omit<Article, 'image'>[] = [
@@ -96,6 +178,9 @@ const raw: Omit<Article, 'image'>[] = [
   { id: 70, title: '서울 공연 시장 역대 최대…공연장마다 줄서기', slug: 'seoul-concerts', category: '문화', excerpt: '서울 공연 시장이 역대 최대 1조 5,000억 원 규모로 성장했다. K팝 콘서트부터 뮤지컬까지 전 장르에서 매진 행렬이다.', content: '<p>2026년 서울 공연 시장 규모가 역대 최대인 1조 5,000억 원을 넘어설 것으로 전망된다. K팝 콘서트는 물론 뮤지컬, 클래식, 연극 등 다양한 장르에서 관객이 급증하고 있다.</p>', date: '2026-05-08' },
 ];
 
-export const articles: Article[] = raw.map(a => ({ ...a, image: IMAGES[a.category] }));
+export const articles: Article[] = raw.map(a => ({
+  ...a,
+  image: ARTICLE_IMAGES[a.slug] ?? IMAGES[a.category],
+}));
 
 export const CATEGORIES: Category[] = ['경제', '정치', '사회', '건강', '스포츠', 'IT', '문화'];
