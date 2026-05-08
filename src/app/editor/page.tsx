@@ -281,9 +281,9 @@ export default function EditorPage() {
           <textarea
             value={excerpt}
             onChange={e => setExcerpt(e.target.value)}
-            placeholder="한 두 문장으로 요약해주세요..."
-            rows={2}
-            className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 resize-none transition-colors"
+            placeholder="설명을 입력하세요..."
+            rows={4}
+            className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 resize-y transition-colors"
           />
         </div>
 
