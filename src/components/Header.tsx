@@ -6,14 +6,10 @@ export default function Header() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-4">
         {/* 상단: 로고 */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-100">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="flex items-center py-3 border-b border-gray-100">
+          <Link href="/">
             <span className="text-2xl font-black text-red-600 tracking-tight">AI Insight Note</span>
-            <span className="text-xs text-gray-400 hidden sm:block">세상의 온갖 잡지식을 담다</span>
           </Link>
-          <div className="text-xs text-gray-400">
-            {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
-          </div>
         </div>
 
         {/* 하단: 카테고리 네비게이션 */}
