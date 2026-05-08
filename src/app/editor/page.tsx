@@ -72,11 +72,12 @@ function mdToHtml(md: string): string {
     .replace(/[ \t]*---+[ \t]*/gm, '\n\n<hr />\n\n')
     .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/((?:<li>[^\n]*<\/li>\n?)+)/g, m => `<ul>${m.trim()}</ul>`)
     .split('\n\n')
     .map(p => {
       const t = p.trim();
       if (!t) return '';
-      if (t.startsWith('<h') || t.startsWith('<li') || t.startsWith('<blockquote') || t.startsWith('<table') || t === '<hr />') return t;
+      if (t.startsWith('<h') || t.startsWith('<ul') || t.startsWith('<li') || t.startsWith('<blockquote') || t.startsWith('<table') || t === '<hr />') return t;
       return `<p>${t.replace(/\n/g, '<br />')}</p>`;
     })
     .join('\n');
