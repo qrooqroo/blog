@@ -8,7 +8,7 @@ export default function Header() {
         {/* 상단: 로고 */}
         <div className="flex items-center justify-between py-3 border-b border-gray-100">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-black text-red-600 tracking-tight">생각의 날개</span>
+            <span className="text-2xl font-black text-red-600 tracking-tight">AI Insight Note</span>
             <span className="text-xs text-gray-400 hidden sm:block">세상의 온갖 잡지식을 담다</span>
           </Link>
           <div className="text-xs text-gray-400">

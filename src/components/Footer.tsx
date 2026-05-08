@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="flex flex-col md:flex-row gap-8 justify-between">
           <div>
-            <span className="text-xl font-black text-white">생각의 날개</span>
+            <span className="text-xl font-black text-white">AI Insight Note</span>
             <p className="mt-2 text-sm">세상의 온갖 잡지식을 담다</p>
           </div>
           <div>
@@ -23,7 +23,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-6 text-xs text-center">
-          © 2026 생각의 날개. All rights reserved.
+          © 2026 AI Insight Note. All rights reserved.
         </div>
       </div>
     </footer>

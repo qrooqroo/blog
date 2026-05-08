@@ -11,7 +11,7 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: '생각의 날개 - 세상의 온갖 잡지식을 담다',
+  title: 'AI Insight Note - 세상의 온갖 잡지식을 담다',
   description: '경제, 정치, 사회, 건강, 스포츠, IT, 문화 등 최신 뉴스를 전달합니다.',
 };
 

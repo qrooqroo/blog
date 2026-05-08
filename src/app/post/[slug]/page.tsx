@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const article = getArticleBySlug(slug);
   if (!article) return {};
-  return { title: `${article.title} - 생각의 날개`, description: article.excerpt };
+  return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
