@@ -4,10 +4,13 @@ import FeaturedArticle from '@/components/FeaturedArticle';
 import ArticleCard from '@/components/ArticleCard';
 import Link from 'next/link';
 
-export default function NewsPage() {
-  const featured = getFeaturedArticle();
-  const allArticles = getAllArticles();
-  const rest = allArticles.filter(a => a.id !== featured.id);
+export default async function NewsPage() {
+  const [featured, allArticles] = await Promise.all([
+    getFeaturedArticle(),
+    getAllArticles(),
+  ]);
+
+  const rest = featured ? allArticles.filter(a => a.id !== featured.id) : allArticles;
 
   const byCategory = CATEGORIES.map(cat => ({
     cat,
@@ -34,17 +37,19 @@ export default function NewsPage() {
       </section>
 
       {/* 최신 노트 */}
-      <section>
-        <SectionTitle title="최신 노트" href="/news" />
-        <div className="space-y-4">
-          <FeaturedArticle article={featured} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {rest.slice(0, 3).map(a => (
-              <ArticleCard key={a.id} article={a} size="small" />
-            ))}
+      {featured && (
+        <section>
+          <SectionTitle title="최신 노트" href="/news" />
+          <div className="space-y-4">
+            <FeaturedArticle article={featured} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {rest.slice(0, 3).map(a => (
+                <ArticleCard key={a.id} article={a} size="small" />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 카테고리별 섹션 */}
       {byCategory.map(({ cat, articles }) => (

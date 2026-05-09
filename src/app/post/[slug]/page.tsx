@@ -7,13 +7,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return getAllArticles().map(a => ({ slug: a.slug }));
-}
-
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
   if (!article) return {};
   return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
 }
@@ -26,14 +22,21 @@ const CATEGORY_COLORS: Record<string, string> = {
   '스포츠': 'bg-orange-50 text-orange-700',
   'IT': 'bg-violet-50 text-violet-700',
   '문화': 'bg-pink-50 text-pink-700',
+  'AI 대화': 'bg-indigo-50 text-indigo-700',
+  '논문 분석': 'bg-purple-50 text-purple-700',
+  '스타트업 AI 적용': 'bg-cyan-50 text-cyan-700',
 };
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const [article, allArticles] = await Promise.all([
+    getArticleBySlug(slug),
+    getAllArticles(),
+  ]);
+
   if (!article) notFound();
 
-  const related = getAllArticles()
+  const related = allArticles
     .filter(a => a.category === article.category && a.id !== article.id)
     .slice(0, 3);
 

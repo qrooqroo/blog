@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 
-const GITHUB_API = 'https://api.github.com';
-const OWNER = 'qrooqroo';
-const REPO  = 'blog';
-const FILE  = 'src/data/articles.ts';
+const DEFAULT_IMAGES: Record<string, string> = {
+  'AI 대화':        'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&fit=crop',
+  '논문 분석':      'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80&fit=crop',
+  '스타트업 AI 적용': 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop',
+  '경제':   'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&fit=crop',
+  '정치':   'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&q=80&fit=crop',
+  '사회':   'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop',
+  '건강':   'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80&fit=crop',
+  '스포츠': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80&fit=crop',
+  'IT':     'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&fit=crop',
+  '문화':   'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&fit=crop',
+};
 
 interface ArticlePayload {
   title: string;
@@ -15,11 +24,6 @@ interface ArticlePayload {
 }
 
 export async function POST(req: NextRequest) {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    return NextResponse.json({ error: 'GITHUB_TOKEN 환경변수가 설정되지 않았습니다.' }, { status: 500 });
-  }
-
   const payload: ArticlePayload = await req.json();
   const { title, slug, category, excerpt, content, date } = payload;
 
@@ -27,58 +31,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '제목, slug, 내용은 필수입니다.' }, { status: 400 });
   }
 
-  const headers = {
-    Authorization: `token ${token}`,
-    Accept: 'application/vnd.github.v3+json',
-    'Content-Type': 'application/json',
-  };
+  const image = DEFAULT_IMAGES[category] ?? DEFAULT_IMAGES['IT'];
 
-  // 현재 파일 가져오기
-  const fileRes = await fetch(`${GITHUB_API}/repos/${OWNER}/${REPO}/contents/${FILE}`, { headers });
-  if (!fileRes.ok) {
-    return NextResponse.json({ error: 'GitHub에서 파일을 가져오지 못했습니다.' }, { status: 500 });
-  }
-  const fileData = await fileRes.json();
-  const currentContent = Buffer.from(fileData.content, 'base64').toString('utf-8');
-  const sha = fileData.sha;
+  const { data, error } = await supabase
+    .from('articles')
+    .insert({ title, slug, category, excerpt, content, date, image })
+    .select('id, slug')
+    .single();
 
-  // 마지막 ID 찾기
-  const idMatches = [...currentContent.matchAll(/id:\s*(\d+)/g)];
-  const maxId = idMatches.length > 0 ? Math.max(...idMatches.map(m => parseInt(m[1]))) : 0;
-  const newId = maxId + 1;
-
-  // slug 중복 확인
-  if (currentContent.includes(`slug: '${slug}'`)) {
-    return NextResponse.json({ error: `slug '${slug}'가 이미 존재합니다. 다른 제목을 사용해주세요.` }, { status: 400 });
+  if (error) {
+    if (error.code === '23505') {
+      return NextResponse.json({ error: `slug '${slug}'가 이미 존재합니다. 다른 제목을 사용해주세요.` }, { status: 400 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // 새 기사 코드 생성
-  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
-  const newEntry = `  { id: ${newId}, title: \`${esc(title)}\`, slug: '${slug}', category: '${category}', excerpt: \`${esc(excerpt)}\`, content: \`${esc(content)}\`, date: '${date}' },`;
-
-  // raw 배열 끝 "];" 직전에 삽입
-  const insertPoint = currentContent.lastIndexOf('];');
-  if (insertPoint === -1) {
-    return NextResponse.json({ error: '파일 구조를 파악할 수 없습니다.' }, { status: 500 });
-  }
-
-  const newContent = currentContent.slice(0, insertPoint) + newEntry + '\n' + currentContent.slice(insertPoint);
-
-  // GitHub에 커밋
-  const updateRes = await fetch(`${GITHUB_API}/repos/${OWNER}/${REPO}/contents/${FILE}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify({
-      message: `feat: 새 글 추가 - ${title}`,
-      content: Buffer.from(newContent, 'utf-8').toString('base64'),
-      sha,
-    }),
-  });
-
-  if (!updateRes.ok) {
-    const err = await updateRes.json();
-    return NextResponse.json({ error: `GitHub 커밋 실패: ${err.message}` }, { status: 500 });
-  }
-
-  return NextResponse.json({ success: true, id: newId, slug });
+  return NextResponse.json({ success: true, id: data.id, slug: data.slug });
 }

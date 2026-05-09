@@ -18,7 +18,7 @@ export default async function CategoryPage({ params }: Props) {
 
   if (!CATEGORIES.includes(decoded)) notFound();
 
-  const articles = getArticlesByCategory(decoded);
+  const articles = await getArticlesByCategory(decoded);
 
   return (
     <div>

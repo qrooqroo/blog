@@ -9,6 +9,9 @@ const IMAGES: Record<Category, string> = {
   '스포츠': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80&fit=crop',
   'IT': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&fit=crop',
   '문화': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&fit=crop',
+  'AI 대화': 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&fit=crop',
+  '논문 분석': 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80&fit=crop',
+  '스타트업 AI 적용': 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80&fit=crop',
 };
 
 // 기사별 개별 이미지 (주제에 맞게 선별)
@@ -176,14 +179,8 @@ const raw: Omit<Article, 'image'>[] = [
   { id: 68, title: '한국 웹툰 글로벌 50억 달러 돌파…미국 주류로', slug: 'webtoon-global', category: '문화', excerpt: '한국 웹툰 글로벌 시장이 50억 달러를 돌파했다. 북미 시장에서 미국 전통 만화사들도 웹툰 형식을 채용하기 시작했다.', content: '<p>한국 웹툰의 글로벌 시장 규모가 50억 달러를 돌파했다. 네이버 웹툰 플랫폼의 미국 월간 활성 사용자가 2,000만 명을 넘었다.</p>', date: '2026-05-05' },
   { id: 69, title: '범죄도시 5 개봉 3일 300만 돌파…시리즈 최고 흥행', slug: 'crime-city-5', category: '문화', excerpt: '범죄도시 5가 개봉 3일 만에 300만 관객을 돌파했다. 역대 시리즈 최고 흥행 속도로 최종 1,500만 명이 전망된다.', content: '<p>마동석 주연의 범죄도시 5가 개봉 3일 만에 누적 관객 300만 명을 돌파하며 역대 시리즈 중 가장 빠른 흥행 속도를 기록하고 있다.</p>', date: '2026-05-04' },
   { id: 70, title: '서울 공연 시장 역대 최대…공연장마다 줄서기', slug: 'seoul-concerts', category: '문화', excerpt: '서울 공연 시장이 역대 최대 1조 5,000억 원 규모로 성장했다. K팝 콘서트부터 뮤지컬까지 전 장르에서 매진 행렬이다.', content: '<p>2026년 서울 공연 시장 규모가 역대 최대인 1조 5,000억 원을 넘어설 것으로 전망된다. K팝 콘서트는 물론 뮤지컬, 클래식, 연극 등 다양한 장르에서 관객이 급증하고 있다.</p>', date: '2026-05-08' },
-];
 
-export const articles: Article[] = raw.map(a => ({
-  ...a,
-  image: ARTICLE_IMAGES[a.slug] ?? IMAGES[a.category],
-}));
-
-export const CATEGORIES: Category[] = ['경제', '정치', '사회', '건강', '스포츠', 'IT', '문화'  { id: 71, title: `bitcoin 프로젝트의 소스 분석`, slug: 'bitcoin-프로젝트의-소스-분석-mox2sgin', category: 'AI 대화', excerpt: `Project Name:  bitcoin
+  { id: 71, title: `bitcoin 프로젝트의 소스 분석`, slug: 'bitcoin-프로젝트의-소스-분석-mox2sgin', category: 'AI 대화', excerpt: `Project Name:  bitcoin
 Programming Language: C++
 `, content: `<div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">비트코인이 어떤 방식으로 채굴되는지 자세히 아는 사람이 몇명이나 되겠어요?<br />Bitcoin 프로젝트의 소스 분석을 AI에게 요청하여 여러분의 궁금증을 해결해드리겠습니다.</div>
 <hr style="border:none;border-top:2px solid #e2e8f0;margin:1em 0" />
@@ -405,3 +402,10 @@ Programming Language: C++
 <div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">2016블록마다<br />    └── GetNextWorkRequired() → CalculateNextWorkRequired()<br />          └── 실제 소요 시간 vs 목표 2주 비교 → Target 재조정</div>
 <div style="margin-bottom:0.5em;line-height:1.7;font-size:0.95rem;color:#334155">핵심은 SHA256을 두 번 한 결과가 nBits로 정해진 Target보다 작아야 한다는 단순한 부등식이고,<br />  이 Target을 조정하는 것이 난이도 조정 메커니즘입니다.</div>`, date: '2026-05-08' },
 ];
+
+export const articles: Article[] = raw.map(a => ({
+  ...a,
+  image: ARTICLE_IMAGES[a.slug] ?? IMAGES[a.category],
+}));
+
+export const CATEGORIES: Category[] = ['경제', '정치', '사회', '건강', '스포츠', 'IT', '문화'];
