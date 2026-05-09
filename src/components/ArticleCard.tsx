@@ -49,7 +49,7 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
         </h3>
 
         {size === 'normal' && (
-          <p className="mt-2 text-sm text-slate-500 line-clamp-2 leading-relaxed">
+          <p className="mt-2 text-sm text-slate-500 line-clamp-2 leading-relaxed whitespace-pre-wrap">
             {article.excerpt}
           </p>
         )}

@@ -81,7 +81,7 @@ export default async function PostPage({ params }: Props) {
 
           {/* 요약 — AI 말풍선 스타일 */}
           <div className="ai-bubble pl-5 mb-8 py-3 bg-indigo-50 rounded-r-xl">
-            <p className="text-sm text-indigo-800 leading-relaxed font-medium">
+            <p className="text-sm text-indigo-800 leading-relaxed font-medium whitespace-pre-wrap">
               {article.excerpt}
             </p>
           </div>

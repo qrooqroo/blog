@@ -45,7 +45,7 @@ export default function FeaturedArticle({ article }: { article: Article }) {
             <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-3 group-hover:text-indigo-600 transition-colors">
               {article.title}
             </h2>
-            <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
+            <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 whitespace-pre-wrap">
               {article.excerpt}
             </p>
           </div>
