@@ -76,6 +76,10 @@ body { -webkit-font-smoothing: antialiased; }
 
 .prose-ai hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
 
+/* 숫자 목록 번호 강조 */
+.prose ._ol > span,
+.prose-ai ._ol > span { color: #6366f1 !important; font-weight: 700 !important; }
+
 .prose-ai table,
 .prose table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
 .prose-ai thead tr,
