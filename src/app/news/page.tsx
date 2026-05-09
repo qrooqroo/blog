@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getFeaturedArticle, getAllArticles } from '@/lib/articles';
 import { CATEGORIES } from '@/data/articles';
 import FeaturedArticle from '@/components/FeaturedArticle';

@@ -25,8 +25,14 @@ export default function Header() {
         {/* 카테고리 탭 */}
         <nav className="flex gap-1 overflow-x-auto pb-3 scrollbar-none -mx-1 px-1">
           <Link
-            href="/news"
+            href="/"
             className="flex-shrink-0 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+          >
+            AI 대화
+          </Link>
+          <Link
+            href="/news"
+            className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
           >
             뉴스
           </Link>
