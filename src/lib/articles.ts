@@ -20,6 +20,15 @@ export async function getArticlesByCategory(category: Category): Promise<Article
   return (data ?? []) as Article[];
 }
 
+export async function getArticleById(id: number): Promise<Article | undefined> {
+  const { data } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('id', id)
+    .limit(1);
+  return (data && data.length > 0) ? data[0] as Article : undefined;
+}
+
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   const decoded = decodeURIComponent(slug);
   const { data } = await supabase
