@@ -76,12 +76,18 @@ body { -webkit-font-smoothing: antialiased; }
 
 .prose-ai hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
 
-.prose-ai table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
-.prose-ai thead tr { background: #f1f5f9; }
-.prose-ai th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
-.prose-ai td { padding: 9px 14px; color: #475569; border: 1px solid #e2e8f0; }
-.prose-ai tbody tr:nth-child(even) { background: #f8fafc; }
-.prose-ai tbody tr:hover { background: #f1f5f9; }
+.prose-ai table,
+.prose table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
+.prose-ai thead tr,
+.prose thead tr { background: #f1f5f9; }
+.prose-ai th,
+.prose th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
+.prose-ai td,
+.prose td { padding: 9px 14px; color: #475569; border: 1px solid #e2e8f0; }
+.prose-ai tbody tr:nth-child(even),
+.prose tbody tr:nth-child(even) { background: #f8fafc; }
+.prose-ai tbody tr:hover,
+.prose tbody tr:hover { background: #f1f5f9; }
 
 /* AI 대화 말풍선 효과 */
 .ai-bubble {
