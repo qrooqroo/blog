@@ -22,7 +22,7 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
 
   return (
     <Link
-      href={`/post/${article.slug}`}
+      href={`/post/${article.id}`}
       className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-md transition-all duration-200"
     >
       {/* 썸네일 */}

@@ -17,7 +17,7 @@ export default function FeaturedArticle({ article }: { article: Article }) {
 
   return (
     <Link
-      href={`/post/${article.slug}`}
+      href={`/post/${article.id}`}
       className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-lg transition-all duration-200"
     >
       <div className="md:flex">

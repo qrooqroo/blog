@@ -1,15 +1,15 @@
-import { getArticleBySlug, getAllArticles, formatDate } from '@/lib/articles';
+import { getArticleById, getAllArticles, formatDate } from '@/lib/articles';
 import ArticleCard from '@/components/ArticleCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const { id } = await params;
+  const article = await getArticleById(Number(id));
   if (!article) return {};
   return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
 }
@@ -28,9 +28,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default async function PostPage({ params }: Props) {
-  const { slug } = await params;
+  const { id } = await params;
   const [article, allArticles] = await Promise.all([
-    getArticleBySlug(slug),
+    getArticleById(Number(id)),
     getAllArticles(),
   ]);
 
@@ -57,16 +57,10 @@ export default async function PostPage({ params }: Props) {
 
       {/* 기사 */}
       <article className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-        {/* 히어로 이미지 */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={article.image}
-          alt={article.title}
-          className="w-full h-64 object-cover"
-        />
+        <img src={article.image} alt={article.title} className="w-full h-64 object-cover" />
 
         <div className="p-6 md:p-8">
-          {/* 메타 */}
           <div className="flex items-center gap-2.5 mb-4">
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tagColor}`}>
               {article.category}
@@ -74,19 +68,16 @@ export default async function PostPage({ params }: Props) {
             <time className="text-sm text-slate-400">{formatDate(article.date)}</time>
           </div>
 
-          {/* 제목 */}
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-5">
             {article.title}
           </h1>
 
-          {/* 요약 — AI 말풍선 스타일 */}
           <div className="ai-bubble pl-5 mb-8 py-3 bg-indigo-50 rounded-r-xl">
             <p className="text-sm text-indigo-800 leading-relaxed font-medium whitespace-pre-wrap">
               {article.excerpt}
             </p>
           </div>
 
-          {/* 본문 */}
           <div
             className="prose text-slate-700 text-[0.95rem] leading-8"
             dangerouslySetInnerHTML={{ __html: article.content }}

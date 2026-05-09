@@ -202,7 +202,7 @@ export default function EditorClient({ article }: Props) {
       <div className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <a href={isEdit ? `/post/${article!.slug}` : '/'} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
+            <a href={isEdit ? `/post/${article!.id}` : '/'} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
               ← {isEdit ? '글로 돌아가기' : '홈'}
             </a>
             <span className="text-slate-200">|</span>
