@@ -7,6 +7,7 @@ export interface Article {
   category: Category;
   excerpt: string;
   content: string;
+  markdown_content?: string | null;
   date: string;
   image: string;
 }

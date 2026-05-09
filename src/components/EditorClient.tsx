@@ -103,7 +103,7 @@ export default function EditorClient({ article }: Props) {
   const [title,    setTitle]    = useState(article?.title    ?? '');
   const [category, setCategory] = useState<string>(article?.category ?? 'AI 대화');
   const [excerpt,  setExcerpt]  = useState(article?.excerpt  ?? '');
-  const [content,  setContent]  = useState(article?.content  ?? '');
+  const [content,  setContent]  = useState(article?.markdown_content ?? '');
   const [showPreview, setShowPreview] = useState(false);
   const [savedAt,     setSavedAt]     = useState('');
   const [saving,      setSaving]      = useState(false);
@@ -150,26 +150,27 @@ export default function EditorClient({ article }: Props) {
     setSaving(true); setResult(null);
 
     try {
+      const html = mdToHtml(content);
+
       if (isEdit) {
-        // 편집: PUT /api/articles/:id (HTML 그대로 저장)
+        // 편집: 마크다운 → HTML 변환 후 PUT
         const res = await fetch(`/api/articles/${article!.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category, excerpt, content }),
+          body: JSON.stringify({ title, category, excerpt, content: html, markdown_content: content }),
         });
         const data = await res.json();
         setResult(res.ok
           ? { ok: true,  msg: '수정 완료! 블로그에 바로 반영됩니다.' }
           : { ok: false, msg: data.error ?? '수정 실패' });
       } else {
-        // 신규: POST /api/publish (마크다운 → HTML 변환)
+        // 신규: 마크다운 → HTML 변환 후 POST
         const slug = generateSlug(title);
-        const html = mdToHtml(content);
         const date = new Date().toISOString().split('T')[0];
         const res = await fetch('/api/publish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, slug, category, excerpt, content: html, date }),
+          body: JSON.stringify({ title, slug, category, excerpt, content: html, markdown_content: content, date }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -286,10 +287,10 @@ export default function EditorClient({ article }: Props) {
                 ))}
               </div>
             )}
-            {isEdit && (
+            {isEdit && !article?.markdown_content && (
               <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-100 text-xs text-amber-600 bg-amber-50 rounded-t-xl">
                 <span>⚠️</span>
-                <span>편집 모드에서는 저장된 HTML을 직접 수정합니다. 내용 textarea에 HTML이 표시됩니다.</span>
+                <span>이 글은 원본 마크다운이 없습니다. 마크다운으로 새로 작성하면 저장 시 변환됩니다.</span>
               </div>
             )}
             <textarea

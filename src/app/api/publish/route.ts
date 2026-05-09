@@ -20,12 +20,13 @@ interface ArticlePayload {
   category: string;
   excerpt: string;
   content: string;
+  markdown_content: string;
   date: string;
 }
 
 export async function POST(req: NextRequest) {
   const payload: ArticlePayload = await req.json();
-  const { title, slug, category, excerpt, content, date } = payload;
+  const { title, slug, category, excerpt, content, markdown_content, date } = payload;
 
   if (!title || !slug || !content) {
     return NextResponse.json({ error: '제목, slug, 내용은 필수입니다.' }, { status: 400 });
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('articles')
-    .insert({ title, slug, category, excerpt, content, date, image })
+    .insert({ title, slug, category, excerpt, content, markdown_content, date, image })
     .select('id, slug')
     .single();
 
