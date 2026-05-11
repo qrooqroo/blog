@@ -405,7 +405,7 @@ Programming Language: C++
 
 export const articles: Article[] = raw.map(a => ({
   ...a,
-  image: ARTICLE_IMAGES[a.slug] ?? IMAGES[a.category],
+  image: ARTICLE_IMAGES[a.slug] ?? IMAGES[a.category as keyof typeof IMAGES],
 }));
 
 export const CATEGORIES: Category[] = ['경제', '정치', '사회', '건강', '스포츠', 'IT', '문화'];

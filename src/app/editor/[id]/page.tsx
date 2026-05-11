@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getArticleById } from '@/lib/articles';
+import { getNewsById } from '@/lib/news';
 import EditorClient from '@/components/EditorClient';
 
 interface Props {
@@ -8,7 +9,8 @@ interface Props {
 
 export default async function EditPage({ params }: Props) {
   const { id } = await params;
-  const article = await getArticleById(Number(id));
+  const nid = Number(id);
+  const article = (await getArticleById(nid)) ?? (await getNewsById(nid));
   if (!article) notFound();
   return <EditorClient article={article} />;
 }

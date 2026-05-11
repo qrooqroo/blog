@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { tableFor } from '@/lib/table-utils';
 
 const DEFAULT_IMAGES: Record<string, string> = {
   'AI 대화':        'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&fit=crop',
@@ -14,11 +15,21 @@ const DEFAULT_IMAGES: Record<string, string> = {
   '문화':   'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&fit=crop',
 };
 
+/** 카테고리 이름 → ID 조회 */
+async function getCategoryId(name: string): Promise<number | null> {
+  const { data } = await supabase
+    .from('categories')
+    .select('id')
+    .eq('name', name)
+    .single();
+  return data?.id ?? null;
+}
+
 interface ArticlePayload {
   title: string;
   slug: string;
   category: string;
-  excerpt: string;
+  excerpt?: string;
   content: string;
   markdown_content: string;
   date: string;
@@ -32,11 +43,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '제목, slug, 내용은 필수입니다.' }, { status: 400 });
   }
 
+  const table = tableFor(category);
   const image = DEFAULT_IMAGES[category] ?? DEFAULT_IMAGES['IT'];
 
+  // documents 테이블에 넣는 경우 category_id 사용, news 테이블은 기존 category 텍스트 사용
+  const isDocuments = table === 'documents';
+  // 카테고리를 찾지 못해도 null 로 저장 (선택 사항)
+  const categoryId  = isDocuments && category ? await getCategoryId(category) : null;
+
+  // id 컬럼에 auto-increment 기본값이 없으므로 max(id) + 1 직접 계산
+  const { data: maxRow } = await supabase
+    .from(table)
+    .select('id')
+    .order('id', { ascending: false })
+    .limit(1)
+    .single();
+  const nextId = ((maxRow?.id as number) ?? 0) + 1;
+
+  const insertData = isDocuments
+    ? { id: nextId, title, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image }
+    : { id: nextId, title, slug, category, excerpt: excerpt ?? '', content, markdown_content, date, image };
+
   const { data, error } = await supabase
-    .from('articles')
-    .insert({ title, slug, category, excerpt, content, markdown_content, date, image })
+    .from(table)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .insert(insertData as any)
     .select('id, slug')
     .single();
 

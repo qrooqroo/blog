@@ -48,11 +48,6 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
           {article.title}
         </h3>
 
-        {size === 'normal' && (
-          <p className="mt-2 text-sm text-slate-500 line-clamp-2 leading-relaxed whitespace-pre-wrap">
-            {article.excerpt}
-          </p>
-        )}
       </div>
     </Link>
   );

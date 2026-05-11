@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { tableFor } from '@/lib/table-utils';
 import { Article } from '@/types';
 
 // ── 카테고리 ──────────────────────────────────────────────
-type NewCategory = 'AI 대화' | '논문 분석' | '스타트업 AI 적용';
-const NEW_CATEGORIES: NewCategory[] = ['AI 대화', '논문 분석', '스타트업 AI 적용'];
-const ALL_CATEGORIES = ['AI 대화', '논문 분석', '스타트업 AI 적용', '경제', '정치', '사회', '건강', '스포츠', 'IT', '문화'];
+const ARTICLE_CATEGORIES = ['AI 대화', '논문 분석', '스타트업 AI 적용'];
+const ALL_CATEGORIES     = ['AI 대화', '논문 분석', '스타트업 AI 적용', '뉴스'];
 const CATEGORY_ICONS: Record<string, string> = {
-  'AI 대화': '💬', '논문 분석': '📄', '스타트업 AI 적용': '🏢',
-  '경제': '💰', '정치': '🏛', '사회': '👥', '건강': '🏥', '스포츠': '⚽', 'IT': '💻', '문화': '🎭',
+  'AI 대화': '💬', '논문 분석': '📄', '스타트업 AI 적용': '🏢', '뉴스': '📰',
 };
 
 // ── 마크다운 → HTML ───────────────────────────────────────
@@ -70,7 +71,7 @@ function mdToHtml(md: string): string {
     .replace(/`(.+?)`/g, '<code>$1</code>')
     .replace(/[ \t]*---+[ \t]*/gm, '\n\n<hr style="border:none;border-top:2px solid #e2e8f0;margin:1em 0" />\n\n')
     .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #6366f1;padding:0.5em 1em;background:#f5f3ff;margin:0.8em 0;border-radius:0 6px 6px 0;color:#4338ca">$1</blockquote>')
-    .replace(/^- (.+)$/gm, '<div class="_li" style="position:relative;padding:0 0 0 1.2em;margin:0 0 3px 0;line-height:1.4;font-size:0.95rem;color:#334155"><span style="position:absolute;left:0;color:#6366f1;font-weight:700">•</span>$1</div>')
+    .replace(/^- (.+)$/gm, '<div class="_li" style="display:flex;gap:0.65em;align-items:baseline;margin:0 0 1px 0;line-height:1.4;font-size:0.95rem;color:#334155"><span style="color:#6366f1;font-weight:700;flex-shrink:0">•</span><span>$1</span></div>')
     .replace(/^(\d+)\.\s*(.+)$/gm, '<div class="_ol" style="position:relative;padding:0 0 0 1.8em;margin:0 0 3px 0;line-height:1.4;font-size:0.95rem;color:#334155"><span style="position:absolute;left:0;color:#6366f1;font-weight:700">$1.</span>$2</div>')
     .split('\n\n')
     .map(p => {
@@ -98,16 +99,30 @@ interface Props {
 const STORAGE_KEY = 'ai-insight-editor-draft';
 
 export default function EditorClient({ article }: Props) {
-  const isEdit = !!article;
+  const isEdit  = !!article;
+  const router  = useRouter();
 
   const [title,    setTitle]    = useState(article?.title    ?? '');
-  const [category, setCategory] = useState<string>(article?.category ?? 'AI 대화');
+  const [category, setCategory] = useState<string>(article?.category ?? '');
   const [excerpt,  setExcerpt]  = useState(article?.excerpt  ?? '');
   const [content,  setContent]  = useState(article?.markdown_content ?? '');
   const [showPreview, setShowPreview] = useState(false);
   const [savedAt,     setSavedAt]     = useState('');
   const [saving,      setSaving]      = useState(false);
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+
+  // 카테고리 목록을 DB에서 동적으로 로드
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(data => {
+        if (data.categories) {
+          setDbCategories(data.categories.map((c: { name: string }) => c.name));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // 신규 글: 초안 불러오기
   useEffect(() => {
@@ -116,7 +131,7 @@ export default function EditorClient({ article }: Props) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw);
-      setTitle(d.title || ''); setCategory(d.category || 'AI 대화');
+      setTitle(d.title || ''); setCategory(d.category || '');
       setExcerpt(d.excerpt || ''); setContent(d.content || '');
       setSavedAt(d.savedAt || '');
     } catch { /* ignore */ }
@@ -139,7 +154,6 @@ export default function EditorClient({ article }: Props) {
   // ── 저장 / 발행 ──────────────────────────────────────────
   const handleSave = async () => {
     if (!title.trim())   { alert('제목을 입력해주세요.');   return; }
-    if (!excerpt.trim()) { alert('요약을 입력해주세요.');   return; }
     if (!content.trim()) { alert('내용을 입력해주세요.');   return; }
 
     const confirmMsg = isEdit
@@ -153,8 +167,9 @@ export default function EditorClient({ article }: Props) {
       const html = mdToHtml(content);
 
       if (isEdit) {
-        // 편집: 마크다운 → HTML 변환 후 PUT
-        const res = await fetch(`/api/articles/${article!.id}`, {
+        // 편집: 원본 카테고리 기준으로 어느 테이블인지 결정
+        const table = tableFor(article!.category);
+        const res = await fetch(`/api/articles/${article!.id}?table=${table}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, category, excerpt, content: html, markdown_content: content }),
@@ -188,13 +203,33 @@ export default function EditorClient({ article }: Props) {
   };
 
   const resetDraft = () => {
-    if (!confirm(isEdit ? '변경사항을 초기화하시겠습니까?' : '초안을 초기화하시겠습니까?')) return;
-    setTitle(article?.title ?? ''); setCategory(article?.category ?? 'AI 대화');
-    setExcerpt(article?.excerpt ?? ''); setContent(article?.content ?? '');
-    if (!isEdit) { localStorage.removeItem(STORAGE_KEY); setSavedAt(''); }
+    if (!confirm('초안을 초기화하시겠습니까?')) return;
+    setTitle(''); setCategory(''); setExcerpt(''); setContent('');
+    localStorage.removeItem(STORAGE_KEY); setSavedAt('');
   };
 
-  const displayCategories = isEdit ? ALL_CATEGORIES : NEW_CATEGORIES;
+  const handleDelete = async () => {
+    if (!confirm(`"${title}" 글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+    setSaving(true);
+    try {
+      const table = tableFor(article!.category);
+      const res = await fetch(`/api/articles/${article!.id}?table=${table}`, { method: 'DELETE' });
+      if (res.ok) {
+        router.push('/');
+      } else {
+        const data = await res.json();
+        setResult({ ok: false, msg: data.error ?? '삭제 실패' });
+      }
+    } catch {
+      setResult({ ok: false, msg: '네트워크 오류가 발생했습니다.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // DB에서 로드된 카테고리 우선, 없으면 하드코딩 폴백
+  const editCategories   = dbCategories.length > 0 ? dbCategories : ALL_CATEGORIES;
+  const displayCategories = isEdit ? editCategories : (dbCategories.length > 0 ? dbCategories : ARTICLE_CATEGORIES);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
@@ -210,10 +245,24 @@ export default function EditorClient({ article }: Props) {
             <span className="text-sm font-bold text-slate-700">
               {isEdit ? '✏️ 글 편집' : '✍️ 새 글 작성'}
             </span>
+            <a href="/editor/categories" className="text-xs text-slate-400 hover:text-indigo-500 transition-colors">
+              카테고리 관리
+            </a>
             {!isEdit && savedAt && <span className="text-xs text-slate-400">저장됨 {savedAt}</span>}
             {isEdit && <span className="text-xs text-slate-400 bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full border border-amber-200">편집 모드</span>}
           </div>
           <div className="flex items-center gap-2">
+            {isEdit && (
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+                className="text-sm border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 outline-none focus:border-indigo-400 transition-colors"
+              >
+                {editCategories.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            )}
             <button
               onClick={() => setShowPreview(!showPreview)}
               className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${showPreview ? 'bg-slate-700 text-white border-slate-700' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
@@ -227,9 +276,15 @@ export default function EditorClient({ article }: Props) {
             >
               {saving ? (isEdit ? '저장 중...' : '발행 중...') : (isEdit ? '💾 저장하기' : '🚀 발행하기')}
             </button>
-            <button onClick={resetDraft} className="px-3 py-1.5 text-sm rounded-lg border border-red-200 text-red-400 hover:bg-red-50 transition-colors">
-              🗑️
-            </button>
+            {isEdit ? (
+              <button onClick={handleDelete} disabled={saving} className="px-3 py-1.5 text-sm rounded-lg border border-red-300 text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors">
+                🗑️ 삭제
+              </button>
+            ) : (
+              <button onClick={resetDraft} className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors">
+                🗑️
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -269,12 +324,18 @@ export default function EditorClient({ article }: Props) {
               </button>
             ))}
           </div>
-          <textarea
-            value={excerpt} onChange={e => setExcerpt(e.target.value)}
-            placeholder="요약을 입력하세요..."
-            rows={4}
-            className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 resize-y transition-colors"
-          />
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 font-medium">참고 링크</span>
+              <span className="text-xs text-slate-300">(선택 · 한 줄에 URL 하나씩)</span>
+            </div>
+            <textarea
+              value={excerpt} onChange={e => setExcerpt(e.target.value)}
+              placeholder={"https://example.com\nhttps://github.com/..."}
+              rows={3}
+              className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 resize-y transition-colors font-mono"
+            />
+          </div>
         </div>
 
         {/* 편집 / 미리보기 */}
@@ -308,10 +369,7 @@ export default function EditorClient({ article }: Props) {
                 <p className="text-sm text-indigo-800 font-medium whitespace-pre-wrap">{excerpt}</p>
               </div>
             )}
-            <div
-              className="prose-ai"
-              dangerouslySetInnerHTML={{ __html: isEdit ? content : mdToHtml(content) }}
-            />
+            <MarkdownRenderer className="prose-ai">{content}</MarkdownRenderer>
           </div>
         )}
       </div>

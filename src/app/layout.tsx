@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const notoSansKR = Noto_Sans_KR({
@@ -19,7 +18,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
-        <Header />
         <main className="max-w-5xl mx-auto px-4 py-10">
           {children}
         </main>

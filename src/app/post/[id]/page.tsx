@@ -1,15 +1,27 @@
 import { getArticleById, getAllArticles, formatDate } from '@/lib/articles';
+import { getNewsById, getAllNews } from '@/lib/news';
+import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+
+async function getCategoryIdByName(name: string): Promise<number | null> {
+  const { data } = await supabase.from('categories').select('id').eq('name', name).single();
+  return data?.id ?? null;
+}
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+async function findArticle(id: number) {
+  return (await getArticleById(id)) ?? (await getNewsById(id));
+}
+
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
-  const article = await getArticleById(Number(id));
+  const article = await findArticle(Number(id));
   if (!article) return {};
   return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
 }
@@ -29,14 +41,21 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default async function PostPage({ params }: Props) {
   const { id } = await params;
-  const [article, allArticles] = await Promise.all([
-    getArticleById(Number(id)),
+  const nid = Number(id);
+
+  const [article, allArticles, allNews] = await Promise.all([
+    findArticle(nid),
     getAllArticles(),
+    getAllNews(),
   ]);
 
   if (!article) notFound();
 
-  const related = allArticles
+  // category_id 가 없는 경우(news 등) 카테고리 이름으로 ID 조회
+  const categoryId = article.category_id ?? await getCategoryIdByName(article.category);
+
+  const pool = [...allArticles, ...allNews];
+  const related = pool
     .filter(a => a.category === article.category && a.id !== article.id)
     .slice(0, 3);
 
@@ -48,9 +67,13 @@ export default async function PostPage({ params }: Props) {
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6">
         <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
         <span>›</span>
-        <Link href={`/news/category/${encodeURIComponent(article.category)}`} className="hover:text-indigo-500 transition-colors">
-          {article.category}
-        </Link>
+        {categoryId ? (
+          <Link href={`/category/${categoryId}`} className="hover:text-indigo-500 transition-colors">
+            {article.category}
+          </Link>
+        ) : (
+          <span>{article.category}</span>
+        )}
         <span>›</span>
         <span className="text-slate-600 truncate">{article.title}</span>
       </nav>
@@ -72,16 +95,46 @@ export default async function PostPage({ params }: Props) {
             {article.title}
           </h1>
 
-          <div className="ai-bubble pl-5 mb-8 py-3 bg-indigo-50 rounded-r-xl">
-            <p className="text-sm text-indigo-800 leading-relaxed font-medium whitespace-pre-wrap">
-              {article.excerpt}
-            </p>
-          </div>
+          {article.excerpt && article.excerpt.trim() && (
+            <div className="mb-8 rounded-xl border border-slate-200 overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">참고 링크</span>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {article.excerpt.split('\n').filter(l => l.trim()).map((url, i) => (
+                  <a
+                    key={i}
+                    href={url.trim()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors group"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-300 flex-shrink-0 group-hover:text-indigo-400 transition-colors">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    <span className="text-sm text-indigo-600 group-hover:text-indigo-800 truncate transition-colors">
+                      {url.trim()}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div
-            className="prose text-slate-700 text-[0.95rem] leading-8"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+          {article.markdown_content ? (
+            <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">{article.markdown_content}</MarkdownRenderer>
+          ) : (
+            <div
+              className="prose text-slate-700 text-[0.95rem] leading-8"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          )}
         </div>
       </article>
 

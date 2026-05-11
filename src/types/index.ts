@@ -4,7 +4,8 @@ export interface Article {
   id: number;
   title: string;
   slug: string;
-  category: Category;
+  category: string;
+  category_id?: number | null;
   excerpt: string;
   content: string;
   markdown_content?: string | null;

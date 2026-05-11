@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
+/* ── 전역 리셋 (unlayered) ───────────────────────────────── */
 * { box-sizing: border-box; }
-
 body { -webkit-font-smoothing: antialiased; }
 
 .line-clamp-2 {
@@ -16,94 +16,111 @@ body { -webkit-font-smoothing: antialiased; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
-.prose p { margin-bottom: 1.4em; line-height: 1.9; }
-.prose h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-top: 2em;
-  margin-bottom: 0.6em;
-  color: #1e293b;
-}
-
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* ── AI 대화 렌더링 스타일 ─────────────────────────────── */
-.ai-conversation { display: flex; flex-direction: column; gap: 12px; }
+/* ── 컴포넌트 스타일 (@layer components > @layer base) ───── */
+/*    Tailwind 레이어 우선순위: utilities > components > base  */
+/*    @layer components 안에 배치하면 base 리셋을 !important   */
+/*    없이 구조적으로 이긴다.                                   */
+@layer components {
 
-.conv-turn { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-radius: 12px; }
-.conv-user  { background: #f8fafc; border: 1px solid #e2e8f0; }
-.conv-ai    { background: #eef2ff; border: 1px solid #c7d2fe; }
+  /* ── prose (포스트 페이지) ──────────────────────────────── */
+  .prose p { margin-bottom: 1.4em; line-height: 1.9; }
 
-.conv-label {
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
-  text-transform: uppercase; opacity: 0.6;
-}
-.conv-user  .conv-label { color: #475569; }
-.conv-ai    .conv-label { color: #4338ca; }
+  .prose h1 { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 1.5em 0 0.4em; }
+  .prose h2 { font-size: 1.2rem; font-weight: 700; margin-top: 2em; margin-bottom: 0.6em; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2em; }
+  .prose h3 { font-size: 1rem;   font-weight: 700; color: #334155; margin: 1.2em 0 0.3em; }
+  .prose h4, .prose h5, .prose h6 { font-size: 0.95rem; font-weight: 700; color: #475569; margin: 1em 0 0.25em; }
 
-.conv-content p { margin: 0 0 0.6em; font-size: 0.92rem; line-height: 1.75; color: #1e293b; }
-.conv-content p:last-child { margin-bottom: 0; }
-.conv-content code {
-  background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px;
-  font-size: 0.82rem; font-family: 'JetBrains Mono', monospace;
-}
+  /* ul/ol 기본 리셋만 유지 — li 스타일은 MarkdownRenderer에서 인라인으로 처리 */
+  .prose ul, .prose ol { list-style: none; padding-left: 0; margin: 0.75em 0; }
 
-/* ── 분석 모드 prose ────────────────────────────────────── */
-.prose-ai h1 { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 1.5em 0 0.4em; }
-.prose-ai h2 { font-size: 1.2rem; font-weight: 800; color: #1e293b; margin: 1.4em 0 0.4em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3em; }
-.prose-ai h3 { font-size: 1rem;   font-weight: 700; color: #334155; margin: 1.2em 0 0.3em; }
-.prose-ai p  { font-size: 0.95rem; line-height: 1.85; color: #334155; margin-bottom: 1em; }
-.prose-ai ul { padding-left: 0; margin: 0.5em 0 1em; list-style: none; }
-.prose-ai li {
-  font-size: 0.95rem; line-height: 1.5; color: #334155;
-  margin: 0 !important; padding: 0.1em 0 0.1em 1.6em;
-  position: relative;
-  list-style: none;
-  display: block;
-}
-.prose-ai li::before {
-  content: '•';
-  position: absolute;
-  left: 0.4em;
-  color: #6366f1;
-  font-weight: 700;
-}
-.prose-ai blockquote { border-left: 3px solid #6366f1; padding: 0.6em 1em; background: #f5f3ff; border-radius: 0 8px 8px 0; margin: 1em 0; }
-.prose-ai blockquote p { color: #4338ca; margin: 0; }
-.prose-ai code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #6366f1; }
-.prose-ai strong { font-weight: 700; color: #0f172a; }
+  .prose code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #6366f1; }
+  .prose pre { background: #1e1e1e; color: #d4d4d4; padding: 1em 1.2em; border-radius: 8px; overflow-x: auto; font-size: 0.82rem; line-height: 1.6; margin: 0.8em 0; border: 1px solid #3d3d3d; }
+  .prose pre code { background: none; padding: 0; border-radius: 0; color: #d4d4d4; font-size: inherit; }
 
-.prose-ai hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
+  .prose blockquote { border-left: 3px solid #6366f1; padding: 0.6em 1em; background: #f5f3ff; border-radius: 0 8px 8px 0; margin: 1em 0; }
+  .prose blockquote p { color: #4338ca; margin: 0; }
 
-/* 숫자 목록 번호 강조 */
-.prose ._ol > span,
-.prose-ai ._ol > span { color: #6366f1 !important; font-weight: 700 !important; }
+  .prose a { color: #6366f1; text-decoration: underline; }
+  .prose strong { font-weight: 700; color: #0f172a; }
+  .prose em { font-style: italic; }
+  .prose del { text-decoration: line-through; opacity: 0.7; }
+  .prose img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.8em 0; }
+  .prose hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
 
-.prose-ai table,
-.prose table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
-.prose-ai thead tr,
-.prose thead tr { background: #f1f5f9; }
-.prose-ai th,
-.prose th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
-.prose-ai td,
-.prose td { padding: 9px 14px; color: #475569; border: 1px solid #e2e8f0; }
-.prose-ai tbody tr:nth-child(even),
-.prose tbody tr:nth-child(even) { background: #f8fafc; }
-.prose-ai tbody tr:hover,
-.prose tbody tr:hover { background: #f1f5f9; }
+  .prose table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
+  .prose thead tr { background: #f1f5f9; }
+  .prose th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
+  .prose td { padding: 9px 14px; color: #475569; border: 1px solid #e2e8f0; }
+  .prose tbody tr:nth-child(even) { background: #f8fafc; }
+  .prose tbody tr:hover { background: #f1f5f9; }
 
-/* AI 대화 말풍선 효과 */
-.ai-bubble {
-  position: relative;
-}
-.ai-bubble::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: linear-gradient(180deg, #6366f1, #8b5cf6);
-  border-radius: 2px;
+  /* 레거시 _li/_ol (구 mdToHtml 저장 글) */
+  .prose ._li { display: flex; gap: 0.65em; padding-left: 0.5em; align-items: baseline; margin-bottom: 1px; }
+  .prose ._li > span:first-child { position: static; flex-shrink: 0; }
+  .prose ._ol > span { color: #6366f1; font-weight: 700; }
+
+  /* ── prose-ai (에디터 미리보기) ─────────────────────────── */
+  .prose-ai h1 { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 1.5em 0 0.4em; }
+  .prose-ai h2 { font-size: 1.2rem; font-weight: 800; color: #1e293b; margin: 1.4em 0 0.4em; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3em; }
+  .prose-ai h3 { font-size: 1rem;   font-weight: 700; color: #334155; margin: 1.2em 0 0.3em; }
+  .prose-ai h4, .prose-ai h5, .prose-ai h6 { font-size: 0.95rem; font-weight: 700; color: #475569; margin: 1em 0 0.25em; }
+  .prose-ai p  { font-size: 0.95rem; line-height: 1.85; color: #334155; margin-bottom: 1em; }
+
+  /* ul/ol 기본 리셋만 유지 — li 스타일은 MarkdownRenderer에서 인라인으로 처리 */
+  .prose-ai ul, .prose-ai ol { padding-left: 0; margin: 0.5em 0 1em; list-style: none; }
+
+  .prose-ai code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #6366f1; }
+  .prose-ai pre { background: #1e1e1e; color: #d4d4d4; padding: 1em 1.2em; border-radius: 8px; overflow-x: auto; font-size: 0.82rem; line-height: 1.6; margin: 0.8em 0; border: 1px solid #3d3d3d; }
+  .prose-ai pre code { background: none; padding: 0; border-radius: 0; color: #d4d4d4; font-size: inherit; }
+
+  .prose-ai blockquote { border-left: 3px solid #6366f1; padding: 0.6em 1em; background: #f5f3ff; border-radius: 0 8px 8px 0; margin: 1em 0; }
+  .prose-ai blockquote p { color: #4338ca; margin: 0; }
+
+  .prose-ai a { color: #6366f1; text-decoration: underline; }
+  .prose-ai strong { font-weight: 700; color: #0f172a; }
+  .prose-ai em { font-style: italic; }
+  .prose-ai del { text-decoration: line-through; opacity: 0.7; }
+  .prose-ai img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.8em 0; }
+  .prose-ai hr { border: none; border-top: 2px solid #e2e8f0; margin: 1.8em 0; }
+
+  .prose-ai table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.9rem; }
+  .prose-ai thead tr { background: #f1f5f9; }
+  .prose-ai th { padding: 10px 14px; text-align: left; font-weight: 700; color: #334155; border: 1px solid #e2e8f0; }
+  .prose-ai td { padding: 9px 14px; color: #475569; border: 1px solid #e2e8f0; }
+  .prose-ai tbody tr:nth-child(even) { background: #f8fafc; }
+  .prose-ai tbody tr:hover { background: #f1f5f9; }
+
+  /* 레거시 _li/_ol */
+  .prose-ai ._li { display: flex; gap: 0.65em; padding-left: 0.5em; align-items: baseline; margin-bottom: 1px; }
+  .prose-ai ._li > span:first-child { position: static; flex-shrink: 0; }
+  .prose-ai ._ol > span { color: #6366f1; font-weight: 700; }
+
+  /* ── AI 대화 렌더링 ──────────────────────────────────────── */
+  .ai-conversation { display: flex; flex-direction: column; gap: 12px; }
+
+  .conv-turn { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-radius: 12px; }
+  .conv-user  { background: #f8fafc; border: 1px solid #e2e8f0; }
+  .conv-ai    { background: #eef2ff; border: 1px solid #c7d2fe; }
+
+  .conv-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; opacity: 0.6; }
+  .conv-user  .conv-label { color: #475569; }
+  .conv-ai    .conv-label { color: #4338ca; }
+
+  .conv-content p { margin: 0 0 0.6em; font-size: 0.92rem; line-height: 1.75; color: #1e293b; }
+  .conv-content p:last-child { margin-bottom: 0; }
+  .conv-content code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── AI 대화 말풍선 효과 ─────────────────────────────────── */
+  .ai-bubble { position: relative; }
+  .ai-bubble::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #6366f1, #8b5cf6);
+    border-radius: 2px;
+  }
+
 }
