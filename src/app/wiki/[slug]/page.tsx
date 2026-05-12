@@ -6,9 +6,29 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 
-async function getCategoryIdByName(name: string): Promise<number | null> {
-  const { data } = await supabase.from('categories').select('id').eq('name', name).single();
-  return data?.id ?? null;
+interface CategoryInfo {
+  id: number;
+  name: string;
+  parent?: { id: number; name: string } | null;
+}
+
+async function getCategoryInfo(name: string): Promise<CategoryInfo | null> {
+  const { data } = await supabase
+    .from('categories')
+    .select('id, name, parent_id')
+    .eq('name', name)
+    .single();
+  if (!data) return null;
+
+  if (!data.parent_id) return { id: data.id, name: data.name, parent: null };
+
+  const { data: parent } = await supabase
+    .from('categories')
+    .select('id, name')
+    .eq('id', data.parent_id)
+    .single();
+
+  return { id: data.id, name: data.name, parent: parent ?? null };
 }
 
 interface Props {
@@ -50,7 +70,8 @@ export default async function WikiPage({ params }: Props) {
 
   if (!article) notFound();
 
-  const categoryId = article.category_id ?? await getCategoryIdByName(article.category);
+  const categoryInfo = await getCategoryInfo(article.category);
+  const categoryId = categoryInfo?.id ?? null;
 
   const pool = [...allArticles, ...allNews];
   const related = pool
@@ -62,9 +83,17 @@ export default async function WikiPage({ params }: Props) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* 브레드크럼 */}
-      <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6">
+      <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">
         <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
         <span>›</span>
+        {categoryInfo?.parent && (
+          <>
+            <Link href={`/category/${categoryInfo.parent.id}`} className="hover:text-indigo-500 transition-colors">
+              {categoryInfo.parent.name}
+            </Link>
+            <span>›</span>
+          </>
+        )}
         {categoryId ? (
           <Link href={`/category/${categoryId}`} className="hover:text-indigo-500 transition-colors">
             {article.category}
