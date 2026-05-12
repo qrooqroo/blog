@@ -20,7 +20,7 @@ export default async function CategoryPage({ params }: Props) {
   // 카테고리 조회
   const catRes = await supabase
     .from('categories')
-    .select('id, name')
+    .select('id, name, parent_id')
     .eq('id', categoryId)
     .single();
 
@@ -28,7 +28,18 @@ export default async function CategoryPage({ params }: Props) {
     return <ErrorView msg={`카테고리 ID ${categoryId} 조회 실패: ${catRes.error?.message ?? '데이터 없음'}`} />;
   }
 
-  const cat = catRes.data as { id: number; name: string };
+  const cat = catRes.data as { id: number; name: string; parent_id: number | null };
+
+  // 상위 카테고리 조회
+  let parent: { id: number; name: string } | null = null;
+  if (cat.parent_id) {
+    const parentRes = await supabase
+      .from('categories')
+      .select('id, name')
+      .eq('id', cat.parent_id)
+      .single();
+    if (!parentRes.error && parentRes.data) parent = parentRes.data;
+  }
 
   // documents 조회 — 3단계 폴백
   // 1) documents_with_category 뷰 (마이그레이션 완료)
@@ -79,9 +90,17 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6">
+      <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">
         <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
         <span>›</span>
+        {parent && (
+          <>
+            <Link href={`/category/${parent.id}`} className="hover:text-indigo-500 transition-colors">
+              {parent.name}
+            </Link>
+            <span>›</span>
+          </>
+        )}
         <span className="text-slate-600">{cat.name}</span>
       </nav>
 
