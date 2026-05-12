@@ -38,7 +38,10 @@ export default function InfiniteArticleList({ initialArticles }: Props) {
           const data = await res.json();
           const next: Article[] = data.articles ?? [];
 
-          setArticles(prev => [...prev, ...next]);
+          setArticles(prev => {
+            const seen = new Set(prev.map(a => a.id));
+            return [...prev, ...next.filter(a => !seen.has(a.id))];
+          });
           pageRef.current += 1;
 
           if (next.length < LIMIT) {
