@@ -9,6 +9,13 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+type Cat = { id: number; name: string; parent_id: number | null };
+
+function collectDescendants(rootId: number, allCats: Cat[]): number[] {
+  const children = allCats.filter(c => c.parent_id === rootId);
+  return children.flatMap(c => [c.id, ...collectDescendants(c.id, allCats)]);
+}
+
 export default async function CategoryPage({ params }: Props) {
   const { id } = await params;
   const categoryId = Number(id);
@@ -17,39 +24,34 @@ export default async function CategoryPage({ params }: Props) {
     return <ErrorView msg={`잘못된 카테고리 ID: "${id}"`} />;
   }
 
-  // 카테고리 조회
-  const catRes = await supabase
+  // 모든 카테고리 한 번에 조회
+  const { data: allCats, error: allCatsErr } = await supabase
     .from('categories')
-    .select('id, name, parent_id')
-    .eq('id', categoryId)
-    .single();
+    .select('id, name, parent_id');
 
-  if (catRes.error || !catRes.data) {
-    return <ErrorView msg={`카테고리 ID ${categoryId} 조회 실패: ${catRes.error?.message ?? '데이터 없음'}`} />;
+  if (allCatsErr || !allCats) {
+    return <ErrorView msg={`카테고리 조회 실패: ${allCatsErr?.message}`} />;
   }
 
-  const cat = catRes.data as { id: number; name: string; parent_id: number | null };
+  const cat = allCats.find(c => c.id === categoryId);
+  if (!cat) return <ErrorView msg={`카테고리 ID ${categoryId}를 찾을 수 없습니다.`} />;
 
-  // 상위 카테고리 조회
-  let parent: { id: number; name: string } | null = null;
-  if (cat.parent_id) {
-    const parentRes = await supabase
-      .from('categories')
-      .select('id, name')
-      .eq('id', cat.parent_id)
-      .single();
-    if (!parentRes.error && parentRes.data) parent = parentRes.data;
-  }
+  const parent = cat.parent_id ? (allCats.find(c => c.id === cat.parent_id) ?? null) : null;
+  const children = allCats.filter(c => c.parent_id === categoryId);
+
+  // 현재 + 모든 하위 카테고리 ID·이름 수집
+  const descendantIds = collectDescendants(categoryId, allCats);
+  const allIds = [categoryId, ...descendantIds];
+  const allNames = allIds
+    .map(i => allCats.find(c => c.id === i)?.name)
+    .filter(Boolean) as string[];
 
   // documents 조회 — 3단계 폴백
-  // 1) documents_with_category 뷰 (마이그레이션 완료)
-  // 2) documents 테이블 + category_id (category 컬럼 삭제, 뷰 미생성)
-  // 3) documents 테이블 + category 텍스트 (마이그레이션 전)
   let docs: Article[] = [];
   const viewRes = await supabase
     .from('documents_with_category')
     .select('*')
-    .eq('category_id', cat.id)
+    .in('category_id', allIds)
     .order('date', { ascending: false })
     .order('id', { ascending: false });
 
@@ -59,7 +61,7 @@ export default async function CategoryPage({ params }: Props) {
     const idRes = await supabase
       .from('documents')
       .select('*')
-      .eq('category_id', cat.id)
+      .in('category_id', allIds)
       .order('date', { ascending: false })
       .order('id', { ascending: false });
 
@@ -69,7 +71,7 @@ export default async function CategoryPage({ params }: Props) {
       const textRes = await supabase
         .from('documents')
         .select('*')
-        .eq('category', cat.name)
+        .in('category', allNames)
         .order('date', { ascending: false })
         .order('id', { ascending: false });
       docs = (textRes.data ?? []) as Article[];
@@ -80,7 +82,7 @@ export default async function CategoryPage({ params }: Props) {
   const newsRes = await supabase
     .from('news')
     .select('*')
-    .eq('category', cat.name)
+    .in('category', allNames)
     .order('date', { ascending: false })
     .order('id', { ascending: false });
   const news: Article[] = newsRes.error ? [] : (newsRes.data ?? []) as Article[];
@@ -104,13 +106,28 @@ export default async function CategoryPage({ params }: Props) {
         <span className="text-slate-600">{cat.name}</span>
       </nav>
 
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-5">
         <span className="w-1 h-7 bg-indigo-500 rounded-full" />
         <div>
           <h1 className="text-2xl font-black text-slate-900">{cat.name}</h1>
           <p className="text-sm text-slate-400 mt-0.5">총 {articles.length}개의 글</p>
         </div>
       </div>
+
+      {/* 하위 카테고리 탭 */}
+      {children.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {children.map(c => (
+            <Link
+              key={c.id}
+              href={`/category/${c.id}`}
+              className="px-3 py-1.5 text-sm font-medium rounded-full bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+            >
+              {c.name}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {articles.length === 0 ? (
         <p className="text-sm text-slate-400 py-16 text-center">아직 작성된 글이 없습니다.</p>
