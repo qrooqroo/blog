@@ -1,5 +1,5 @@
-import { getArticleById, getAllArticles, formatDate } from '@/lib/articles';
-import { getNewsById, getAllNews } from '@/lib/news';
+import { getArticleBySlug, getAllArticles, formatDate } from '@/lib/articles';
+import { getNewsBySlug, getAllNews } from '@/lib/news';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import { notFound } from 'next/navigation';
@@ -12,16 +12,16 @@ async function getCategoryIdByName(name: string): Promise<number | null> {
 }
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
-async function findArticle(id: number) {
-  return (await getArticleById(id)) ?? (await getNewsById(id));
+async function findArticle(slug: string) {
+  return (await getArticleBySlug(slug)) ?? (await getNewsBySlug(slug));
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { id } = await params;
-  const article = await findArticle(Number(id));
+  const { slug } = await params;
+  const article = await findArticle(slug);
   if (!article) return {};
   return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
 }
@@ -39,24 +39,22 @@ const CATEGORY_COLORS: Record<string, string> = {
   '스타트업 AI 적용': 'bg-cyan-50 text-cyan-700',
 };
 
-export default async function PostPage({ params }: Props) {
-  const { id } = await params;
-  const nid = Number(id);
+export default async function WikiPage({ params }: Props) {
+  const { slug } = await params;
 
   const [article, allArticles, allNews] = await Promise.all([
-    findArticle(nid),
+    findArticle(slug),
     getAllArticles(),
     getAllNews(),
   ]);
 
   if (!article) notFound();
 
-  // category_id 가 없는 경우(news 등) 카테고리 이름으로 ID 조회
   const categoryId = article.category_id ?? await getCategoryIdByName(article.category);
 
   const pool = [...allArticles, ...allNews];
   const related = pool
-    .filter(a => a.category === article.category && a.id !== article.id)
+    .filter(a => a.category === article.category && a.slug !== article.slug)
     .slice(0, 3);
 
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
@@ -106,13 +104,8 @@ export default async function PostPage({ params }: Props) {
               </div>
               <div className="divide-y divide-slate-100">
                 {article.excerpt.split('\n').filter(l => l.trim()).map((url, i) => (
-                  <a
-                    key={i}
-                    href={url.trim()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors group"
-                  >
+                  <a key={i} href={url.trim()} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors group">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-300 flex-shrink-0 group-hover:text-indigo-400 transition-colors">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                       <polyline points="15 3 21 3 21 9"/>
@@ -130,10 +123,8 @@ export default async function PostPage({ params }: Props) {
           {article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">{article.markdown_content}</MarkdownRenderer>
           ) : (
-            <div
-              className="prose text-slate-700 text-[0.95rem] leading-8"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            />
+            <div className="prose text-slate-700 text-[0.95rem] leading-8"
+              dangerouslySetInnerHTML={{ __html: article.content }} />
           )}
         </div>
       </article>

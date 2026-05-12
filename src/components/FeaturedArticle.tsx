@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Article } from '@/types';
-import { formatDate } from '@/lib/articles';
+import { formatDate } from '@/lib/format';
 
 const CATEGORY_COLORS: Record<string, string> = {
   '경제': 'bg-blue-100 text-blue-700',
@@ -17,7 +17,7 @@ export default function FeaturedArticle({ article }: { article: Article }) {
 
   return (
     <Link
-      href={`/post/${article.id}`}
+      href={`/wiki/${article.slug}`}
       className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-lg transition-all duration-200"
     >
       <div className="md:flex">

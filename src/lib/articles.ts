@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Article, Category } from '@/types';
+export { formatDate } from './format';
 
 // 3단계 폴백:
 // 1) documents_with_category 뷰  (마이그레이션 완료)
@@ -72,7 +73,3 @@ export async function getRecentArticles(count = 9): Promise<Article[]> {
   );
 }
 
-export function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-}

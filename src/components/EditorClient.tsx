@@ -106,6 +106,7 @@ export default function EditorClient({ article }: Props) {
   const [category, setCategory] = useState<string>(article?.category ?? '');
   const [excerpt,  setExcerpt]  = useState(article?.excerpt  ?? '');
   const [content,  setContent]  = useState(article?.markdown_content ?? '');
+  const [slugInput,   setSlugInput]   = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [savedAt,     setSavedAt]     = useState('');
   const [saving,      setSaving]      = useState(false);
@@ -180,7 +181,7 @@ export default function EditorClient({ article }: Props) {
           : { ok: false, msg: data.error ?? '수정 실패' });
       } else {
         // 신규: 마크다운 → HTML 변환 후 POST
-        const slug = generateSlug(title);
+        const slug = slugInput.trim() || generateSlug(title);
         const date = new Date().toISOString().split('T')[0];
         const res = await fetch('/api/publish', {
           method: 'POST',
@@ -238,7 +239,7 @@ export default function EditorClient({ article }: Props) {
       <div className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <a href={isEdit ? `/post/${article!.id}` : '/'} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
+            <a href={isEdit ? `/wiki/${article!.slug}` : '/'} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
               ← {isEdit ? '글로 돌아가기' : '홈'}
             </a>
             <span className="text-slate-200">|</span>
@@ -336,6 +337,20 @@ export default function EditorClient({ article }: Props) {
               className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 resize-y transition-colors font-mono"
             />
           </div>
+          {!isEdit && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 font-medium">Slug</span>
+                <span className="text-xs text-slate-300">(선택 · 비우면 자동 생성)</span>
+              </div>
+              <input
+                value={slugInput}
+                onChange={e => setSlugInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="예: bittorrent"
+                className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 transition-colors font-mono"
+              />
+            </div>
+          )}
         </div>
 
         {/* 편집 / 미리보기 */}
