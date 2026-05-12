@@ -8,8 +8,13 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-black text-slate-900">AI Insight Note</h1>
+      <div className="rounded-xl overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/site_title.png"
+          alt="AI Insight Note"
+          className="w-full object-cover"
+        />
       </div>
       <InfiniteArticleList initialArticles={initialArticles} />
     </div>
