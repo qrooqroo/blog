@@ -13,6 +13,9 @@ const notoSansKR = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: 'AI Insight Note',
   description: 'AI와 나눈 대화, 발견한 인사이트, 기록할 가치 있는 생각들을 모아둔 노트입니다.',
+  other: {
+    'google-adsense-account': 'ca-pub-4600038940266134',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
