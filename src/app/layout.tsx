@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
-        <main className="max-w-5xl mx-auto px-4 py-10">
+        <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
           {children}
         </main>
         <Footer />
