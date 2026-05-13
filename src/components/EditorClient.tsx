@@ -171,9 +171,11 @@ export default function EditorClient({ article }: Props) {
           body: JSON.stringify({ title, category, excerpt, content: html, markdown_content: content }),
         });
         const data = await res.json();
-        setResult(res.ok
-          ? { ok: true,  msg: '수정 완료! 블로그에 바로 반영됩니다.' }
-          : { ok: false, msg: data.error ?? '수정 실패' });
+        if (res.ok) {
+          router.push(`/wiki/${article!.slug}`);
+        } else {
+          setResult({ ok: false, msg: data.error ?? '수정 실패' });
+        }
       } else {
         // 신규: 마크다운 → HTML 변환 후 POST
         const slug = slugInput.trim() || generateSlug(title);
