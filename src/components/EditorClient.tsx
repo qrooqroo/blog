@@ -157,11 +157,6 @@ export default function EditorClient({ article }: Props) {
     if (!title.trim())   { alert('제목을 입력해주세요.');   return; }
     if (!content.trim()) { alert('내용을 입력해주세요.');   return; }
 
-    const confirmMsg = isEdit
-      ? `"${title}" 글을 수정하시겠습니까?`
-      : `"${title}" 글을 발행하시겠습니까?`;
-    if (!confirm(confirmMsg)) return;
-
     setSaving(true); setResult(null);
 
     try {
@@ -190,8 +185,8 @@ export default function EditorClient({ article }: Props) {
         });
         const data = await res.json();
         if (res.ok) {
-          setResult({ ok: true, msg: '발행 완료! 블로그에 반영됩니다.' });
           localStorage.removeItem(STORAGE_KEY);
+          router.push('/');
         } else {
           setResult({ ok: false, msg: data.error ?? '발행 실패' });
         }
