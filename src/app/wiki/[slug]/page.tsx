@@ -150,7 +150,12 @@ export default async function WikiPage({ params }: Props) {
           )}
 
           {article.markdown_content ? (
-            <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">{article.markdown_content}</MarkdownRenderer>
+            <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
+              {article.markdown_content.replace(/^\s*#[^\n]*\n/, (match) => {
+                const heading = match.trim().replace(/^#+\s*/, '');
+                return heading === article.title.trim() ? '' : match;
+              })}
+            </MarkdownRenderer>
           ) : (
             <div className="prose text-slate-700 text-[0.95rem] leading-8"
               dangerouslySetInnerHTML={{ __html: article.content }} />
