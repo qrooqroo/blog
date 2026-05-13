@@ -3,6 +3,7 @@ import { Noto_Sans_KR } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Footer from '@/components/Footer';
+import NavigationSpinner from '@/components/NavigationSpinner';
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        <NavigationSpinner />
         <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
           {children}
         </main>
