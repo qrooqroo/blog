@@ -80,15 +80,41 @@ const codeInline: React.CSSProperties = {
   fontSize: '0.82rem', fontFamily: 'ui-monospace,monospace', color: INDIGO,
 };
 
+// ── 헤딩 id 생성 (목차 앵커 링크용) ──────────────────────────
+function toHeadingId(children: React.ReactNode): string {
+  const text = React.Children.toArray(children)
+    .map(child => (typeof child === 'string' ? child : ''))
+    .join('');
+  return text.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w가-힣ㄱ-ㅎㅏ-ㅣ-]/g, '');
+}
+
 // ── components 맵 ─────────────────────────────────────────
 const components: Components = {
-  h1:  ({ children }) => <h1  style={S.h1}>{children}</h1>,
-  h2:  ({ children }) => <h2  style={S.h2}>{children}</h2>,
-  h3:  ({ children }) => <h3  style={S.h3}>{children}</h3>,
-  h4:  ({ children }) => <h4  style={S.h456}>{children}</h4>,
+  h1:  ({ children }) => <h1  id={toHeadingId(children)} style={S.h1}>{children}</h1>,
+  h2:  ({ children }) => <h2  id={toHeadingId(children)} style={S.h2}>{children}</h2>,
+  h3:  ({ children }) => <h3  id={toHeadingId(children)} style={S.h3}>{children}</h3>,
+  h4:  ({ children }) => <h4  id={toHeadingId(children)} style={S.h456}>{children}</h4>,
   h5:  ({ children }) => <h5  style={S.h456}>{children}</h5>,
   h6:  ({ children }) => <h6  style={S.h456}>{children}</h6>,
-  a:   ({ href, children }) => <a href={href} style={S.a}>{children}</a>,
+  a:   ({ href, children }) => {
+    if (href?.startsWith('#')) {
+      const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        const id = decodeURIComponent(href.slice(1));
+        const target = document.getElementById(id);
+        if (target) {
+          const y = target.getBoundingClientRect().top + window.scrollY - 16;
+          if ('scrollBehavior' in document.documentElement.style) {
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          } else {
+            window.scrollTo(0, y);
+          }
+        }
+      };
+      return <a href={href} style={S.a} onClick={handleClick}>{children}</a>;
+    }
+    return <a href={href} style={S.a}>{children}</a>;
+  },
   ol:  ({ children, start }) => <OlList start={start ?? 1}>{children}</OlList>,
   ul:  ({ children }) => <UlList>{children}</UlList>,
   // pre는 code 컴포넌트에서 직접 감싸므로 투명하게 pass-through

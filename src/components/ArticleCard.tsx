@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Article } from '@/types';
 import { formatDate } from '@/lib/format';
+import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 
 const CATEGORY_COLORS: Record<string, string> = {
   '경제': 'bg-blue-50 text-blue-700',
@@ -44,9 +45,22 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
           <span className="text-xs text-slate-400">{formatDate(article.date)}</span>
         </div>
 
-        <h3 className={`font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2 ${size === 'small' ? 'text-sm' : 'text-[0.95rem]'}`}>
-          {article.title}
-        </h3>
+        {(() => {
+          const parts = article.title_ko && article.title_en
+            ? { ko: article.title_ko, en: article.title_en }
+            : parseTitleParts(article.title);
+          const displayKo = resolveDisplayKo(article.title, parts.ko);
+          return (
+            <h3 className={`font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors ${size === 'small' ? 'text-sm' : 'text-[0.95rem]'}`}>
+              <span className="line-clamp-2">{displayKo}</span>
+              {parts.en && (
+                <span className="block font-normal text-slate-400 text-xs mt-0.5 line-clamp-1">
+                  {parts.en}
+                </span>
+              )}
+            </h3>
+          );
+        })()}
 
       </div>
     </Link>

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { parseTitleParts } from '@/lib/title-parser';
+import { extractTitleEnFromContent } from '@/lib/title-extractor';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -36,7 +38,14 @@ export async function PUT(req: NextRequest, { params }: Props) {
     if (!categoryId) {
       return NextResponse.json({ error: `카테고리 '${category}'를 찾을 수 없습니다.` }, { status: 400 });
     }
-    updateData = { title, category_id: categoryId, excerpt, content, markdown_content };
+    const fromTitle = parseTitleParts(title);
+    // 제목 파싱으로 영문명을 못 찾으면 문서 내용에서 추출
+    const fromContent = (!fromTitle.en && markdown_content)
+      ? extractTitleEnFromContent(title, markdown_content)
+      : { ko: null, en: null };
+    const title_ko = fromTitle.ko ?? fromContent.ko ?? null;
+    const title_en = fromTitle.en ?? fromContent.en ?? null;
+    updateData = { title, title_ko, title_en, category_id: categoryId, excerpt, content, markdown_content };
   } else {
     // news 테이블: 기존 category 텍스트 사용
     updateData = { title, category, excerpt, content, markdown_content };

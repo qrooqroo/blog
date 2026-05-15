@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { tableFor } from '@/lib/table-utils';
+import { parseTitleParts } from '@/lib/title-parser';
+import { extractTitleEnFromContent } from '@/lib/title-extractor';
 
 const DEFAULT_IMAGES: Record<string, string> = {
   'AI 대화':        'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80&fit=crop',
@@ -60,8 +62,15 @@ export async function POST(req: NextRequest) {
     .single();
   const nextId = ((maxRow?.id as number) ?? 0) + 1;
 
+  const fromTitle = parseTitleParts(title);
+  const fromContent = (!fromTitle.en && markdown_content)
+    ? extractTitleEnFromContent(title, markdown_content)
+    : { ko: null, en: null };
+  const title_ko = fromTitle.ko ?? fromContent.ko ?? null;
+  const title_en = fromTitle.en ?? fromContent.en ?? null;
+
   const insertData = isDocuments
-    ? { id: nextId, title, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image }
+    ? { id: nextId, title, title_ko, title_en, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image }
     : { id: nextId, title, slug, category, excerpt: excerpt ?? '', content, markdown_content, date, image };
 
   const { data, error } = await supabase

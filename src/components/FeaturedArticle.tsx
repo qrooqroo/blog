@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Article } from '@/types';
 import { formatDate } from '@/lib/format';
+import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 
 const CATEGORY_COLORS: Record<string, string> = {
   '경제': 'bg-blue-100 text-blue-700',
@@ -42,9 +43,22 @@ export default function FeaturedArticle({ article }: { article: Article }) {
                 {article.category}
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-3 group-hover:text-indigo-600 transition-colors">
-              {article.title}
-            </h2>
+            {(() => {
+              const parts = article.title_ko && article.title_en
+                ? { ko: article.title_ko, en: article.title_en }
+                : parseTitleParts(article.title);
+              const displayKo = resolveDisplayKo(article.title, parts.ko);
+              return (
+                <h2 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-3 group-hover:text-indigo-600 transition-colors">
+                  {displayKo}
+                  {parts.en && (
+                    <span className="block font-normal text-slate-400 text-sm mt-0.5">
+                      {parts.en}
+                    </span>
+                  )}
+                </h2>
+              );
+            })()}
             <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 whitespace-pre-wrap">
               {article.excerpt}
             </p>

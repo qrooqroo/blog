@@ -3,6 +3,8 @@ export type Category = '경제' | '정치' | '사회' | '건강' | '스포츠' |
 export interface Article {
   id: number;
   title: string;
+  title_ko?: string | null;
+  title_en?: string | null;
   slug: string;
   category: string;
   category_id?: number | null;

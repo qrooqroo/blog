@@ -5,6 +5,7 @@ import ArticleCard from '@/components/ArticleCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 
 interface CategoryInfo {
   id: number;
@@ -118,9 +119,22 @@ export default async function WikiPage({ params }: Props) {
             <time className="text-sm text-slate-400">{formatDate(article.date)}</time>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-5">
-            {article.title}
-          </h1>
+          {(() => {
+            const parts = article.title_ko && article.title_en
+              ? { ko: article.title_ko, en: article.title_en }
+              : parseTitleParts(article.title);
+            const displayKo = resolveDisplayKo(article.title, parts.ko);
+            return (
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-5 flex items-baseline gap-2 flex-wrap">
+                {displayKo}
+                {parts.en && (
+                  <span className="text-base md:text-lg font-medium text-slate-400">
+                    {parts.en}
+                  </span>
+                )}
+              </h1>
+            );
+          })()}
 
           {article.excerpt && article.excerpt.trim() && (
             <div className="mb-8 rounded-xl border border-slate-200 overflow-hidden">
@@ -151,10 +165,7 @@ export default async function WikiPage({ params }: Props) {
 
           {article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
-              {article.markdown_content.replace(/^\s*#[^\n]*\n/, (match) => {
-                const heading = match.trim().replace(/^#+\s*/, '');
-                return heading === article.title.trim() ? '' : match;
-              })}
+              {article.markdown_content.replace(/^\s*#{1,6}[^\n]*\n?/, '')}
             </MarkdownRenderer>
           ) : (
             <div className="prose text-slate-700 text-[0.95rem] leading-8"

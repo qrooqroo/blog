@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
+import { mergeTitleParts } from '@/lib/articles';
+import { Article } from '@/types';
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? '';
@@ -22,8 +24,9 @@ export async function GET(req: NextRequest) {
       .limit(4),
   ]);
 
+  const docs = await mergeTitleParts((docsRes.data ?? []) as Article[]);
   const results = [
-    ...(docsRes.data ?? []),
+    ...docs,
     ...(newsRes.data ?? []),
   ].slice(0, 10);
 

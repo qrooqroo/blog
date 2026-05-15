@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import { Article } from '@/types';
+import { mergeTitleParts } from '@/lib/articles';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -56,7 +57,7 @@ export default async function CategoryPage({ params }: Props) {
     .order('id', { ascending: false });
 
   if (!viewRes.error) {
-    docs = (viewRes.data ?? []) as Article[];
+    docs = await mergeTitleParts((viewRes.data ?? []) as Article[]);
   } else {
     const idRes = await supabase
       .from('documents')

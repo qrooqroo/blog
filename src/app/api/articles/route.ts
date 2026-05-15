@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { mergeTitleParts } from '@/lib/articles';
+import { Article } from '@/types';
 
 export async function GET(req: NextRequest) {
   const page  = Math.max(1, Number(req.nextUrl.searchParams.get('page')  ?? '1'));
@@ -16,7 +18,8 @@ export async function GET(req: NextRequest) {
     .range(from, to);
 
   if (!viewRes.error) {
-    return NextResponse.json({ articles: viewRes.data ?? [] });
+    const articles = await mergeTitleParts((viewRes.data ?? []) as Article[]);
+    return NextResponse.json({ articles });
   }
 
   const tableRes = await supabase
