@@ -1,7 +1,11 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import CategoriesClient from '@/components/CategoriesClient';
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const host = (await headers()).get('host') ?? '';
+  if (!host.startsWith('localhost') && !host.startsWith('127.0.0.1')) notFound();
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <div className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3">

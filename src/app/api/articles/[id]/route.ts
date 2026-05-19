@@ -24,7 +24,7 @@ async function getCategoryId(name: string): Promise<number | null> {
 export async function PUT(req: NextRequest, { params }: Props) {
   const { id } = await params;
   const table = getTable(req);
-  const { title, category, excerpt, content, markdown_content } = await req.json();
+  const { title, title_ko: inputKo, title_en: inputEn, category, excerpt, content, markdown_content, image } = await req.json();
 
   if (!title || !content) {
     return NextResponse.json({ error: '제목과 내용은 필수입니다.' }, { status: 400 });
@@ -38,17 +38,22 @@ export async function PUT(req: NextRequest, { params }: Props) {
     if (!categoryId) {
       return NextResponse.json({ error: `카테고리 '${category}'를 찾을 수 없습니다.` }, { status: 400 });
     }
-    const fromTitle = parseTitleParts(title);
-    // 제목 파싱으로 영문명을 못 찾으면 문서 내용에서 추출
-    const fromContent = (!fromTitle.en && markdown_content)
-      ? extractTitleEnFromContent(title, markdown_content)
-      : { ko: null, en: null };
-    const title_ko = fromTitle.ko ?? fromContent.ko ?? null;
-    const title_en = fromTitle.en ?? fromContent.en ?? null;
-    updateData = { title, title_ko, title_en, category_id: categoryId, excerpt, content, markdown_content };
+    // 사용자가 직접 입력한 값 우선, 없으면 제목에서 자동 파싱
+    let title_ko = inputKo ?? null;
+    let title_en = inputEn ?? null;
+    if (!title_ko || !title_en) {
+      const fromTitle = parseTitleParts(title);
+      // 순수 영문 제목(한글 없음)은 추출 불필요 — 잘못된 본문 파싱 방지
+    const fromContent = (!fromTitle.en && markdown_content && /[가-힣]/.test(title))
+        ? extractTitleEnFromContent(title, markdown_content)
+        : { ko: null, en: null };
+      title_ko = title_ko ?? fromTitle.ko ?? fromContent.ko ?? null;
+      title_en = title_en ?? fromTitle.en ?? fromContent.en ?? null;
+    }
+    updateData = { title, title_ko, title_en, category_id: categoryId, excerpt, content, markdown_content, ...(image ? { image } : {}) };
   } else {
     // news 테이블: 기존 category 텍스트 사용
-    updateData = { title, category, excerpt, content, markdown_content };
+    updateData = { title, category, excerpt, content, markdown_content, ...(image ? { image } : {}) };
   }
 
   const { error } = await supabase
@@ -61,6 +66,22 @@ export async function PUT(req: NextRequest, { params }: Props) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+export async function PATCH(req: NextRequest, { params }: Props) {
+  const { id } = await params;
+  const body = await req.json();
+
+  if (typeof body.published === 'boolean') {
+    const { error } = await supabase
+      .from('documents')
+      .update({ published: body.published })
+      .eq('id', Number(id));
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 });
 }
 
 export async function DELETE(req: NextRequest, { params }: Props) {

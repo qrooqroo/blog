@@ -5,6 +5,34 @@ interface Props {
   params: Promise<{ name: string }>;
 }
 
+// param이 숫자면 ID, 아니면 name으로 조회
+function isNumeric(s: string) { return /^\d+$/.test(s); }
+
+// GET: 카테고리 위키 조회 (ID로 접근)
+export async function GET(_req: NextRequest, { params }: Props) {
+  const { name: encoded } = await params;
+  const raw = decodeURIComponent(encoded);
+  const query = isNumeric(raw)
+    ? supabase.from('categories').select('id,name,parent_id,excerpt,markdown_content,image').eq('id', Number(raw)).single()
+    : supabase.from('categories').select('id,name,parent_id,excerpt,markdown_content,image').eq('name', raw).single();
+  const { data, error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 404 });
+  return NextResponse.json({ category: data });
+}
+
+// PATCH: 카테고리 위키 내용 수정 (ID로 접근)
+export async function PATCH(req: NextRequest, { params }: Props) {
+  const { name: encoded } = await params;
+  const raw = decodeURIComponent(encoded);
+  const { excerpt, markdown_content, image } = await req.json();
+  const query = isNumeric(raw)
+    ? supabase.from('categories').update({ excerpt, markdown_content, image }).eq('id', Number(raw))
+    : supabase.from('categories').update({ excerpt, markdown_content, image }).eq('name', raw);
+  const { error } = await query;
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
+
 // 카테고리 이름 변경
 // documents 테이블은 category_id(FK)로 참조하므로 별도 업데이트 불필요
 // news 테이블은 아직 category 텍스트를 사용하므로 업데이트 필요

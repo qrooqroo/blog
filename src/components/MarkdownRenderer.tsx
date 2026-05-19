@@ -89,7 +89,34 @@ function toHeadingId(children: React.ReactNode): string {
 }
 
 // ── components 맵 ─────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IframeWrapper = ({ src, title, ...rest }: any) => {
+  const isYouTube = src && (src.includes('youtube.com') || src.includes('youtu.be'));
+  if (isYouTube) {
+    return (
+      <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '0.5rem', margin: '1.25em 0' }}>
+        <iframe
+          src={src}
+          title={title}
+          {...rest}
+          width="100%"
+          height="100%"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+  return (
+    <div style={{ overflow: 'auto', margin: '1em 0' }}>
+      <iframe src={src} title={title} {...rest} style={{ maxWidth: '100%' }} />
+    </div>
+  );
+};
+
 const components: Components = {
+  strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
+  em:     ({ children }) => <em     style={{ fontStyle: 'italic' }}>{children}</em>,
   h1:  ({ children }) => <h1  id={toHeadingId(children)} style={S.h1}>{children}</h1>,
   h2:  ({ children }) => <h2  id={toHeadingId(children)} style={S.h2}>{children}</h2>,
   h3:  ({ children }) => <h3  id={toHeadingId(children)} style={S.h3}>{children}</h3>,
@@ -117,6 +144,9 @@ const components: Components = {
   },
   ol:  ({ children, start }) => <OlList start={start ?? 1}>{children}</OlList>,
   ul:  ({ children }) => <UlList>{children}</UlList>,
+  // iframe — YouTube 등 반응형 처리
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  iframe: (props: any) => <IframeWrapper {...props} />,
   // pre는 code 컴포넌트에서 직접 감싸므로 투명하게 pass-through
   pre: ({ children }) => <>{children}</>,
   code: ({ className, children }) => {

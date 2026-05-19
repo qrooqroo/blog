@@ -13,4 +13,5 @@ export interface Article {
   markdown_content?: string | null;
   date: string;
   image: string;
+  published?: boolean | null;
 }

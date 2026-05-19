@@ -63,14 +63,15 @@ export async function POST(req: NextRequest) {
   const nextId = ((maxRow?.id as number) ?? 0) + 1;
 
   const fromTitle = parseTitleParts(title);
-  const fromContent = (!fromTitle.en && markdown_content)
+  // 순수 영문 제목(한글 없음)은 추출 불필요 — 잘못된 본문 파싱 방지
+  const fromContent = (!fromTitle.en && markdown_content && /[가-힣]/.test(title))
     ? extractTitleEnFromContent(title, markdown_content)
     : { ko: null, en: null };
   const title_ko = fromTitle.ko ?? fromContent.ko ?? null;
   const title_en = fromTitle.en ?? fromContent.en ?? null;
 
   const insertData = isDocuments
-    ? { id: nextId, title, title_ko, title_en, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image }
+    ? { id: nextId, title, title_ko, title_en, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image, published: false }
     : { id: nextId, title, slug, category, excerpt: excerpt ?? '', content, markdown_content, date, image };
 
   const { data, error } = await supabase

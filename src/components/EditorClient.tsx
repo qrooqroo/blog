@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import ImageUploadButton from '@/components/ImageUploadButton';
 import { tableFor } from '@/lib/table-utils';
 import { Article } from '@/types';
 
@@ -99,17 +100,26 @@ interface Props {
 const STORAGE_KEY = 'ai-insight-editor-draft';
 
 export default function EditorClient({ article }: Props) {
-  const isEdit  = !!article;
-  const router  = useRouter();
+  const isEdit     = !!article;
+  const router     = useRouter();
+  const searchParams = useSearchParams();
+
+  // /wiki/{slug} 에서 문서가 없을 때 ?slug=xxx 로 넘어오는 경우 — slug만 채우고 나머지는 비움
+  const prefilledSlug = searchParams.get('slug') ?? '';
 
   const [title,    setTitle]    = useState(article?.title    ?? '');
+  const [titleKo,  setTitleKo]  = useState(article?.title_ko ?? '');
+  const [titleEn,  setTitleEn]  = useState(article?.title_en ?? '');
   const [category, setCategory] = useState<string>(article?.category ?? '');
   const [excerpt,  setExcerpt]  = useState(article?.excerpt  ?? '');
   const [content,  setContent]  = useState(article?.markdown_content ?? '');
-  const [slugInput,   setSlugInput]   = useState('');
+  const [image,    setImage]    = useState(article?.image    ?? '');
+  const [slugInput,   setSlugInput]   = useState(prefilledSlug);
   const [showPreview, setShowPreview] = useState(false);
   const [savedAt,     setSavedAt]     = useState('');
   const [saving,      setSaving]      = useState(false);
+  const [publishing,  setPublishing]  = useState(false);
+  const [published,   setPublished]   = useState(article?.published ?? false);
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [dbCategories, setDbCategories] = useState<string[]>([]);
 
@@ -125,9 +135,9 @@ export default function EditorClient({ article }: Props) {
       .catch(() => {});
   }, []);
 
-  // 신규 글: 초안 불러오기
+  // 신규 글: 초안 불러오기 (wiki에서 리다이렉트된 경우는 초안 무시)
   useEffect(() => {
-    if (isEdit) return;
+    if (isEdit || prefilledSlug) return;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
@@ -136,7 +146,7 @@ export default function EditorClient({ article }: Props) {
       setExcerpt(d.excerpt || ''); setContent(d.content || '');
       setSavedAt(d.savedAt || '');
     } catch { /* ignore */ }
-  }, [isEdit]);
+  }, [isEdit, prefilledSlug]);
 
   // 신규 글: 자동 저장
   const autosave = useCallback(() => {
@@ -168,7 +178,7 @@ export default function EditorClient({ article }: Props) {
         const res = await fetch(`/api/articles/${article!.id}?table=${table}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, category, excerpt, content: html, markdown_content: content }),
+          body: JSON.stringify({ title, title_ko: titleKo || null, title_en: titleEn || null, category, excerpt, content: html, markdown_content: content, ...(image ? { image } : {}) }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -183,12 +193,12 @@ export default function EditorClient({ article }: Props) {
         const res = await fetch('/api/publish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, slug, category, excerpt, content: html, markdown_content: content, date }),
+          body: JSON.stringify({ title, slug, category, excerpt, content: html, markdown_content: content, date, ...(image ? { image } : {}) }),
         });
         const data = await res.json();
         if (res.ok) {
           localStorage.removeItem(STORAGE_KEY);
-          router.push('/');
+          router.push('/wiki/drafts');
         } else {
           setResult({ ok: false, msg: data.error ?? '발행 실패' });
         }
@@ -197,6 +207,27 @@ export default function EditorClient({ article }: Props) {
       setResult({ ok: false, msg: '네트워크 오류가 발생했습니다.' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      const res = await fetch(`/api/articles/${article!.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: true }),
+      });
+      if (res.ok) {
+        setPublished(true);
+        setTimeout(() => router.push(`/wiki/${article!.slug}`), 600);
+      } else {
+        setResult({ ok: false, msg: '발행 실패' });
+      }
+    } catch {
+      setResult({ ok: false, msg: '네트워크 오류가 발생했습니다.' });
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -234,21 +265,7 @@ export default function EditorClient({ article }: Props) {
 
       {/* 툴바 */}
       <div className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <a href={isEdit ? `/wiki/${article!.slug}` : '/'} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
-              ← {isEdit ? '글로 돌아가기' : '홈'}
-            </a>
-            <span className="text-slate-200">|</span>
-            <span className="text-sm font-bold text-slate-700">
-              {isEdit ? '✏️ 글 편집' : '✍️ 새 글 작성'}
-            </span>
-            <a href="/editor/categories" className="text-xs text-slate-400 hover:text-indigo-500 transition-colors">
-              카테고리 관리
-            </a>
-            {!isEdit && savedAt && <span className="text-xs text-slate-400">저장됨 {savedAt}</span>}
-            {isEdit && <span className="text-xs text-slate-400 bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full border border-amber-200">편집 모드</span>}
-          </div>
+        <div className="max-w-5xl mx-auto flex items-center justify-end gap-4">
           <div className="flex items-center gap-2">
             {isEdit && (
               <select
@@ -272,8 +289,22 @@ export default function EditorClient({ article }: Props) {
               disabled={saving}
               className="px-4 py-1.5 text-sm font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {saving ? (isEdit ? '저장 중...' : '발행 중...') : (isEdit ? '💾 저장하기' : '🚀 발행하기')}
+              {saving ? '저장 중...' : '💾 저장하기'}
             </button>
+            {isEdit && !published && (
+              <button
+                onClick={handlePublish}
+                disabled={publishing || saving}
+                className="px-4 py-1.5 text-sm font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {publishing ? '...' : '🚀 발행하기'}
+              </button>
+            )}
+            {isEdit && published && (
+              <span className="px-4 py-1.5 text-sm font-bold rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200">
+                ✓ 발행됨
+              </span>
+            )}
             {isEdit ? (
               <button onClick={handleDelete} disabled={saving} className="px-3 py-1.5 text-sm rounded-lg border border-red-300 text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors">
                 🗑️ 삭제
@@ -312,6 +343,26 @@ export default function EditorClient({ article }: Props) {
             placeholder="제목을 입력하세요..."
             className="w-full text-2xl font-black text-slate-900 placeholder-slate-300 border-none outline-none bg-transparent"
           />
+
+          {/* 한글명 / 영문명 */}
+          <div className="flex gap-3 pt-1 border-t border-slate-100">
+            <div className="flex-1 space-y-1">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">한글명</label>
+              <input
+                type="text" value={titleKo} onChange={e => setTitleKo(e.target.value)}
+                placeholder="예: 거버넌스 토큰"
+                className="w-full text-sm text-slate-700 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 transition-colors"
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">영문명</label>
+              <input
+                type="text" value={titleEn} onChange={e => setTitleEn(e.target.value)}
+                placeholder="예: Governance Token"
+                className="w-full text-sm text-slate-700 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 transition-colors"
+              />
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2">
             {displayCategories.map(c => (
               <button
@@ -348,6 +399,23 @@ export default function EditorClient({ article }: Props) {
               />
             </div>
           )}
+
+          {/* 이미지 */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">커버 이미지</span>
+              <ImageUploadButton onUploaded={setImage} />
+            </div>
+            <input
+              type="text" value={image} onChange={e => setImage(e.target.value)}
+              placeholder="이미지 URL 직접 입력 또는 위 버튼으로 업로드"
+              className="w-full text-sm text-slate-600 placeholder-slate-300 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-indigo-400 transition-colors"
+            />
+            {image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={image} alt="preview" className="w-full h-32 object-cover rounded-lg mt-1" />
+            )}
+          </div>
         </div>
 
         {/* 편집 / 미리보기 */}

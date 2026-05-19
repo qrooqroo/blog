@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Article } from '@/types';
 import { formatDate } from '@/lib/format';
@@ -14,7 +17,19 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function FeaturedArticle({ article }: { article: Article }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    if (img.complete) {
+      if (img.naturalWidth === 0) { setImgLoaded(true); setImgError(true); }
+      else { setImgLoaded(true); }
+    }
+  }, []);
 
   return (
     <Link
@@ -23,12 +38,29 @@ export default function FeaturedArticle({ article }: { article: Article }) {
     >
       <div className="md:flex">
         {/* 이미지 */}
-        <div className="md:w-2/5 h-52 md:h-auto overflow-hidden bg-slate-100 flex-shrink-0">
+        <div className="md:w-2/5 h-52 md:h-auto relative overflow-hidden bg-slate-100 flex-shrink-0">
+          {!imgLoaded && <div className="absolute inset-0 bg-slate-200 animate-pulse" />}
+          {imgError && (
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-violet-50 flex items-end justify-end p-4">
+              <span className="text-5xl font-black text-white/20 select-none leading-none">
+                {(article.title_ko || article.title).slice(0, 2)}
+              </span>
+            </div>
+          )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={article.image}
-            alt={article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
+            ref={imgRef}
+            src={article.image ?? ''}
+            alt=""
+            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
+              imgLoaded && !imgError ? 'opacity-90' : 'opacity-0'
+            }`}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth === 0) { setImgLoaded(true); setImgError(true); }
+              else { setImgLoaded(true); }
+            }}
+            onError={() => { setImgLoaded(true); setImgError(true); }}
           />
         </div>
 

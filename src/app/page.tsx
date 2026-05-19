@@ -6,7 +6,8 @@ import SiteHeader from '@/components/SiteHeader';
 import SearchBar from '@/components/SearchBar';
 
 export default async function HomePage() {
-  const initialArticles = await getRecentArticles(9);
+  // image_ok=true 항목만 서버에서 필터링 (기본 이미지/null 제외)
+  const initialArticles = await getRecentArticles(9, true);
 
   return (
     <div className="space-y-6">

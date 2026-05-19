@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import sql from './supabase';
 import { Article, Category } from '@/types';
 export { formatDate } from './format';
 
@@ -12,7 +13,8 @@ export async function mergeTitleParts(articles: Article[]): Promise<Article[]> {
     .select('id, title_ko, title_en')
     .in('id', ids);
   if (!data) return articles;
-  const map = new Map(data.map(r => [r.id as number, r as { id: number; title_ko: string | null; title_en: string | null }]));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const map = new Map((data as any[]).map((r: any) => [r.id as number, r as { id: number; title_ko: string | null; title_en: string | null }]));
   return articles.map(a => {
     const extra = map.get(a.id);
     if (!extra) return a;
@@ -90,11 +92,50 @@ export async function getFeaturedArticle(): Promise<Article | null> {
   return rows[0] ?? null;
 }
 
-export async function getRecentArticles(count = 9): Promise<Article[]> {
+export async function getRecentArticles(count = 9, imageOkOnly = false): Promise<Article[]> {
+  const applyFilter = (qb: ReturnType<typeof supabase.from>) => {
+    if (imageOkOnly) qb.imageOkOnly();
+    qb.publishedOnly();
+    return qb;
+  };
   return safeQuery(
-    async () => supabase.from('documents_with_category').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(count),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(count),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(count)
+    async () => applyFilter(supabase.from('documents_with_category').select('*')).order('date', { ascending: false }).order('id', { ascending: false }).limit(count),
+    async () => applyFilter(supabase.from('documents').select('*')).order('date', { ascending: false }).order('id', { ascending: false }).limit(count),
+    async () => applyFilter(supabase.from('documents').select('*')).order('date', { ascending: false }).order('id', { ascending: false }).limit(count)
   );
+}
+
+// documents_with_category 뷰에 published 컬럼이 없으므로
+// documents 테이블과 JOIN해 발행된 문서만 카테고리 정보와 함께 반환한다.
+export async function getPublishedArticles(): Promise<Article[]> {
+  try {
+    const rows = await sql<Article[]>`
+      SELECT dwc.*
+      FROM documents_with_category dwc
+      JOIN documents d ON d.id = dwc.id
+      WHERE d.published IS NULL OR d.published = TRUE
+      ORDER BY dwc.date DESC, dwc.id DESC
+    `;
+    return await mergeTitleParts(rows);
+  } catch {
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .publishedOnly()
+      .order('date', { ascending: false })
+      .order('id', { ascending: false });
+    return error ? [] : ((data ?? []) as Article[]);
+  }
+}
+
+export async function getDraftArticles(limit = 9): Promise<Article[]> {
+  const { data, error } = await supabase
+    .from('documents')
+    .select('*')
+    .draftOnly()
+    .order('date', { ascending: true })
+    .order('id', { ascending: true })
+    .limit(limit);
+  return error ? [] : ((data ?? []) as Article[]);
 }
 

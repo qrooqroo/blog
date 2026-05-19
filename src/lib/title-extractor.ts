@@ -63,6 +63,8 @@ export function extractTitleEnFromContent(
     while ((m = re.exec(search)) !== null) {
       const koPart = m[1].trim();
       const enPart = m[2].trim().replace(/\.$/, '');
+      // ko_part가 단독 조사(는·은·이·가·을·를·의·도·만 등)로 시작하는 문장 단편은 제외
+      if (!/^[가-힣]{2}/.test(koPart)) continue;
       if (enPart.toLowerCase().includes(kw.toLowerCase()) && isValidEn(enPart)) {
         return { ko: hasKorean(koPart) ? koPart : null, en: enPart };
       }
