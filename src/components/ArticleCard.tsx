@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Article } from '@/types';
 import { formatDate } from '@/lib/format';
@@ -55,26 +55,9 @@ interface Props {
 }
 
 export default function ArticleCard({ article, size = 'normal' }: Props) {
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  // 이미지 URL이 없으면 즉시 placeholder 표시 (SSR과 완전히 호환)
+  const [imgError, setImgError] = useState(!article.image);
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
-
-  // callback ref: commit phase에 동기적으로 실행되어 useEffect 타이밍 버그 없음
-  const imgRef = useCallback((img: HTMLImageElement | null) => {
-    if (!img) return;
-
-    const reveal = () => {
-      if (img.naturalWidth === 0) { setImgLoaded(true); setImgError(true); }
-      else { setImgLoaded(true); }
-    };
-
-    if (img.complete) {
-      reveal();
-    } else {
-      img.addEventListener('load', reveal, { once: true });
-      img.addEventListener('error', () => { setImgLoaded(true); setImgError(true); }, { once: true });
-    }
-  }, []);
 
   const h = size === 'small' ? 'h-36' : 'h-44';
   const gradient = getPlaceholderGradient(article.category ?? '');
@@ -85,28 +68,23 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
       className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-md transition-all duration-200"
     >
       {/* 썸네일 */}
-      <div className={`relative overflow-hidden ${h}`}>
-        {/* 스켈레톤 — 이미지 로드 전 */}
-        {!imgLoaded && (
-          <div className="absolute inset-0 bg-slate-200 animate-pulse" />
-        )}
-        {/* 이미지 오류 시 그래디언트 플레이스홀더 */}
-        {imgError && (
+      <div className={`relative overflow-hidden ${h} bg-slate-200`}>
+        {imgError ? (
+          /* 이미지 없음 또는 로드 실패 시 그래디언트 플레이스홀더 */
           <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-end justify-end p-3`}>
             <span className="text-3xl font-black text-white/20 select-none leading-none">
               {(article.title_ko || article.title).slice(0, 2)}
             </span>
           </div>
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={article.image!}
+            alt=""
+            className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-all duration-500"
+            onError={() => setImgError(true)}
+          />
         )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={imgRef}
-          src={article.image ?? ''}
-          alt=""
-          className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
-            imgLoaded && !imgError ? 'opacity-90' : 'opacity-0'
-          }`}
-        />
       </div>
 
       {/* 내용 */}
