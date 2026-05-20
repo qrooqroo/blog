@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Article } from '@/types';
 import { formatDate } from '@/lib/format';
@@ -57,16 +57,22 @@ interface Props {
 export default function ArticleCard({ article, size = 'normal' }: Props) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 
-  // React 이벤트 리스너 부착 전에 이미 완료된 경우 처리 (race condition)
-  useEffect(() => {
-    const img = imgRef.current;
+  // callback ref: commit phase에 동기적으로 실행되어 useEffect 타이밍 버그 없음
+  const imgRef = useCallback((img: HTMLImageElement | null) => {
     if (!img) return;
-    if (img.complete) {
+
+    const reveal = () => {
       if (img.naturalWidth === 0) { setImgLoaded(true); setImgError(true); }
       else { setImgLoaded(true); }
+    };
+
+    if (img.complete) {
+      reveal();
+    } else {
+      img.addEventListener('load', reveal, { once: true });
+      img.addEventListener('error', () => { setImgLoaded(true); setImgError(true); }, { once: true });
     }
   }, []);
 
@@ -100,12 +106,6 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
             imgLoaded && !imgError ? 'opacity-90' : 'opacity-0'
           }`}
-          onLoad={(e) => {
-            const img = e.currentTarget;
-            if (img.naturalWidth === 0) { setImgLoaded(true); setImgError(true); }
-            else { setImgLoaded(true); }
-          }}
-          onError={() => { setImgLoaded(true); setImgError(true); }}
         />
       </div>
 
