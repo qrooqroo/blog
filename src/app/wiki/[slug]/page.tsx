@@ -5,11 +5,12 @@ import ArticleCard from '@/components/ArticleCard';
 import PublishButton from '@/components/PublishButton';
 import SiteHeader from '@/components/SiteHeader';
 import SearchBar from '@/components/SearchBar';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 import { headers } from 'next/headers';
+import PageTracker from '@/components/PageTracker';
 
 interface CategoryInfo {
   id: number;
@@ -49,7 +50,65 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const article = await findArticle(slug);
   if (!article) return {};
-  return { title: `${article.title} - AI Insight Note`, description: article.excerpt };
+
+  const categoryInfo = await getCategoryInfo(article.category);
+
+  // 제목: 한국어+영어 병기 (title_ko / title_en 있는 경우)
+  const titleKo = article.title_ko || article.title;
+  const titleEn = article.title_en && article.title_en !== titleKo ? ` (${article.title_en})` : '';
+  const fullTitle = `${titleKo}${titleEn}`;
+
+  // 카테고리 breadcrumb
+  const parentName = categoryInfo?.parent?.name;
+  const categoryBreadcrumb = parentName
+    ? `${parentName} > ${article.category}`
+    : article.category;
+
+  const pageTitle = `${fullTitle} - ${categoryBreadcrumb} | AI Insight Note`;
+
+  // 설명: excerpt 우선, 없으면 키워드 중심 자동 생성
+  const rawExcerpt = (article.excerpt ?? '').trim();
+  const autoDesc = `${fullTitle}의 개념과 원리를 정리한 위키 문서입니다. ${article.category}${parentName ? ` · ${parentName}` : ''} 분야의 핵심 내용을 학습하세요.`;
+  const description = rawExcerpt.length > 20
+    ? rawExcerpt.slice(0, 155) + (rawExcerpt.length > 155 ? '…' : '')
+    : autoDesc;
+
+  // 키워드: 제목(한/영) + 카테고리 계층
+  const keywords = [
+    titleKo,
+    article.title_en,
+    article.category,
+    parentName,
+    'AI Insight Note',
+    '위키',
+  ].filter(Boolean).join(', ');
+
+  const canonical = `https://www.aiinsightnote.com/wiki/${slug}`;
+  const imageUrl = article.image
+    ? (article.image.startsWith('http') ? article.image : `https://www.aiinsightnote.com${article.image}`)
+    : 'https://www.aiinsightnote.com/og-default.jpg';
+
+  return {
+    title: pageTitle,
+    description,
+    keywords,
+    alternates: { canonical },
+    openGraph: {
+      title: pageTitle,
+      description,
+      url: canonical,
+      siteName: 'AI Insight Note',
+      images: [{ url: imageUrl, width: 800, height: 400, alt: fullTitle }],
+      type: 'article' as const,
+      locale: 'ko_KR',
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title: pageTitle,
+      description,
+      images: [imageUrl],
+    },
+  };
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -122,7 +181,7 @@ export default async function WikiPage({ params }: Props) {
     getAllNews(),
   ]);
 
-  if (!article) redirect(`/editor?slug=${encodeURIComponent(slug)}`);
+  if (!article) notFound();
 
   const categoryInfo = await getCategoryInfo(article.category);
   const categoryId = categoryInfo?.id ?? null;
@@ -136,6 +195,7 @@ export default async function WikiPage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <PageTracker slug={slug} />
       {/* 브레드크럼 */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">
         <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
