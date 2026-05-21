@@ -4,6 +4,7 @@ const sql = postgres(process.env.DATABASE_URL!, {
   max: 10,
   idle_timeout: 30,
   connect_timeout: 10,
+  ssl: process.env.DATABASE_URL?.includes('supabase') ? 'require' : false,
 });
 
 // ── Supabase 쿼리 빌더 호환 레이어 ──────────────────────────────
