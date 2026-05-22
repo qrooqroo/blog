@@ -1,14 +1,21 @@
 export const dynamic = 'force-dynamic';
 
 import { getAllNews } from '@/lib/news';
-import ArticleCard from '@/components/ArticleCard';
 import NewsSlider from '@/components/NewsSlider';
+import NewsCategoryTabs from '@/components/NewsCategoryTabs';
+import { Article } from '@/types';
 
 export default async function NewsPage() {
   const articles = await getAllNews();
 
   const sliderArticles = articles.slice(0, 5);
-  const restArticles = articles.slice(5);
+
+  // 카테고리별 분류
+  const byCategory: Record<string, Article[]> = {};
+  for (const a of articles) {
+    if (!byCategory[a.category]) byCategory[a.category] = [];
+    byCategory[a.category].push(a);
+  }
 
   return (
     <div className="space-y-8">
@@ -22,20 +29,7 @@ export default async function NewsPage() {
       ) : (
         <>
           <NewsSlider articles={sliderArticles} />
-
-          {restArticles.length > 0 && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2.5">
-                <span className="w-1 h-5 bg-indigo-500 rounded-full" />
-                <h2 className="text-base font-black text-slate-800">더 보기</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {restArticles.map(a => (
-                  <ArticleCard key={a.id} article={a} basePath="/news" />
-                ))}
-              </div>
-            </section>
-          )}
+          <NewsCategoryTabs byCategory={byCategory} />
         </>
       )}
     </div>
