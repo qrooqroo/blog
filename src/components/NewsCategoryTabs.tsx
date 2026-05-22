@@ -31,7 +31,7 @@ export default function NewsCategoryTabs({ byCategory }: Props) {
   return (
     <div className="space-y-5">
       {/* 탭 */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-0 border-b border-slate-200">
         {categories.map(cat => {
           const isActive = cat === active;
           const color = CATEGORY_COLORS[cat] ?? 'bg-slate-500 text-white';
@@ -39,10 +39,10 @@ export default function NewsCategoryTabs({ byCategory }: Props) {
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-150 ${
+              className={`px-4 py-2 text-sm font-semibold transition-all duration-150 border-b-2 ${
                 isActive
-                  ? color + ' shadow-sm scale-105'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  ? 'border-b-2 text-slate-900 border-indigo-500'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300'
               }`}
             >
               {cat}
