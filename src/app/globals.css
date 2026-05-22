@@ -123,4 +123,13 @@ body { -webkit-font-smoothing: antialiased; }
     border-radius: 2px;
   }
 
+  .animate-progress {
+    animation: progress-bar 5s linear forwards;
+  }
+
+  @keyframes progress-bar {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+
 }
