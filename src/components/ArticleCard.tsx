@@ -52,9 +52,10 @@ function getPlaceholderGradient(category: string): string {
 interface Props {
   article: Article;
   size?: 'normal' | 'small';
+  basePath?: string;
 }
 
-export default function ArticleCard({ article, size = 'normal' }: Props) {
+export default function ArticleCard({ article, size = 'normal', basePath = '/wiki' }: Props) {
   // 이미지 URL이 없으면 즉시 placeholder 표시 (SSR과 완전히 호환)
   const [imgError, setImgError] = useState(!article.image);
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
@@ -64,7 +65,7 @@ export default function ArticleCard({ article, size = 'normal' }: Props) {
 
   return (
     <Link
-      href={`/wiki/${article.slug}`}
+      href={`${basePath}/${article.slug}`}
       className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-indigo-300 hover:shadow-md transition-all duration-200"
     >
       {/* 썸네일 */}
