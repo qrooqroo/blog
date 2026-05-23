@@ -45,3 +45,6 @@ next-env.d.ts
 # utility scripts (contain hardcoded secrets)
 /scripts/
 .claude/
+
+# batch logs
+logs/*.log

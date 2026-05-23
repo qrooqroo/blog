@@ -189,11 +189,18 @@ function normalizeHeadings(md: string): string {
   return md.replace(/^(#{1,6})([^ #\n\r])/gm, '$1 $2');
 }
 
+// CommonMark 우플랭킹 규칙: **content)** 처럼 닫는 ** 앞이 구두점이고
+// 뒤가 일반 문자(한글 등)이면 우플랭킹으로 인식하지 않아 볼드가 깨짐.
+// rehypeRaw가 활성화되어 있으므로 해당 패턴을 <strong>으로 변환해 우회.
+function fixBoldAfterPunct(md: string): string {
+  return md.replace(/\*\*([^*\n]+[)}\]>])\*\*(?=[^\s*])/g, '<strong>$1</strong>');
+}
+
 export default function MarkdownRenderer({ children, className }: Props) {
   return (
     <div className={className}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={components}>
-        {normalizeHeadings(children)}
+        {fixBoldAfterPunct(normalizeHeadings(children))}
       </ReactMarkdown>
     </div>
   );

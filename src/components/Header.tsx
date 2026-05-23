@@ -26,15 +26,33 @@ export default function Header() {
         <nav className="flex gap-1 overflow-x-auto pb-3 scrollbar-none -mx-1 px-1">
           <Link
             href="/"
-            className="flex-shrink-0 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+            className="flex-shrink-0 px-3 py-1.5 text-sm font-semibold rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
           >
-            AI 대화
+            홈
           </Link>
           <Link
             href="/news"
             className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
           >
             뉴스
+          </Link>
+          <Link
+            href="/wiki"
+            className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+          >
+            위키
+          </Link>
+          <Link
+            href="/insights"
+            className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+          >
+            인사이트
+          </Link>
+          <Link
+            href="/stocks"
+            className="flex-shrink-0 px-3 py-1.5 text-sm font-medium rounded-md text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+          >
+            증권·주식
           </Link>
           {CATEGORIES.map(cat => (
             <Link

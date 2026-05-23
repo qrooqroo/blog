@@ -12,10 +12,20 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Insight Note',
+  metadataBase: new URL('https://aiinsightnote.com'),
+  title: {
+    default: 'AI Insight Note',
+    template: '%s | AI Insight Note',
+  },
   description: 'AI와 나눈 대화, 발견한 인사이트, 기록할 가치 있는 생각들을 모아둔 노트입니다.',
+  openGraph: {
+    siteName: 'AI Insight Note',
+    locale: 'ko_KR',
+    type: 'website',
+  },
   other: {
     'google-adsense-account': 'ca-pub-4600038940266134',
+    'google-site-verification': 'RCrxGvqvk_0sXfzsZu7P50DvLNr5SSED-Iki5mJee64',
   },
 };
 
