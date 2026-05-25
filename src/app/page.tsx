@@ -2,16 +2,23 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { getAllInsights } from '@/lib/insights';
+import { getRecentPapers } from '@/lib/papers';
+import { formatDate } from '@/lib/format';
 import SiteHeader from '@/components/SiteHeader';
 import InsightSlider from '@/components/InsightSlider';
-import CryptoTicker from '@/components/CryptoTicker';
-import IndexTicker from '@/components/IndexTicker';
-import MarketTicker from '@/components/MarketTicker';
+import MarketBar from '@/components/MarketBar';
 import WeatherWidget from '@/components/WeatherWidget';
 import CalendarWidget from '@/components/CalendarWidget';
+import AiStocksWidget from '@/components/AiStocksWidget';
+import GithubTrendingWidget from '@/components/GithubTrendingWidget';
+import HuggingFaceWidget from '@/components/HuggingFaceWidget';
+import { Suspense } from 'react';
 
 export default async function HomePage() {
-  const insights = await getAllInsights();
+  const [insights, papers] = await Promise.all([
+    getAllInsights(),
+    getRecentPapers(3),
+  ]);
 
   return (
     <div className="space-y-10">
@@ -19,14 +26,11 @@ export default async function HomePage() {
 
       {/* 슬라이더(2/3) + 최신 목록(1/3) */}
       {insights.length > 0 && (
-        <div className="flex gap-5 items-stretch">
-          {/* 슬라이더 — 2/3 너비 */}
-          <div className="w-2/3 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-5 items-stretch">
+          <div className="w-full md:w-2/3 md:flex-shrink-0">
             <InsightSlider insights={insights.slice(0, 6)} />
           </div>
-
-          {/* 최신 인사이트 목록 — 1/3 너비, 슬라이더와 동일 높이 */}
-          <div className="flex-1 flex flex-col justify-between" style={{ height: '420px' }}>
+          <div className="hidden md:flex flex-1 flex-col justify-between md:h-[420px]">
             {insights.slice(0, 6).map(ins => (
               <Link
                 key={ins.id}
@@ -45,18 +49,48 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* 지수 + 참고지표 + 코인 티커 */}
-      <div className="space-y-4">
-        <IndexTicker />
-        <MarketTicker />
-        <CryptoTicker />
-      </div>
+      {/* 통합 마켓 바 */}
+      <MarketBar />
 
       {/* 날씨 위젯 + 달력 */}
-      <div className="flex gap-4 items-stretch">
+      <div className="flex flex-col sm:flex-row gap-4 items-stretch">
         <WeatherWidget />
         <CalendarWidget />
       </div>
+
+      {/* 논문 분석 목록 + 빈 공간 */}
+      {papers.length > 0 && (
+        <div className="flex gap-4">
+          <div className="w-full md:w-1/3 flex flex-col gap-3">
+            {papers.map(paper => (
+              <Link
+                key={paper.id}
+                href={`/papers/${paper.slug}`}
+                className="group bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-indigo-200 transition-all flex flex-col gap-2"
+              >
+                <p className="text-sm font-bold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
+                  {paper.title}
+                </p>
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{paper.excerpt}</p>
+                <p className="text-xs text-slate-400 mt-auto">{formatDate(paper.date)}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="hidden md:flex md:w-2/3 flex-col gap-3">
+            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 h-20 animate-pulse" />}>
+              <AiStocksWidget />
+            </Suspense>
+            <div className="grid grid-cols-2 gap-3 flex-1">
+              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
+                <GithubTrendingWidget />
+              </Suspense>
+              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
+                <HuggingFaceWidget />
+              </Suspense>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

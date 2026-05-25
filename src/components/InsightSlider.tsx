@@ -25,8 +25,7 @@ export default function InsightSlider({ insights }: { insights: Insight[] }) {
 
   return (
     <div
-      className="relative w-full rounded-2xl overflow-hidden select-none"
-      style={{ height: '420px' }}
+      className="relative w-full rounded-2xl overflow-hidden select-none h-56 sm:h-80 md:h-[420px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

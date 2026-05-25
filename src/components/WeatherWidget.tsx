@@ -123,14 +123,14 @@ export default function WeatherWidget() {
   }, []);
 
   if (!data) {
-    return <div className="w-80 bg-white rounded-xl border border-slate-200 animate-pulse" style={{ height: '320px' }} />;
+    return <div className="w-full sm:w-80 bg-white rounded-xl border border-slate-200 animate-pulse" style={{ height: '320px' }} />;
   }
 
   const { current, daily, air } = data;
   const { label, icon } = wmo(current.code);
 
   return (
-    <div className="w-80 bg-white rounded-xl border border-slate-200 p-5">
+    <div className="w-full sm:w-80 bg-white rounded-xl border border-slate-200 p-5">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs text-slate-400">📍 서울</span>

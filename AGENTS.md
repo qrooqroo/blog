@@ -39,6 +39,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `청년 우울증 10년 만에 최고, 취업난·주거 불안에 정신건강 위기`
 - `합계출산율 0.68명, 역대 최저 또 경신, 인구 위기 대책 요구`
 
+# 논문 분석 작성 규칙
+
+`papers` 테이블에 논문 분석 글을 작성할 때 따른다.
+
+- 분석가 닉네임은 항상 **Liminal·P** 를 사용한다. DB의 `analyst` 컬럼에 `'Liminal·P'`로 저장한다.
+- 논문 분석은 뉴스가 아니라 학술 칼럼 스타일로 쓴다. 흐르는 산문체를 기본으로 하되, 필요한 경우 `##` 수준의 소제목은 허용한다.
+- arXiv 논문이라면 `arxiv_id`를 반드시 채운다. 링크는 `https://arxiv.org/pdf/{arxiv_id}` (PDF 직링크)를 사용한다.
+- `paper_title`(영문 원제), `authors`, `paper_date`를 항상 채운다.
+- 분석 글 제목은 한국어로, 논문의 핵심 주장과 의미를 담은 두 절 구조로 쓴다.
+
 # 작업 환경
 
 - **DB**: 로컬 PostgreSQL만 사용 (`localhost:5433`). Supabase에는 동기화하지 않는다.

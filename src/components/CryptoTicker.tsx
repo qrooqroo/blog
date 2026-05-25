@@ -48,23 +48,25 @@ export default function CryptoTicker() {
   }, [connect]);
 
   return (
-    <div className="grid grid-cols-7 gap-3">
-      {COINS.map(coin => {
-        const t = tickers[coin.symbol];
-        return (
-          <div key={coin.symbol} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <p className="text-xs text-slate-400 mb-1">{coin.label}</p>
-            <p className="text-sm font-black text-slate-900 tabular-nums">
-              {t ? `$${t.price}` : <span className="text-slate-300">—</span>}
-            </p>
-            {t && (
-              <p className={`text-xs font-semibold mt-0.5 tabular-nums ${t.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'}`}>
-                {t.isUp ? '▲' : '▼'} {t.percent}
+    <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+      <div className="flex gap-2 w-max sm:w-auto sm:grid sm:grid-cols-7 sm:gap-3">
+        {COINS.map(coin => {
+          const t = tickers[coin.symbol];
+          return (
+            <div key={coin.symbol} className="w-32 sm:w-auto bg-white rounded-xl border border-slate-200 px-3 sm:px-4 py-3">
+              <p className="text-xs text-slate-400 mb-1">{coin.label}</p>
+              <p className="text-sm font-black text-slate-900 tabular-nums">
+                {t ? `$${t.price}` : <span className="text-slate-300">—</span>}
               </p>
-            )}
-          </div>
-        );
-      })}
+              {t && (
+                <p className={`text-xs font-semibold mt-0.5 tabular-nums ${t.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'}`}>
+                  {t.isUp ? '▲' : '▼'} {t.percent}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

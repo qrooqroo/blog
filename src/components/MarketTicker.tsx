@@ -29,35 +29,39 @@ export default function MarketTicker() {
 
   if (!items.length) {
     return (
-      <div className="grid grid-cols-7 gap-3">
-        {Array(7).fill(0).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 px-4 py-3 h-16 animate-pulse" />
-        ))}
+      <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+        <div className="flex gap-2 w-max sm:w-auto sm:grid sm:grid-cols-7 sm:gap-3">
+          {Array(7).fill(0).map((_, i) => (
+            <div key={i} className="w-32 sm:w-auto bg-white rounded-xl border border-slate-200 px-3 py-3 h-16 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-7 gap-3">
-      {items.map(item => (
-        <div key={item.key} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-          <p className="text-xs text-slate-400 mb-1 truncate">{item.name}</p>
-          <p className="text-sm font-black text-slate-900 tabular-nums">
-            {item.live ? item.value : <span className="text-slate-300">—</span>}
-          </p>
-          {item.pct && (
-            <p className={`text-xs font-semibold mt-0.5 truncate ${
-              item.key === 'fng'
-                ? item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'
-                : item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'
-            }`}>
-              {item.key === 'fng'
-                ? item.pct
-                : `${item.isUp ? '▲' : '▼'} ${item.pct}`}
+    <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+      <div className="flex gap-2 w-max sm:w-auto sm:grid sm:grid-cols-7 sm:gap-3">
+        {items.map(item => (
+          <div key={item.key} className="w-32 sm:w-auto bg-white rounded-xl border border-slate-200 px-3 sm:px-4 py-3">
+            <p className="text-xs text-slate-400 mb-1 truncate">{item.name}</p>
+            <p className="text-sm font-black text-slate-900 tabular-nums">
+              {item.live ? item.value : <span className="text-slate-300">—</span>}
             </p>
-          )}
-        </div>
-      ))}
+            {item.pct && (
+              <p className={`text-xs font-semibold mt-0.5 truncate ${
+                item.key === 'fng'
+                  ? item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'
+                  : item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'
+              }`}>
+                {item.key === 'fng'
+                  ? item.pct
+                  : `${item.isUp ? '▲' : '▼'} ${item.pct}`}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

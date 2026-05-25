@@ -51,25 +51,29 @@ export default function IndexTicker() {
 
   if (!items.length) {
     return (
-      <div className="grid grid-cols-7 gap-3">
-        {Array(7).fill(0).map((_, i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 px-4 py-3 h-16 animate-pulse" />
-        ))}
+      <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+        <div className="flex gap-2 w-max sm:w-auto sm:grid sm:grid-cols-7 sm:gap-3">
+          {Array(7).fill(0).map((_, i) => (
+            <div key={i} className="w-32 sm:w-auto bg-white rounded-xl border border-slate-200 px-3 py-3 h-16 animate-pulse" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-7 gap-3">
-      {items.map(item => (
-        <div key={item.name} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-          <p className="text-xs text-slate-400 mb-1 truncate">{item.name}</p>
-          <p className="text-sm font-black text-slate-900 tabular-nums truncate">{item.price}</p>
-          <p className={`text-xs font-semibold mt-0.5 tabular-nums ${item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'}`}>
-            {item.isUp ? '▲' : '▼'} {item.ratio}%
-          </p>
-        </div>
-      ))}
+    <div className="overflow-x-auto -mx-4 px-4 sm:overflow-visible sm:mx-0 sm:px-0">
+      <div className="flex gap-2 w-max sm:w-auto sm:grid sm:grid-cols-7 sm:gap-3">
+        {items.map(item => (
+          <div key={item.name} className="w-32 sm:w-auto bg-white rounded-xl border border-slate-200 px-3 sm:px-4 py-3">
+            <p className="text-xs text-slate-400 mb-1 truncate">{item.name}</p>
+            <p className="text-sm font-black text-slate-900 tabular-nums truncate">{item.price}</p>
+            <p className={`text-xs font-semibold mt-0.5 tabular-nums ${item.isUp ? 'text-[#F03030]' : 'text-[#3478F6]'}`}>
+              {item.isUp ? '▲' : '▼'} {item.ratio}%
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
