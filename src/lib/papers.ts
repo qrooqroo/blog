@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { supabase } from './supabase';
 
 export interface Paper {
@@ -30,7 +31,7 @@ export async function getAllPapers(): Promise<Paper[]> {
   return (data ?? []) as Paper[];
 }
 
-export async function getPaperBySlug(slug: string): Promise<Paper | undefined> {
+export const getPaperBySlug = cache(async (slug: string): Promise<Paper | undefined> => {
   const decoded = decodeURIComponent(slug);
   const { data } = await supabase
     .from('papers')
@@ -38,7 +39,7 @@ export async function getPaperBySlug(slug: string): Promise<Paper | undefined> {
     .eq('slug', decoded)
     .limit(1);
   return data?.[0] as Paper | undefined;
-}
+});
 
 export async function getRecentPapers(count = 3): Promise<Paper[]> {
   const { data } = await supabase

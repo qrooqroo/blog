@@ -1,11 +1,12 @@
 'use client';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useWidgetsVisible } from '@/lib/useWidgetsVisible';
 import { getDictionary, isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
 
 export default function SiteHeader() {
   const params = useParams<{ locale?: string }>();
-  const rawLocale = params?.locale ?? defaultLocale;
+  const searchParams = useSearchParams();
+  const rawLocale = params?.locale ?? searchParams.get('lang') ?? defaultLocale;
   const locale = isValidLocale(rawLocale) ? rawLocale : defaultLocale;
   const dict = getDictionary(locale);
 
