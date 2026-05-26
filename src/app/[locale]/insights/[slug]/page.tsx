@@ -23,8 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isEn = locale === 'en';
   const title = (isEn && insight.title_en) ? insight.title_en : insight.title;
   const description = (isEn && insight.excerpt_en) ? insight.excerpt_en : (insight.excerpt ?? insight.content.slice(0, 160).replace(/\n/g, ' '));
-  const canonicalSlug = (isEn && insight.slug_en) ? insight.slug_en : insight.slug;
-  const url = `${SITE_URL}/${locale}/insights/${canonicalSlug}`;
+  const url = `${SITE_URL}/${locale}/insights/${insight.slug}`;
 
   return {
     title: { absolute: `${title} | AI Insight Note` },

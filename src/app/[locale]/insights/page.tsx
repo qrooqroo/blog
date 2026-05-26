@@ -50,7 +50,7 @@ export default async function InsightsPage({ params }: Props) {
             const isEn = locale === 'en';
             const title = (isEn && insight.title_en) ? insight.title_en : insight.title;
             const excerpt = (isEn && insight.excerpt_en) ? insight.excerpt_en : insight.excerpt;
-            const slug = (isEn && insight.slug_en) ? insight.slug_en : insight.slug;
+            const slug = insight.slug;
             return (
               <Link
                 key={insight.id}

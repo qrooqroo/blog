@@ -54,7 +54,7 @@ export default async function HomePage() {
               <div className="hidden md:flex flex-1 flex-col justify-between md:h-[420px]">
                 {insights.slice(0, 6).map(ins => {
                   const insTitle = (isEn && ins.title_en) ? ins.title_en : ins.title;
-                  const insSlug = (isEn && ins.slug_en) ? ins.slug_en : ins.slug;
+                  const insSlug = ins.slug;
                   return (
                     <Link
                       key={ins.id}

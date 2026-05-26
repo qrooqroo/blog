@@ -25,7 +25,7 @@ export default function InsightSlider({ insights, locale = 'ko' }: { insights: I
   const isEn = locale === 'en';
   const itemTitle = (isEn && item.title_en) ? item.title_en : item.title;
   const itemExcerpt = (isEn && item.excerpt_en) ? item.excerpt_en : item.excerpt;
-  const itemSlug = (isEn && item.slug_en) ? item.slug_en : item.slug;
+  const itemSlug = item.slug;
 
   return (
     <div
