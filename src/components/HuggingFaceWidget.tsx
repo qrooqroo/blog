@@ -82,7 +82,6 @@ export default async function HuggingFaceWidget({ locale = 'ko' }: { locale?: st
               </a>
             );
           })}
-          ))}
         </div>
       )}
     </div>
