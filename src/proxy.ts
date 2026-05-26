@@ -43,26 +43,26 @@ export function proxy(request: NextRequest) {
 
   if (pathnameHasLocale) {
     const locale = pathname.split('/')[1];
-    const response = NextResponse.next();
-    response.headers.set('x-locale', isValidLocale(locale) ? locale : defaultLocale);
-    return response;
+    const newHeaders = new Headers(request.headers);
+    newHeaders.set('x-locale', isValidLocale(locale) ? locale : defaultLocale);
+    return NextResponse.next({ request: { headers: newHeaders } });
   }
 
   const locale = detectLocale(request);
 
   // Root path: pass through to src/app/page.tsx with x-locale header (no redirect/rewrite)
   if (pathname === '/') {
-    const response = NextResponse.next();
-    response.headers.set('x-locale', locale);
-    return response;
+    const newHeaders = new Headers(request.headers);
+    newHeaders.set('x-locale', locale);
+    return NextResponse.next({ request: { headers: newHeaders } });
   }
 
   // Other non-locale paths: rewrite to locale version (URL stays clean)
   const url = request.nextUrl.clone();
   url.pathname = `/${locale}${pathname}`;
-  const response = NextResponse.rewrite(url);
-  response.headers.set('x-locale', locale);
-  return response;
+  const newHeaders = new Headers(request.headers);
+  newHeaders.set('x-locale', locale);
+  return NextResponse.rewrite(url, { request: { headers: newHeaders } });
 }
 
 export const config = {
