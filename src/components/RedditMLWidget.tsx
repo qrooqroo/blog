@@ -1,73 +1,50 @@
-interface RedditPost {
+interface DevPost {
   title: string;
   url: string;
-  score: number;
-  num_comments: number;
+  positive_reactions_count: number;
+  comments_count: number;
+  user: { name: string };
 }
 
-async function getRedditToken(): Promise<string | null> {
-  const clientId = process.env.REDDIT_CLIENT_ID;
-  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
-
+async function fetchDevPosts(): Promise<DevPost[]> {
   try {
-    const res = await fetch('https://www.reddit.com/api/v1/access_token', {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'aiinsightnote/1.0',
-      },
-      body: 'grant_type=client_credentials',
-      next: { revalidate: 3300 }, // 토큰 유효기간 1시간, 55분마다 갱신
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.access_token ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchRedditML(): Promise<RedditPost[]> {
-  try {
-    const token = await getRedditToken();
-    if (!token) return [];
-
-    const res = await fetch(
-      'https://oauth.reddit.com/r/MachineLearning/hot?limit=8&raw_json=1',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'User-Agent': 'aiinsightnote/1.0',
-        },
+    const [ml, ai] = await Promise.all([
+      fetch('https://dev.to/api/articles?tag=machinelearning&per_page=6&top=7', {
+        headers: { 'User-Agent': 'aiinsightnote/1.0' },
         next: { revalidate: 300 },
+      }),
+      fetch('https://dev.to/api/articles?tag=ai&per_page=6&top=7', {
+        headers: { 'User-Agent': 'aiinsightnote/1.0' },
+        next: { revalidate: 300 },
+      }),
+    ]);
+    const [mlData, aiData] = await Promise.all([
+      ml.ok ? ml.json() : [],
+      ai.ok ? ai.json() : [],
+    ]);
+    const seen = new Set<string>();
+    const merged: DevPost[] = [];
+    for (const post of [...mlData, ...aiData]) {
+      if (!seen.has(post.url)) {
+        seen.add(post.url);
+        merged.push(post);
       }
-    );
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data.children
-      .filter((c: any) => !c.data.stickied)
-      .slice(0, 5)
-      .map((c: any) => ({
-        title: c.data.title,
-        url: `https://reddit.com${c.data.permalink}`,
-        score: c.data.score,
-        num_comments: c.data.num_comments,
-      }));
+      if (merged.length === 5) break;
+    }
+    return merged;
   } catch {
     return [];
   }
 }
 
 export default async function RedditMLWidget({ locale = 'ko' }: { locale?: string }) {
-  const posts = await fetchRedditML();
+  const posts = await fetchDevPosts();
   const isEn = locale === 'en';
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">
-        {locale === 'en' ? 'Reddit AI Trending' : 'Reddit 인기글'}
+        {isEn ? 'Dev.to AI Trending' : 'Dev.to 인기글'}
       </p>
       {posts.length === 0 ? (
         <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
@@ -85,7 +62,7 @@ export default async function RedditMLWidget({ locale = 'ko' }: { locale?: strin
                 {post.title}
               </p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                ↑{post.score.toLocaleString()} · {isEn ? 'comments' : '댓글'} {post.num_comments}
+                ♥ {post.positive_reactions_count.toLocaleString()} · {isEn ? 'comments' : '댓글'} {post.comments_count}
               </p>
             </a>
           ))}
