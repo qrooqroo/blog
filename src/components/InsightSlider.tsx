@@ -6,7 +6,7 @@ import { Insight } from '@/lib/insights';
 
 const INTERVAL = 5000;
 
-export default function InsightSlider({ insights }: { insights: Insight[] }) {
+export default function InsightSlider({ insights, locale = 'ko' }: { insights: Insight[]; locale?: string }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -22,6 +22,10 @@ export default function InsightSlider({ insights }: { insights: Insight[] }) {
   if (!insights.length) return null;
 
   const item = insights[current];
+  const isEn = locale === 'en';
+  const itemTitle = (isEn && item.title_en) ? item.title_en : item.title;
+  const itemExcerpt = (isEn && item.excerpt_en) ? item.excerpt_en : item.excerpt;
+  const itemSlug = (isEn && item.slug_en) ? item.slug_en : item.slug;
 
   return (
     <div
@@ -43,13 +47,13 @@ export default function InsightSlider({ insights }: { insights: Insight[] }) {
 
       {/* 텍스트 */}
       <Link
-        href={`/insights/${item.slug}`}
+        href={`/${locale}/insights/${itemSlug}`}
         className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-8 group"
       >
         <h2 className="text-xl md:text-2xl font-black text-white leading-tight mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
-          {item.title}
+          {itemTitle}
         </h2>
-        <p className="text-sm text-white/70 line-clamp-2">{item.excerpt}</p>
+        <p className="text-sm text-white/70 line-clamp-2">{itemExcerpt}</p>
       </Link>
 
       {/* 이전/다음 */}

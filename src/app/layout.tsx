@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
-import Script from 'next/script';
+import { headers } from 'next/headers';
 import './globals.css';
-import Footer from '@/components/Footer';
-import NavigationSpinner from '@/components/NavigationSpinner';
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
@@ -20,7 +18,6 @@ export const metadata: Metadata = {
   description: 'AI와 나눈 대화, 발견한 인사이트, 기록할 가치 있는 생각들을 모아둔 노트입니다.',
   openGraph: {
     siteName: 'AI Insight Note',
-    locale: 'ko_KR',
     type: 'website',
   },
   other: {
@@ -29,21 +26,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers();
+  const locale = headersList.get('x-locale') ?? 'ko';
+
   return (
-    <html lang="ko">
+    <html lang={locale}>
       <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4600038940266134"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-        <NavigationSpinner />
-        <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   );

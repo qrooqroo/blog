@@ -9,7 +9,7 @@ interface HFModel {
 async function fetchTrendingModels(): Promise<HFModel[]> {
   try {
     const res = await fetch(
-      'https://huggingface.co/api/models?sort=trendingScore&direction=-1&limit=5',
+      'https://huggingface.co/api/models?sort=trendingScore&direction=-1&limit=7',
       { next: { revalidate: 1800 } }
     );
     if (!res.ok) return [];
@@ -30,23 +30,41 @@ const PIPELINE_LABELS: Record<string, string> = {
   'video-classification': '영상 분류',
 };
 
-export default async function HuggingFaceWidget() {
+const PIPELINE_LABELS_EN: Record<string, string> = {
+  'text-generation': 'Text Generation',
+  'text2text-generation': 'Text-to-Text',
+  'image-classification': 'Image Classification',
+  'text-to-image': 'Text-to-Image',
+  'automatic-speech-recognition': 'Speech Recognition',
+  'feature-extraction': 'Feature Extraction',
+  'fill-mask': 'Fill Mask',
+  'question-answering': 'Question Answering',
+  'image-to-text': 'Image-to-Text',
+  'video-classification': 'Video Classification',
+};
+
+export default async function HuggingFaceWidget({ locale = 'ko' }: { locale?: string }) {
   const models = await fetchTrendingModels();
+  const isEn = locale === 'en';
+  const labels = isEn ? PIPELINE_LABELS_EN : PIPELINE_LABELS;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">HuggingFace 트렌딩</p>
+    <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col h-full">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">
+        {isEn ? 'AI Model Trends' : 'AI 모델 트렌드'}
+        <span className="font-normal normal-case ml-1">(HuggingFace)</span>
+      </p>
       {models.length === 0 ? (
-        <p className="text-xs text-slate-400">불러오는 중…</p>
+        <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100">
+        <div className="flex flex-col divide-y divide-slate-100 overflow-hidden flex-1">
           {models.map(model => (
             <a
               key={model.id ?? model.modelId}
               href={`https://huggingface.co/${model.modelId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2 first:pt-0 last:pb-0 group flex items-center justify-between gap-2"
+              className="group flex flex-1 items-center justify-between gap-2 py-1"
             >
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-slate-700 group-hover:text-indigo-600 transition-colors truncate">
@@ -54,7 +72,7 @@ export default async function HuggingFaceWidget() {
                 </p>
                 {model.pipeline_tag && (
                   <span className="text-xs text-indigo-400">
-                    {PIPELINE_LABELS[model.pipeline_tag] ?? model.pipeline_tag}
+                    {labels[model.pipeline_tag] ?? model.pipeline_tag}
                   </span>
                 )}
               </div>

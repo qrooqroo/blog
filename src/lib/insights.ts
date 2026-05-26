@@ -4,12 +4,16 @@ export interface Insight {
   id: number;
   title: string;
   slug: string;
+  slug_en: string | null;
   excerpt: string;
   content: string;
   date: string;
   image: string;
   tags: string[];
   published: boolean | null;
+  title_en: string | null;
+  excerpt_en: string | null;
+  content_en: string | null;
 }
 
 export async function getAllInsights(): Promise<Insight[]> {
@@ -27,7 +31,7 @@ export async function getInsightBySlug(slug: string): Promise<Insight | undefine
   const { data } = await supabase
     .from('insights')
     .select('*')
-    .eq('slug', decoded)
+    .or(`slug.eq.${decoded},slug_en.eq.${decoded}`)
     .limit(1);
   return data?.[0] as Insight | undefined;
 }

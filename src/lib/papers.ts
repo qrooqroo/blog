@@ -15,6 +15,9 @@ export interface Paper {
   arxiv_id: string;
   paper_date: string | null;
   analyst: string;
+  title_en: string | null;
+  excerpt_en: string | null;
+  content_en: string | null;
 }
 
 export async function getAllPapers(): Promise<Paper[]> {

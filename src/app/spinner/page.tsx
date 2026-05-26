@@ -1,34 +1,83 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+const CHAR_POOL = '01001011010010110100101001010110100101101001011010010101001011010011010100110101001101001100110001100011000110101010011';
 
 export default function SpinnerTestPage() {
   const [overlay, setOverlay] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!overlay) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const setSize = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    setSize();
+    window.addEventListener('resize', setSize);
+
+    const fontSize = 14;
+    const cols     = Math.floor(canvas.width / fontSize);
+
+    const totalRows = Math.floor(canvas.height / fontSize);
+    const drops = Array.from({ length: cols }, () =>
+      Math.random() < 0.5
+        ? Math.floor(Math.random() * totalRows)
+        : Math.floor(Math.random() * -totalRows)
+    );
+    const colColors = Array.from({ length: cols }, () => {
+      const r = Math.random();
+      if (r > 0.88) return '#818cf8';
+      if (r > 0.68) return '#60a5fa';
+      return '#22d3ee';
+    });
+
+    let frameId: number;
+    let lastTime = 0;
+
+    const draw = (now: number) => {
+      frameId = requestAnimationFrame(draw);
+      if (now - lastTime < 40) return;
+      lastTime = now;
+
+      ctx.fillStyle = 'rgba(2, 8, 20, 0.07)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `${fontSize}px 'Courier New', monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const ch = CHAR_POOL[Math.floor(Math.random() * CHAR_POOL.length)];
+        const x  = i * fontSize;
+        const y  = drops[i] * fontSize;
+
+        if (y >= 0 && y < canvas.height) {
+          ctx.fillStyle = colColors[i];
+          ctx.fillText(ch, x, y);
+        }
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = Math.floor(Math.random() * -30);
+        }
+        drops[i]++;
+      }
+    };
+
+    frameId = requestAnimationFrame(draw);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', setSize);
+    };
+  }, [overlay]);
 
   return (
     <>
-      <style>{`
-        @keyframes face-spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-      `}</style>
-
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-16 p-8">
         <h1 className="text-xl font-semibold text-slate-700">스피너 테스트</h1>
-
-        <div className="flex flex-col items-center gap-6">
-          <p className="text-sm text-slate-400">인라인 미리보기</p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/ai-face.png"
-            alt=""
-            width={120}
-            height={120}
-            style={{ borderRadius: '50%', animation: 'face-spin 3s linear infinite' }}
-          />
-          <span className="text-sm text-slate-500 font-medium tracking-wide">불러오는 중...</span>
-        </div>
 
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-slate-400">오버레이 (실제 화면과 동일)</p>
@@ -39,26 +88,21 @@ export default function SpinnerTestPage() {
             오버레이로 보기
           </button>
         </div>
-
-        {overlay && (
-          <div
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-5 cursor-pointer"
-            style={{ backgroundColor: 'rgba(248,250,252,0.82)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setOverlay(false)}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/ai-face.png"
-              alt=""
-              width={120}
-              height={120}
-              style={{ borderRadius: '50%', animation: 'face-spin 3s linear infinite' }}
-            />
-            <span className="text-sm text-slate-500 font-medium tracking-wide">불러오는 중...</span>
-            <span className="absolute bottom-8 text-xs text-slate-400">클릭하면 닫힘</span>
-          </div>
-        )}
       </div>
+
+      {overlay && (
+        <div
+          className="fixed inset-0 z-[9999] cursor-pointer"
+          style={{ background: '#020814' }}
+          onClick={() => setOverlay(false)}
+        >
+          <canvas ref={canvasRef} className="absolute inset-0" />
+
+          <span className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xs" style={{ color: '#22d3ee88' }}>
+            클릭하면 닫힘
+          </span>
+        </div>
+      )}
     </>
   );
 }
