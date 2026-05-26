@@ -44,7 +44,7 @@ export default async function HomePage() {
       <NavigationSpinner />
       <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
         <div className="space-y-10">
-          <SiteHeader />
+          <SiteHeader locale={locale} />
 
           {insights.length > 0 && (
             <div className="flex flex-col md:flex-row gap-5 items-stretch">
@@ -74,7 +74,7 @@ export default async function HomePage() {
             </div>
           )}
 
-          <WidgetsPanel>
+          <WidgetsPanel locale={locale}>
             <MarketBar />
             <div className="flex flex-col sm:flex-row gap-4 items-stretch">
               <WeatherWidget />

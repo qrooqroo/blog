@@ -58,26 +58,30 @@ export default async function HuggingFaceWidget({ locale = 'ko' }: { locale?: st
         <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
       ) : (
         <div className="flex flex-col divide-y divide-slate-100 overflow-hidden flex-1">
-          {models.map(model => (
-            <a
-              key={model.id ?? model.modelId}
-              href={`https://huggingface.co/${model.modelId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-1 items-center justify-between gap-2 py-1"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-700 group-hover:text-indigo-600 transition-colors truncate">
-                  {model.modelId}
-                </p>
-                {model.pipeline_tag && (
-                  <span className="text-xs text-indigo-400">
-                    {labels[model.pipeline_tag] ?? model.pipeline_tag}
-                  </span>
-                )}
-              </div>
-              <span className="text-xs text-rose-400 flex-shrink-0">♥ {(model.likes ?? 0).toLocaleString()}</span>
-            </a>
+          {models.map(model => {
+            const isLong = model.modelId.length > 26;
+            return (
+              <a
+                key={model.id ?? model.modelId}
+                href={`https://huggingface.co/${model.modelId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-1 items-center justify-between gap-2 py-1"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-bold text-slate-700 group-hover:text-indigo-600 transition-colors ${isLong ? 'line-clamp-2 break-all' : 'truncate'}`}>
+                    {model.modelId}
+                  </p>
+                  {model.pipeline_tag && !isLong && (
+                    <span className="text-xs text-indigo-400">
+                      {labels[model.pipeline_tag] ?? model.pipeline_tag}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-rose-400 flex-shrink-0">♥ {(model.likes ?? 0).toLocaleString()}</span>
+              </a>
+            );
+          })}
           ))}
         </div>
       )}
