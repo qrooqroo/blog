@@ -5,12 +5,42 @@ interface RedditPost {
   num_comments: number;
 }
 
+async function getRedditToken(): Promise<string | null> {
+  const clientId = process.env.REDDIT_CLIENT_ID;
+  const clientSecret = process.env.REDDIT_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
+
+  try {
+    const res = await fetch('https://www.reddit.com/api/v1/access_token', {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'aiinsightnote/1.0',
+      },
+      body: 'grant_type=client_credentials',
+      next: { revalidate: 3300 }, // 토큰 유효기간 1시간, 55분마다 갱신
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchRedditML(): Promise<RedditPost[]> {
   try {
+    const token = await getRedditToken();
+    if (!token) return [];
+
     const res = await fetch(
-      'https://www.reddit.com/r/MachineLearning/hot.json?limit=8&raw_json=1',
+      'https://oauth.reddit.com/r/MachineLearning/hot?limit=8&raw_json=1',
       {
-        headers: { 'User-Agent': 'aiinsightnote/1.0' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'aiinsightnote/1.0',
+        },
         next: { revalidate: 300 },
       }
     );
