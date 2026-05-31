@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
 interface RedditPost {
   title: string;
   url: string;
@@ -5,42 +9,42 @@ interface RedditPost {
   num_comments: number;
 }
 
-async function fetchRedditML(): Promise<RedditPost[]> {
-  try {
-    const res = await fetch(
-      'https://www.reddit.com/r/MachineLearning/hot.json?limit=10&raw_json=1',
-      {
-        headers: { 'User-Agent': 'aiinsightnote/1.0' },
-        next: { revalidate: 300 },
-      }
-    );
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data.children
-      .filter((c: any) => !c.data.stickied)
-      .slice(0, 6)
-      .map((c: any) => ({
-        title: c.data.title,
-        url: `https://reddit.com${c.data.permalink}`,
-        score: c.data.score,
-        num_comments: c.data.num_comments,
-      }));
-  } catch {
-    return [];
-  }
-}
-
-export default async function RedditAIWidget({ locale = 'ko' }: { locale?: string }) {
-  const posts = await fetchRedditML();
+export default function RedditAIWidget({ locale = 'ko' }: { locale?: string }) {
+  const [posts, setPosts] = useState<RedditPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const isEn = locale === 'en';
+
+  useEffect(() => {
+    fetch('https://www.reddit.com/r/artificial/hot.json?limit=10&raw_json=1', {
+      headers: { 'User-Agent': 'aiinsightnote/1.0' },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (!json) return;
+        const items: RedditPost[] = json.data.children
+          .filter((c: any) => !c.data.stickied)
+          .slice(0, 6)
+          .map((c: any) => ({
+            title: c.data.title,
+            url: `https://reddit.com${c.data.permalink}`,
+            score: c.data.score,
+            num_comments: c.data.num_comments,
+          }));
+        setPosts(items);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col h-full">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">
-        {isEn ? 'Reddit AI' : 'Reddit 인기글'}
+        {isEn ? 'Reddit AI' : 'Reddit AI'}
       </p>
-      {posts.length === 0 ? (
+      {loading ? (
         <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
+      ) : posts.length === 0 ? (
+        <p className="text-xs text-slate-400">{isEn ? 'No posts.' : '게시물 없음'}</p>
       ) : (
         <div className="flex flex-col divide-y divide-slate-100">
           {posts.map((post, i) => (
