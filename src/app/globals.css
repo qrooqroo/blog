@@ -134,7 +134,7 @@ body { -webkit-font-smoothing: antialiased; }
 
   .animate-marquee {
     display: flex;
-    animation: marquee 22s linear infinite;
+    animation: marquee 11s linear infinite;
     will-change: transform;
   }
 

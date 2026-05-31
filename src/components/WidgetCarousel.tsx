@@ -2,16 +2,26 @@
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 
-const VISIBLE = 3;
 const GAP = 12;
 const INTERVAL = 4000;
 const DURATION = 300;
+const SM = 640;
+
+function useVisible() {
+  const [visible, setVisible] = useState(typeof window !== 'undefined' && window.innerWidth < SM ? 1 : 3);
+  useEffect(() => {
+    const update = () => setVisible(window.innerWidth < SM ? 1 : 3);
+    window.addEventListener('resize', update, { passive: true });
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return visible;
+}
 
 export default function WidgetCarousel({ children }: { children: React.ReactNode }) {
   const childArray = React.Children.toArray(children);
   const count = childArray.length;
-  // 끝에 앞쪽 VISIBLE개를 복제해 붙여 무한 좌향 루프 구현
-  const items = [...childArray, ...childArray.slice(0, VISIBLE)];
+  const visible = useVisible();
+  const items = [...childArray, ...childArray.slice(0, visible)];
 
   const [index, setIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(true);
@@ -27,7 +37,12 @@ export default function WidgetCarousel({ children }: { children: React.ReactNode
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  // 복제 구간에 진입하면 트랜지션 완료 후 조용히 되감기
+  // visible 변경 시 index 리셋
+  useEffect(() => {
+    setIndex(0);
+    startTimer();
+  }, [visible]);
+
   useEffect(() => {
     if (index < count) return;
     const id = setTimeout(() => {
@@ -37,7 +52,6 @@ export default function WidgetCarousel({ children }: { children: React.ReactNode
     return () => clearTimeout(id);
   }, [index, count]);
 
-  // 되감기 직후 다음 프레임에서 트랜지션 복구
   useEffect(() => {
     if (transitioning) return;
     const id = requestAnimationFrame(() =>
@@ -46,7 +60,7 @@ export default function WidgetCarousel({ children }: { children: React.ReactNode
     return () => cancelAnimationFrame(id);
   }, [transitioning]);
 
-  const transform = `translateX(calc(${-index} * (100% + ${GAP}px) / ${VISIBLE}))`;
+  const transform = `translateX(calc(${-index} * (100% + ${GAP}px) / ${visible}))`;
 
   return (
     <div className="overflow-hidden">
@@ -61,7 +75,7 @@ export default function WidgetCarousel({ children }: { children: React.ReactNode
           <div
             key={i}
             className="flex-none flex flex-col"
-            style={{ width: `calc((100% - ${(VISIBLE - 1) * GAP}px) / ${VISIBLE})` }}
+            style={{ width: `calc((100% - ${(visible - 1) * GAP}px) / ${visible})` }}
           >
             {child}
           </div>
