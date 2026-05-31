@@ -37,7 +37,7 @@ export default async function AiLabNewsWidget({ locale = 'ko' }: { locale?: stri
                 href={`/${locale}/news/${a.slug}`}
                 className="inline-flex items-center px-8 py-3.5 group hover:bg-indigo-50 transition-colors"
               >
-                <span className="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 group-hover:underline transition-colors">
                   {a.title}
                 </span>
                 <span className="text-slate-300 ml-8">·</span>
