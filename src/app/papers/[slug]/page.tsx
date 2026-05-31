@@ -48,8 +48,8 @@ export default async function PaperPage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <Link href="/" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors block">
-        ← 홈으로
+      <Link href="/papers" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors block">
+        ← 논문 분석으로
       </Link>
 
       {/* 제목 */}

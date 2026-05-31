@@ -49,7 +49,7 @@ export default function NewsSlider({ articles }: { articles: Article[] }) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={a.image ?? ''}
+            src={a.image ?? undefined}
             alt=""
             className="w-full h-full object-cover"
           />

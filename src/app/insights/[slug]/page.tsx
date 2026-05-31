@@ -3,9 +3,10 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { headers, cookies } from 'next/headers';
 import { getInsightBySlug } from '@/lib/insights';
-import { formatDate } from '@/lib/format';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { isValidLocale, defaultLocale, getDictionary } from '@/lib/i18n/dictionaries';
 
 const SITE_URL = 'https://aiinsightnote.com';
 
@@ -13,33 +14,47 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+async function getLocale(): Promise<string> {
+  const h = await headers();
+  const c = await cookies();
+  const fromHeader = h.get('x-locale');
+  const fromCookie = c.get('NEXT_LOCALE')?.value;
+  const raw = fromHeader ?? fromCookie ?? defaultLocale;
+  return isValidLocale(raw) ? raw : defaultLocale;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const locale = await getLocale();
   const insight = await getInsightBySlug(slug);
   if (!insight) return { title: '인사이트 | AI Insight Note' };
 
+  const isEn = locale === 'en';
+  const title = (isEn && insight.title_en) ? insight.title_en : insight.title;
+  const description = (isEn && insight.excerpt_en)
+    ? insight.excerpt_en
+    : (insight.excerpt ?? insight.content.slice(0, 160).replace(/\n/g, ' '));
   const url = `${SITE_URL}/insights/${slug}`;
-  const description = insight.excerpt ?? insight.content.slice(0, 160).replace(/\n/g, ' ');
 
   return {
-    title: { absolute: `${insight.title} | AI Insight Note` },
+    title: { absolute: `${title} | AI Insight Note` },
     description,
     keywords: insight.tags ?? [],
     alternates: { canonical: url },
     openGraph: {
       type: 'article',
       url,
-      title: insight.title,
+      title,
       description,
-      images: insight.image ? [{ url: insight.image, width: 800, height: 450, alt: insight.title }] : [],
+      images: insight.image ? [{ url: insight.image, width: 800, height: 450, alt: title }] : [],
       publishedTime: insight.date,
       tags: insight.tags ?? [],
       siteName: 'AI Insight Note',
-      locale: 'ko_KR',
+      locale: isEn ? 'en_US' : 'ko_KR',
     },
     twitter: {
       card: 'summary_large_image',
-      title: insight.title,
+      title,
       description,
       images: insight.image ? [insight.image] : [],
     },
@@ -48,37 +63,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function InsightPage({ params }: Props) {
   const { slug } = await params;
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
   const insight = await getInsightBySlug(slug);
 
   if (!insight) return notFound();
 
+  const isEn = locale === 'en';
+  const title = (isEn && insight.title_en) ? insight.title_en : insight.title;
+  const excerpt = (isEn && insight.excerpt_en) ? insight.excerpt_en : insight.excerpt;
+  const content = (isEn && insight.content_en) ? insight.content_en : insight.content;
+
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      {/* 뒤로가기 */}
       <Link href="/insights" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors block mb-4">
-        ← 인사이트 목록
+        {dict.pages.insights.back}
       </Link>
 
-      {/* 헤더 */}
       <div>
-        <h1 className="text-2xl font-black text-slate-900 leading-snug">{insight.title}</h1>
+        <h1 className="text-2xl font-black text-slate-900 leading-snug">{title}</h1>
       </div>
 
-      {/* 썸네일 */}
       {insight.image && (
         <div className="relative h-64 rounded-xl overflow-hidden bg-slate-200">
           <img src={insight.image} alt="" className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* 요약 */}
       <p className="text-base text-slate-600 leading-relaxed border-l-4 border-indigo-200 pl-4 italic">
-        {insight.excerpt}
+        {excerpt}
       </p>
 
-      {/* 본문 */}
       <div className="prose prose-slate max-w-none">
-        <MarkdownRenderer>{insight.content}</MarkdownRenderer>
+        <MarkdownRenderer>{content}</MarkdownRenderer>
       </div>
     </div>
   );

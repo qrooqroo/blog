@@ -1,29 +1,19 @@
-import type { Metadata } from 'next';
 import Script from 'next/script';
 import Footer from '@/components/Footer';
 import NavigationSpinner from '@/components/NavigationSpinner';
 import SiteNav from '@/components/SiteNav';
+import { headers, cookies } from 'next/headers';
 import { isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
 
-export const metadata: Metadata = {
-  openGraph: {
-    siteName: 'AI Insight Note',
-    type: 'website',
-  },
-};
-
-export function generateStaticParams() {
-  return [{ locale: 'ko' }, { locale: 'en' }];
+async function getLocale() {
+  const h = await headers();
+  const c = await cookies();
+  const raw = h.get('x-locale') ?? c.get('NEXT_LOCALE')?.value ?? defaultLocale;
+  return isValidLocale(raw) ? raw : defaultLocale;
 }
 
-interface Props {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}
-
-export default async function LocaleLayout({ children, params }: Props) {
-  const { locale: raw } = await params;
-  const locale = isValidLocale(raw) ? raw : defaultLocale;
+export default async function InsightsLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
 
   return (
     <>

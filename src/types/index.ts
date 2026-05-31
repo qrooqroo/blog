@@ -14,4 +14,5 @@ export interface Article {
   date: string;
   image: string;
   published?: boolean | null;
+  source_url?: string | null;
 }

@@ -12,7 +12,7 @@ export default function SiteHeader({ locale: localeProp }: { locale?: string }) 
   const { visible, toggle } = useWidgetsVisible();
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative">
+    <div id="site-header" className="bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative">
       {/* Left: Logo + Divider + Subtitle */}
       <div className="flex items-center gap-5 sm:gap-7 min-w-0">
         <div className="flex items-center flex-shrink-0">

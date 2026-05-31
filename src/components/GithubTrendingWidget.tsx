@@ -21,6 +21,12 @@ async function searchRepos(query: string): Promise<Repo[]> {
   return (json.items ?? []) as Repo[];
 }
 
+const NON_ASCII_RE = /[^\x00-\x7F]/;
+
+function isEnglish(repo: Repo): boolean {
+  return !NON_ASCII_RE.test(repo.name) && !NON_ASCII_RE.test(repo.description ?? '');
+}
+
 async function fetchTrendingRepos(): Promise<Repo[]> {
   const day30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const day7  = new Date(Date.now() -  7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -32,7 +38,7 @@ async function fetchTrendingRepos(): Promise<Repo[]> {
     const seen = new Set<number>();
     const merged: Repo[] = [];
     for (const repo of [...newRepos, ...hotRepos]) {
-      if (!seen.has(repo.id)) {
+      if (!seen.has(repo.id) && isEnglish(repo)) {
         seen.add(repo.id);
         merged.push(repo);
       }

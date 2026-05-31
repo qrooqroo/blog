@@ -1,50 +1,43 @@
-interface DevPost {
+interface RedditPost {
   title: string;
   url: string;
-  positive_reactions_count: number;
-  comments_count: number;
-  user: { name: string };
+  score: number;
+  num_comments: number;
 }
 
-async function fetchDevPosts(): Promise<DevPost[]> {
+async function fetchRedditML(): Promise<RedditPost[]> {
   try {
-    const [ml, ai] = await Promise.all([
-      fetch('https://dev.to/api/articles?tag=machinelearning&per_page=6&top=7', {
+    const res = await fetch(
+      'https://www.reddit.com/r/MachineLearning/hot.json?limit=10&raw_json=1',
+      {
         headers: { 'User-Agent': 'aiinsightnote/1.0' },
         next: { revalidate: 300 },
-      }),
-      fetch('https://dev.to/api/articles?tag=ai&per_page=6&top=7', {
-        headers: { 'User-Agent': 'aiinsightnote/1.0' },
-        next: { revalidate: 300 },
-      }),
-    ]);
-    const [mlData, aiData] = await Promise.all([
-      ml.ok ? ml.json() : [],
-      ai.ok ? ai.json() : [],
-    ]);
-    const seen = new Set<string>();
-    const merged: DevPost[] = [];
-    for (const post of [...mlData, ...aiData]) {
-      if (!seen.has(post.url)) {
-        seen.add(post.url);
-        merged.push(post);
       }
-      if (merged.length === 6) break;
-    }
-    return merged;
+    );
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data.children
+      .filter((c: any) => !c.data.stickied)
+      .slice(0, 6)
+      .map((c: any) => ({
+        title: c.data.title,
+        url: `https://reddit.com${c.data.permalink}`,
+        score: c.data.score,
+        num_comments: c.data.num_comments,
+      }));
   } catch {
     return [];
   }
 }
 
-export default async function RedditMLWidget({ locale = 'ko' }: { locale?: string }) {
-  const posts = await fetchDevPosts();
+export default async function RedditAIWidget({ locale = 'ko' }: { locale?: string }) {
+  const posts = await fetchRedditML();
   const isEn = locale === 'en';
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col h-full">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">
-        {isEn ? 'Dev.to AI Trending' : 'Dev.to 인기글'}
+        {isEn ? 'Reddit AI' : 'Reddit 인기글'}
       </p>
       {posts.length === 0 ? (
         <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
@@ -62,7 +55,7 @@ export default async function RedditMLWidget({ locale = 'ko' }: { locale?: strin
                 {post.title}
               </p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                ♥ {post.positive_reactions_count.toLocaleString()} · {isEn ? 'comments' : '댓글'} {post.comments_count}
+                ↑{post.score.toLocaleString()} · {isEn ? 'comments' : '댓글'} {post.num_comments}
               </p>
             </a>
           ))}

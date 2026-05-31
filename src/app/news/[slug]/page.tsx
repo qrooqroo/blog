@@ -1,6 +1,6 @@
-import { getNewsBySlug, getAllNews } from '@/lib/news';
+import { cache } from 'react';
+import { getNewsBySlug, getRelatedNews } from '@/lib/news';
 import { formatDate } from '@/lib/articles';
-import ArticleCard from '@/components/ArticleCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -9,9 +9,11 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const getCachedArticle = cache((slug: string) => getNewsBySlug(slug));
+
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const article = await getNewsBySlug(slug);
+  const article = await getCachedArticle(slug);
   if (!article) return {};
 
   const title = `${article.title} | AI Insight Note`;
@@ -53,16 +55,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default async function NewsSlugPage({ params }: Props) {
   const { slug } = await params;
-  const [article, allNews] = await Promise.all([
-    getNewsBySlug(slug),
-    getAllNews(),
-  ]);
-
+  const article = await getCachedArticle(slug);
   if (!article) notFound();
 
-  const related = allNews
-    .filter(a => a.category === article.category && a.slug !== article.slug)
-    .slice(0, 3);
+  const related = await getRelatedNews(article.category, slug, 3);
 
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 
@@ -114,9 +110,15 @@ export default async function NewsSlugPage({ params }: Props) {
             <span className="w-1 h-5 bg-indigo-500 rounded-full" />
             <h2 className="text-base font-black text-slate-800">관련 뉴스</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-2">
             {related.map(a => (
-              <ArticleCard key={a.id} article={a} size="small" basePath="/news" />
+              <Link
+                key={a.id}
+                href={`/news/${a.slug}`}
+                className="block px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all line-clamp-2 leading-snug"
+              >
+                {a.title}
+              </Link>
             ))}
           </div>
         </section>

@@ -132,4 +132,15 @@ body { -webkit-font-smoothing: antialiased; }
     to   { width: 100%; }
   }
 
+  .animate-marquee {
+    display: flex;
+    animation: marquee 22s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
 }

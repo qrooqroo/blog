@@ -21,12 +21,11 @@ function detectLocale(request: NextRequest): Locale {
 export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  // ?lang= override: set cookie and redirect to same clean URL (without lang param)
+  // ?lang= override: set 1-year cookie and redirect to clean URL
   const langParam = searchParams.get('lang');
   if (langParam && isValidLocale(langParam)) {
     const url = request.nextUrl.clone();
     url.searchParams.delete('lang');
-    // Strip locale prefix from URL so it stays clean (e.g. /ko/insights → /insights)
     const existingLocale = locales.find(l => pathname === `/${l}` || pathname.startsWith(`/${l}/`));
     if (existingLocale) {
       url.pathname = pathname.slice(`/${existingLocale}`.length) || '/';
@@ -36,33 +35,19 @@ export function proxy(request: NextRequest) {
     return res;
   }
 
-  // Already on a locale path: pass through and set x-locale header
-  const pathnameHasLocale = locales.some(
-    locale => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
-  );
-
-  if (pathnameHasLocale) {
-    const locale = pathname.split('/')[1];
-    const newHeaders = new Headers(request.headers);
-    newHeaders.set('x-locale', isValidLocale(locale) ? locale : defaultLocale);
-    return NextResponse.next({ request: { headers: newHeaders } });
-  }
-
   const locale = detectLocale(request);
-
-  // Root path: pass through to src/app/page.tsx with x-locale header (no redirect/rewrite)
-  if (pathname === '/') {
-    const newHeaders = new Headers(request.headers);
-    newHeaders.set('x-locale', locale);
-    return NextResponse.next({ request: { headers: newHeaders } });
-  }
-
-  // Other non-locale paths: rewrite to locale version (URL stays clean)
-  const url = request.nextUrl.clone();
-  url.pathname = `/${locale}${pathname}`;
   const newHeaders = new Headers(request.headers);
   newHeaders.set('x-locale', locale);
-  return NextResponse.rewrite(url, { request: { headers: newHeaders } });
+
+  const res = NextResponse.next({ request: { headers: newHeaders } });
+
+  // Auto-set short-lived locale cookie so client-side navigation retains locale
+  const existingCookie = request.cookies.get('NEXT_LOCALE')?.value;
+  if (!existingCookie || !isValidLocale(existingCookie)) {
+    res.cookies.set('NEXT_LOCALE', locale, { path: '/', maxAge: 3600, sameSite: 'lax' });
+  }
+
+  return res;
 }
 
 export const config = {

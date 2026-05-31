@@ -107,6 +107,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **개발 서버**: `http://localhost:3000` 기준으로 확인한다.
 - 프로덕션 배포(Vercel/Supabase)는 사용자가 명시적으로 요청할 때만 진행한다.
 
+# 이미지 테스트 규칙
+
+이미지 URL을 추가하거나 수정할 때는 반드시 실제로 이미지가 깨지지 않는지 확인한다.
+
+- `curl -sL -o /dev/null -w "%{http_code}" <URL>` 로 HTTP 200 응답 여부를 확인한다.
+- 여러 이미지가 있을 경우 전체를 일괄 테스트한다.
+- 404 등 오류 응답이 있으면 올바른 URL로 교체한 뒤 다시 검증한다.
+- Amazon 상품 이미지는 `https://images-na.ssl-images-amazon.com/images/P/{ASIN}.01._SL160_.jpg` 형식을 사용한다 (ASIN 기반 자동 생성, 별도 image ID 불필요).
+
 # CSS 규칙
 
 CSS 충돌이나 우선순위 문제를 `!important`로 해결하지 말 것.

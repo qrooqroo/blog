@@ -3,18 +3,21 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { getAllInsights } from '@/lib/insights';
 import { getRecentPapers } from '@/lib/papers';
-import { formatDate } from '@/lib/format';
 import SiteHeader from '@/components/SiteHeader';
 import InsightSlider from '@/components/InsightSlider';
 import MarketBar from '@/components/MarketBar';
 import WeatherWidget from '@/components/WeatherWidget';
 import CalendarWidget from '@/components/CalendarWidget';
-import AiStocksWidget from '@/components/AiStocksWidget';
 import GithubTrendingWidget from '@/components/GithubTrendingWidget';
 import HuggingFaceWidget from '@/components/HuggingFaceWidget';
 import RedditMLWidget from '@/components/RedditMLWidget';
+import RedditAIWidget from '@/components/RedditAIWidget';
 import HNAILaunchWidget from '@/components/HNAILaunchWidget';
+import LlmLeaderboardWidget from '@/components/LlmLeaderboardWidget';
+import AmazonAffiliateWidget from '@/components/AmazonAffiliateWidget';
+import AiLabNewsWidget from '@/components/AiLabNewsWidget';
 import WidgetsPanel from '@/components/WidgetsPanel';
+import WidgetCarousel from '@/components/WidgetCarousel';
 import { Suspense } from 'react';
 import { isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
 
@@ -34,39 +37,13 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="space-y-10">
-      <SiteHeader />
+      <SiteHeader locale={locale} />
 
-      {/* 슬라이더(2/3) + 최신 목록(1/3) */}
       {insights.length > 0 && (
-        <div className="flex flex-col md:flex-row gap-5 items-stretch">
-          <div className="w-full md:w-2/3 md:flex-shrink-0">
-            <InsightSlider insights={insights.slice(0, 6)} locale={locale} />
-          </div>
-          <div className="hidden md:flex flex-1 flex-col justify-between md:h-[420px]">
-            {insights.slice(0, 6).map(ins => {
-              const insTitle = (isEn && ins.title_en) ? ins.title_en : ins.title;
-              const insSlug = ins.slug;
-              return (
-                <Link
-                  key={ins.id}
-                  href={`/${locale}/insights/${insSlug}`}
-                  className="group flex gap-3 items-center p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-200 flex-1"
-                >
-                  {ins.image && (
-                    <img src={ins.image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
-                  )}
-                  <p className="text-sm font-semibold text-slate-700 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
-                    {insTitle}
-                  </p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        <InsightSlider insights={insights.slice(0, 6)} locale={locale} />
       )}
 
-      {/* 경제지표 + 날씨/달력 (ko 전용) */}
-      <WidgetsPanel>
+      <WidgetsPanel locale={locale}>
         <MarketBar />
         <div className="flex flex-col sm:flex-row gap-4 items-stretch">
           <WeatherWidget />
@@ -74,10 +51,10 @@ export default async function HomePage({ params }: Props) {
         </div>
       </WidgetsPanel>
 
-      {/* 논문 분석 목록 */}
       {papers.length > 0 && (
-        <div className="flex gap-4">
-          <div className="w-full md:w-1/3 flex flex-col gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Col 1: Recent Papers */}
+          <div className="flex flex-col gap-3">
             {papers.map(paper => {
               const title = (isEn && paper.title_en) ? paper.title_en : paper.title;
               const excerpt = (isEn && paper.excerpt_en) ? paper.excerpt_en : paper.excerpt;
@@ -91,33 +68,51 @@ export default async function HomePage({ params }: Props) {
                     {title}
                   </p>
                   <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{excerpt}</p>
-                  <p className="text-xs text-slate-400 mt-auto">{formatDate(paper.date)}</p>
                 </Link>
               );
             })}
           </div>
-          <div className="hidden md:flex md:w-2/3 flex-col gap-3">
-            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 h-20 animate-pulse" />}>
-              <AiStocksWidget />
-            </Suspense>
-            <div className="grid grid-cols-2 gap-3 flex-1">
-              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
-                <GithubTrendingWidget locale={locale} />
-              </Suspense>
-              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
-                <HuggingFaceWidget locale={locale} />
-              </Suspense>
-              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
-                <RedditMLWidget locale={locale} />
-              </Suspense>
-              <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
-                <HNAILaunchWidget locale={locale} />
-              </Suspense>
-            </div>
-          </div>
+          {/* Col 2: HN AI Launch */}
+          <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse" />}>
+            <HNAILaunchWidget locale={locale} />
+          </Suspense>
+          {/* Col 3: LLM Leaderboard */}
+          <LlmLeaderboardWidget locale={locale} />
         </div>
       )}
 
+      {/* Carousel: GitHub AI 트렌드 / AI 모델 트렌드 / Dev.to / Reddit */}
+      <div className="-mt-5">
+        <div className="rounded-2xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100 shadow-lg shadow-indigo-100/60 px-2 pt-2 pb-3">
+          <div className="text-center mb-2">
+            <span className="text-sm font-bold text-slate-700">
+              {isEn ? 'Trending Now' : '인기 트렌드'}
+            </span>
+          </div>
+          <WidgetCarousel>
+            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+              <GithubTrendingWidget locale={locale} />
+            </Suspense>
+            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+              <HuggingFaceWidget locale={locale} />
+            </Suspense>
+            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+              <RedditMLWidget locale={locale} />
+            </Suspense>
+            <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+              <RedditAIWidget locale={locale} />
+            </Suspense>
+          </WidgetCarousel>
+        </div>
+      </div>
+
+      {/* AI 기업 블로그 */}
+      <Suspense fallback={<div className="h-40 bg-white border border-slate-200 rounded-xl animate-pulse" />}>
+        <AiLabNewsWidget locale={locale} />
+      </Suspense>
+
+      {/* Amazon affiliate */}
+      <AmazonAffiliateWidget />
     </div>
   );
 }
