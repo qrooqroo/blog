@@ -50,7 +50,7 @@ export default function FeaturedArticle({ article }: { article: Article }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={imgRef}
-            src={article.image ?? undefined}
+            src={article.image || undefined}
             alt=""
             className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
               imgLoaded && !imgError ? 'opacity-90' : 'opacity-0'

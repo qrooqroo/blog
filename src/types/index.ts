@@ -15,4 +15,5 @@ export interface Article {
   image: string;
   published?: boolean | null;
   source_url?: string | null;
+  analyst?: string | null;
 }

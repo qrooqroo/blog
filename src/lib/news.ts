@@ -6,6 +6,8 @@ export async function getAllNews(): Promise<Article[]> {
   const { data } = await supabase
     .from('news')
     .select('*')
+    .neq('title', '__skip__')
+    .publishedOnly()
     .order('date', { ascending: false })
     .order('id', { ascending: false });
   return (data ?? []) as Article[];
@@ -16,6 +18,8 @@ export async function getNewsByCategory(category: string): Promise<Article[]> {
     .from('news')
     .select('*')
     .eq('category', category)
+    .neq('title', '__skip__')
+    .publishedOnly()
     .order('date', { ascending: false })
     .order('id', { ascending: false });
   return (data ?? []) as Article[];
@@ -44,6 +48,8 @@ export async function getRecentNews(count = 9): Promise<Article[]> {
   const { data } = await supabase
     .from('news')
     .select('*')
+    .neq('title', '__skip__')
+    .publishedOnly()
     .order('date', { ascending: false })
     .order('id', { ascending: false })
     .limit(count);

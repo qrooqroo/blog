@@ -5,6 +5,12 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 
+const ANALYST_EN: Record<string, string> = {
+  '이준혁': 'Maren Cole',
+  '박서연': 'Zoe Strand',
+  '김도현': 'Leo Vane',
+};
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -79,16 +85,15 @@ export default async function NewsSlugPage({ params }: Props) {
         {article.image && <img src={article.image} alt={article.title} className="w-full h-64 object-cover" />}
 
         <div className="p-6 md:p-8">
-          <div className="flex items-center gap-2.5 mb-4">
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tagColor}`}>
-              {article.category}
-            </span>
-            <time className="text-sm text-slate-400">{formatDate(article.date)}</time>
-          </div>
-
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-6">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-3">
             {article.title}
           </h1>
+          <div className="flex items-center justify-end gap-3 mb-6 text-xs text-slate-400">
+            {article.analyst && (
+              <span className="font-medium text-slate-500">{article.analyst} 기자</span>
+            )}
+            <time>{formatDate(article.date)}</time>
+          </div>
 
           {article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">

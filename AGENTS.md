@@ -107,6 +107,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **개발 서버**: `http://localhost:3000` 기준으로 확인한다.
 - 프로덕션 배포(Vercel/Supabase)는 사용자가 명시적으로 요청할 때만 진행한다.
 
+# 배포 규칙
+
+**배포는 사용자가 명시적으로 요청할 때만 진행한다.**
+
+- "배포해줘", "올려줘", "운영에 반영해줘" 등 명확한 배포 지시가 있을 때만 `git push` 및 Supabase 동기화를 실행한다.
+- 코드 수정, 버그 픽스, 기능 추가 작업 후 자동으로 배포하지 않는다.
+- 배포 요청 없이 커밋만 하는 경우에도 `git push`는 하지 않는다.
+
 # 이미지 테스트 규칙
 
 이미지 URL을 추가하거나 수정할 때는 반드시 실제로 이미지가 깨지지 않는지 확인한다.

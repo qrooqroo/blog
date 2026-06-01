@@ -1,26 +1,27 @@
-interface RedditPost {
+interface LobstersPost {
   title: string;
   url: string;
   author: string;
 }
 
-async function fetchRedditRSS(): Promise<RedditPost[]> {
+async function fetchLobstersPosts(): Promise<LobstersPost[]> {
   try {
-    const res = await fetch('https://www.reddit.com/r/artificial/hot/.rss', {
-      headers: { 'User-Agent': 'aiinsightnote/1.0 (by /u/aiinsightnote)' },
+    const res = await fetch('https://lobste.rs/t/ai.rss', {
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];
     const xml = await res.text();
 
-    const posts: RedditPost[] = [];
-    const re = /<entry>([\s\S]*?)<\/entry>/g;
+    const posts: LobstersPost[] = [];
+    const re = /<item>([\s\S]*?)<\/item>/g;
     let m;
     while ((m = re.exec(xml)) !== null && posts.length < 7) {
       const chunk = m[1];
-      const title = chunk.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() ?? '';
-      const url = chunk.match(/<link[^>]+href="([^"]+)"/)?.[1]?.trim() ?? '';
-      const author = chunk.match(/<name>([\s\S]*?)<\/name>/)?.[1]?.trim() ?? '';
+      const title = chunk.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/)?.[1]?.trim() ?? '';
+      const url = chunk.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() ?? '';
+      const rawAuthor = chunk.match(/<author>([\s\S]*?)<\/author>/)?.[1]?.trim() ?? '';
+      // "domain via username" 형식에서 username만 추출
+      const author = rawAuthor.includes(' via ') ? rawAuthor.split(' via ')[1] : rawAuthor;
       if (title && url) posts.push({ title, url, author });
     }
     return posts;
@@ -29,14 +30,14 @@ async function fetchRedditRSS(): Promise<RedditPost[]> {
   }
 }
 
-export default async function RedditAIWidget({ locale = 'ko' }: { locale?: string }) {
-  const posts = await fetchRedditRSS();
+export default async function LobstersWidget({ locale = 'ko' }: { locale?: string }) {
+  const posts = await fetchLobstersPosts();
   const isEn = locale === 'en';
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col h-full">
       <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">
-        Reddit AI (r/artificial)
+        Lobste.rs AI
       </p>
       {posts.length === 0 ? (
         <p className="text-xs text-slate-400">{isEn ? 'Loading…' : '불러오는 중…'}</p>
