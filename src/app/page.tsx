@@ -16,7 +16,6 @@ import CalendarWidget from '@/components/CalendarWidget';
 import GithubTrendingWidget from '@/components/GithubTrendingWidget';
 import HuggingFaceWidget from '@/components/HuggingFaceWidget';
 import RedditMLWidget from '@/components/RedditMLWidget';
-import RedditAIWidget from '@/components/RedditAIWidget';
 import HackerNewsAIWidget from '@/components/HackerNewsAIWidget';
 import LobstersWidget from '@/components/LobstersWidget';
 import HNAILaunchWidget from '@/components/HNAILaunchWidget';
@@ -118,9 +117,6 @@ export default async function HomePage() {
                   </Suspense>
                   <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
                     <RedditMLWidget locale={locale} />
-                  </Suspense>
-                  <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
-                    <RedditAIWidget locale={locale} />
                   </Suspense>
                   <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
                     <HackerNewsAIWidget locale={locale} />
