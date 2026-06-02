@@ -18,6 +18,10 @@ import HuggingFaceWidget from '@/components/HuggingFaceWidget';
 import RedditMLWidget from '@/components/RedditMLWidget';
 import HackerNewsAIWidget from '@/components/HackerNewsAIWidget';
 import LobstersWidget from '@/components/LobstersWidget';
+import TheHackerNewsWidget from '@/components/TheHackerNewsWidget';
+import BleepingComputerWidget from '@/components/BleepingComputerWidget';
+import AhnLabASECWidget from '@/components/AhnLabASECWidget';
+import RaonSecureWidget from '@/components/RaonSecureWidget';
 import HNAILaunchWidget from '@/components/HNAILaunchWidget';
 import LlmLeaderboardWidget from '@/components/LlmLeaderboardWidget';
 import AiLabNewsWidget from '@/components/AiLabNewsWidget';
@@ -125,6 +129,31 @@ export default async function HomePage() {
                     <LobstersWidget locale={locale} />
                   </Suspense>
                 </WidgetCarousel>
+            </div>
+          </div>
+
+          {/* 보안 트렌드 */}
+          <div>
+            <div className="rounded-2xl bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 border border-red-100 shadow-lg shadow-red-100/60 px-2 pt-2 pb-3">
+              <div className="text-center mb-2">
+                <span className="text-sm font-bold text-slate-700">
+                  {isEn ? 'Security Trends' : '보안 트렌드'}
+                </span>
+              </div>
+              <WidgetCarousel>
+                <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+                  <TheHackerNewsWidget locale={locale} />
+                </Suspense>
+                <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+                  <BleepingComputerWidget locale={locale} />
+                </Suspense>
+                <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+                  <AhnLabASECWidget locale={locale} />
+                </Suspense>
+                <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+                  <RaonSecureWidget locale={locale} />
+                </Suspense>
+              </WidgetCarousel>
             </div>
           </div>
 

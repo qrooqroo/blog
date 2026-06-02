@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, sql } from './supabase';
 import { Article } from '@/types';
 export { isNewsCategory, tableFor } from './table-utils';
 
@@ -67,6 +67,27 @@ export async function getRelatedNews(category: string, excludeSlug: string, limi
     .order('id', { ascending: false })
     .limit(limit);
   return (data ?? []) as Article[];
+}
+
+export async function getRelatedNewsBySource(sourceUrl: string | null | undefined, excludeSlug: string, limit = 10): Promise<Article[]> {
+  if (!sourceUrl) return [];
+  let domain: string;
+  try {
+    domain = new URL(sourceUrl).hostname.replace(/^www\./, '');
+  } catch {
+    return [];
+  }
+  const rows = await sql`
+    SELECT id, title, slug, category, excerpt, date, source_url
+    FROM news
+    WHERE source_url ILIKE ${'%' + domain + '%'}
+      AND slug != ${excludeSlug}
+      AND title != '__skip__'
+      AND (published IS NULL OR published = TRUE)
+    ORDER BY date DESC, id DESC
+    LIMIT ${limit}
+  ` as Article[];
+  return rows;
 }
 
 export async function getRecentAiNews(count = 8): Promise<Article[]> {

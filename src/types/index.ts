@@ -16,4 +16,7 @@ export interface Article {
   published?: boolean | null;
   source_url?: string | null;
   analyst?: string | null;
+  title_en?: string | null;
+  excerpt_en?: string | null;
+  markdown_content_en?: string | null;
 }

@@ -1,5 +1,5 @@
 import { cache } from 'react';
-import { getNewsBySlug, getRelatedNews } from '@/lib/news';
+import { getNewsBySlug, getRelatedNewsBySource } from '@/lib/news';
 import { formatDate } from '@/lib/articles';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -64,7 +64,7 @@ export default async function NewsSlugPage({ params }: Props) {
   const article = await getCachedArticle(slug);
   if (!article) notFound();
 
-  const related = await getRelatedNews(article.category, slug, 3);
+  const related = await getRelatedNewsBySource(article.source_url, slug, 10);
 
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 
@@ -120,9 +120,10 @@ export default async function NewsSlugPage({ params }: Props) {
               <Link
                 key={a.id}
                 href={`/news/${a.slug}`}
-                className="block px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all line-clamp-2 leading-snug"
+                className="flex items-start justify-between gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all group"
               >
-                {a.title}
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 line-clamp-2 leading-snug flex-1">{a.title}</span>
+                <time className="text-xs text-slate-400 flex-shrink-0 mt-0.5">{formatDate(a.date)}</time>
               </Link>
             ))}
           </div>

@@ -14,7 +14,15 @@ export default async function NewsPage({ params }: Props) {
   const { locale: raw } = await params;
   const locale = isValidLocale(raw) ? raw : defaultLocale;
   const dict = getDictionary(locale);
-  const articles = await getAllNews();
+  const isEn = locale === 'en';
+  const rawArticles = await getAllNews();
+
+  // 영어 locale이면 title_en/excerpt_en으로 대체
+  const articles = rawArticles.map(a => isEn ? {
+    ...a,
+    title: a.title_en ?? a.title,
+    excerpt: a.excerpt_en ?? a.excerpt,
+  } : a);
 
   const sliderArticles = articles.slice(0, 5);
   const sliderIds = new Set(sliderArticles.map(a => a.id));
