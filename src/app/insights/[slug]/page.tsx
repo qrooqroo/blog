@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { headers, cookies } from 'next/headers';
 import { getInsightBySlug } from '@/lib/insights';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import AdUnit from '@/components/AdUnit';
 import { isValidLocale, defaultLocale, getDictionary } from '@/lib/i18n/dictionaries';
 
 const SITE_URL = 'https://aiinsightnote.com';
@@ -94,9 +95,13 @@ export default async function InsightPage({ params }: Props) {
         {excerpt}
       </p>
 
+      <AdUnit slot="2748808542" className="my-4" />
+
       <div className="prose prose-slate max-w-none">
         <MarkdownRenderer>{content}</MarkdownRenderer>
       </div>
+
+      <AdUnit slot="6963385825" className="mt-6" />
     </div>
   );
 }

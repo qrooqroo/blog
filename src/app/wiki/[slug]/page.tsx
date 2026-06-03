@@ -8,6 +8,7 @@ import SearchBar from '@/components/SearchBar';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import AdUnit from '@/components/AdUnit';
 import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 import { headers } from 'next/headers';
 import PageTracker from '@/components/PageTracker';
@@ -298,6 +299,8 @@ export default async function WikiPage({ params }: Props) {
             <div className="prose text-slate-700 text-[0.95rem] leading-8"
               dangerouslySetInnerHTML={{ __html: article.content }} />
           )}
+
+          <AdUnit slot="6963385825" className="mt-6" />
         </div>
       </article>
 

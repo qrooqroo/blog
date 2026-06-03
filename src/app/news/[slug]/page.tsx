@@ -6,6 +6,7 @@ import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { headers, cookies } from 'next/headers';
 import { isValidLocale } from '@/lib/i18n/dictionaries';
+import AdUnit from '@/components/AdUnit';
 
 const ANALYST_EN: Record<string, string> = {
   '이준혁': 'Maren Cole',
@@ -112,6 +113,8 @@ export default async function NewsSlugPage({ params }: Props) {
             <time>{formatDate(article.date)}</time>
           </div>
 
+          <AdUnit slot="2748808542" className="mb-6" />
+
           {isEn && article.markdown_content_en ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
               {article.markdown_content_en}
@@ -126,6 +129,7 @@ export default async function NewsSlugPage({ params }: Props) {
               dangerouslySetInnerHTML={{ __html: article.content ?? '' }}
             />
           )}
+          <AdUnit slot="6963385825" className="mt-6" />
         </div>
       </article>
 
