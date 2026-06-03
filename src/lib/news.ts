@@ -78,7 +78,7 @@ export async function getRelatedNewsBySource(sourceUrl: string | null | undefine
     return [];
   }
   const rows = await sql`
-    SELECT id, title, slug, category, excerpt, date, source_url
+    SELECT id, title, title_en, slug, category, excerpt, date, source_url
     FROM news
     WHERE source_url ILIKE ${'%' + domain + '%'}
       AND slug != ${excludeSlug}
@@ -93,7 +93,7 @@ export async function getRelatedNewsBySource(sourceUrl: string | null | undefine
 export async function getRecentAiNews(count = 8): Promise<Article[]> {
   const { data } = await supabase
     .from('news')
-    .select('id, title, slug, category, excerpt, date, source_url')
+    .select('id, title, title_en, slug, category, excerpt, date, source_url')
     .eq('category', 'AI')
     .neq('title', '__skip__')
     .publishedOnly()

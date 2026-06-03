@@ -58,6 +58,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default async function NewsSlugPage({ params }: Props) {
   const { locale: raw, slug } = await params;
   const locale = isValidLocale(raw) ? raw : defaultLocale;
+  const isEn = locale === 'en';
   const dict = getDictionary(locale);
 
   const article = await getCachedArticle(slug);

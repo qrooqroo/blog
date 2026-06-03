@@ -8,20 +8,26 @@ import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 
 const CATEGORY_ORDER = ['AI', '암호화폐', '증권', '경제', '건강', '부동산', '사회', '국제', '스포츠'];
 const ALL_TAB = '전체';
+const CATEGORY_EN: Record<string, string> = {
+  '전체': 'All', 'AI': 'AI', '암호화폐': 'Crypto', '증권': 'Markets',
+  '경제': 'Economy', '건강': 'Health', '부동산': 'Real Estate',
+  '사회': 'Society', '국제': 'World', '스포츠': 'Sports',
+};
 
 interface Props {
   byCategory: Record<string, Article[]>;
   allArticles: Article[];
 }
 
-function getTitle(a: Article) {
+function getTitle(a: Article, isEn: boolean) {
+  if (isEn) return a.title_en ?? a.title;
   const parts = a.title_ko && a.title_en
     ? { ko: a.title_ko, en: a.title_en }
     : parseTitleParts(a.title);
   return resolveDisplayKo(a.title, parts.ko);
 }
 
-export default function NewsCategoryTabs({ byCategory, allArticles }: Props) {
+export default function NewsCategoryTabs({ byCategory, allArticles, isEn = false }: Props & { isEn?: boolean }) {
   const categories = CATEGORY_ORDER.filter(c => byCategory[c]?.length > 0);
   const [active, setActive] = useState(ALL_TAB);
 
@@ -47,7 +53,7 @@ export default function NewsCategoryTabs({ byCategory, allArticles }: Props) {
                   : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300'
               }`}
             >
-              {cat}
+              {isEn ? (CATEGORY_EN[cat] ?? cat) : cat}
               <span className={`ml-1.5 text-xs ${isActive ? 'opacity-80' : 'opacity-50'}`}>
                 {count}
               </span>
@@ -81,7 +87,7 @@ export default function NewsCategoryTabs({ byCategory, allArticles }: Props) {
                   </div>
                   <div className="px-3 py-2.5 shrink-0">
                     <h3 className="text-sm font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors h-[2.5rem] overflow-hidden">
-                      {getTitle(a)}
+                      {getTitle(a, isEn)}
                     </h3>
                   </div>
                 </Link>
@@ -101,7 +107,7 @@ export default function NewsCategoryTabs({ byCategory, allArticles }: Props) {
                     className="flex items-center px-4 py-2.5 hover:bg-slate-50 transition-colors group shrink-0"
                   >
                     <p className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors leading-snug h-[2.5rem] overflow-hidden">
-                      {getTitle(a)}
+                      {getTitle(a, isEn)}
                     </p>
                   </Link>
                 ))}
@@ -130,7 +136,7 @@ export default function NewsCategoryTabs({ byCategory, allArticles }: Props) {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors leading-snug h-[2.5rem] overflow-hidden">
-                      {getTitle(a)}
+                      {getTitle(a, isEn)}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">{formatDate(a.date)}</p>
                   </div>

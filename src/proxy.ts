@@ -41,11 +41,8 @@ export function proxy(request: NextRequest) {
 
   const res = NextResponse.next({ request: { headers: newHeaders } });
 
-  // Auto-set short-lived locale cookie so client-side navigation retains locale
-  const existingCookie = request.cookies.get('NEXT_LOCALE')?.value;
-  if (!existingCookie || !isValidLocale(existingCookie)) {
-    res.cookies.set('NEXT_LOCALE', locale, { path: '/', maxAge: 3600, sameSite: 'lax' });
-  }
+  // 매 페이지 이동마다 쿠키를 갱신해 언어 설정이 유지되도록 함 (1년 TTL)
+  res.cookies.set('NEXT_LOCALE', locale, { path: '/', maxAge: 365 * 24 * 3600, sameSite: 'lax' });
 
   return res;
 }

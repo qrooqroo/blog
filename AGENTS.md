@@ -101,6 +101,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Title: two-clause structure "[key claim], [significance/impact]", noun-phrase ending, 8~14 words.
 - Body: 1500+ chars, 2~3 `##` headings.
 
+# 브라우저 테스트 규칙
+
+UI·페이지·라우팅·API 관련 작업이 끝나면 반드시 브라우저로 직접 동작을 확인한다.
+
+- `mcp__claude-in-chrome__browser_batch`로 해당 URL에 접속해 스크린샷을 찍는다.
+- 수정된 화면에 버튼·링크·폼 등 인터랙티브 요소가 있으면 직접 클릭·입력해서 이벤트가 정상 작동하는지 확인한다.
+- 정상 동작 여부를 눈으로 확인한 뒤 작업 완료를 보고한다.
+- 콘솔 에러가 있으면 `mcp__claude-in-chrome__read_console_messages`로 확인하고 수정한다.
+- dev 서버가 꺼져 있으면 사용자에게 `npm run dev` 실행을 요청하고, 응답 후 테스트한다.
+
 # 작업 환경
 
 - **DB**: 로컬 PostgreSQL만 사용 (`localhost:5433`). Supabase에는 동기화하지 않는다.

@@ -2,7 +2,16 @@ export const dynamic = 'force-dynamic';
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers, cookies } from 'next/headers';
 import { getAllInsights } from '@/lib/insights';
+import { isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
+
+async function getLocale() {
+  const h = await headers();
+  const c = await cookies();
+  const raw = h.get('x-locale') ?? c.get('NEXT_LOCALE')?.value ?? defaultLocale;
+  return isValidLocale(raw) ? raw : defaultLocale;
+}
 
 export const metadata: Metadata = {
   title: { absolute: '인사이트 | AI Insight Note' },
@@ -24,17 +33,22 @@ export const metadata: Metadata = {
 };
 
 export default async function InsightsPage() {
-  const insights = await getAllInsights();
+  const [insights, locale] = await Promise.all([getAllInsights(), getLocale()]);
+  const isEn = locale === 'en';
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black text-slate-900">인사이트</h1>
-        <p className="text-sm text-slate-400 mt-1">최신 기술 방향성과 논문 분석</p>
+        <h1 className="text-2xl font-black text-slate-900">{isEn ? 'Insights' : '인사이트'}</h1>
+        <p className="text-sm text-slate-400 mt-1">
+          {isEn ? 'Deep-dive analysis on emerging tech trends' : '최신 기술 방향성과 논문 분석'}
+        </p>
       </div>
 
       {insights.length === 0 ? (
-        <p className="text-sm text-slate-400 py-16 text-center">아직 작성된 글이 없습니다.</p>
+        <p className="text-sm text-slate-400 py-16 text-center">
+          {isEn ? 'No articles yet.' : '아직 작성된 글이 없습니다.'}
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {insights.map(insight => (
@@ -54,9 +68,11 @@ export default async function InsightsPage() {
               )}
               <div className="p-5">
                 <h2 className="text-base font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors mb-2">
-                  {insight.title}
+                  {isEn ? (insight.title_en ?? insight.title) : insight.title}
                 </h2>
-                <p className="text-sm text-slate-500 leading-relaxed">{insight.excerpt}</p>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  {isEn ? (insight.excerpt_en ?? insight.excerpt) : insight.excerpt}
+                </p>
               </div>
             </Link>
           ))}

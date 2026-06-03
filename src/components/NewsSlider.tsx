@@ -15,7 +15,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const INTERVAL = 5000;
 
-export default function NewsSlider({ articles }: { articles: Article[] }) {
+export default function NewsSlider({ articles, isEn = false }: { articles: Article[]; isEn?: boolean }) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -71,10 +71,10 @@ export default function NewsSlider({ articles }: { articles: Article[] }) {
             <span className="text-xs text-white/60">{formatDate(article.date)}</span>
           </div>
           <h2 className="text-xl md:text-2xl font-black text-white leading-tight mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
-            {article.title}
+            {isEn ? (article.title_en ?? article.title) : article.title}
           </h2>
           <p className="text-sm text-white/70 line-clamp-2 max-w-2xl">
-            {article.excerpt}
+            {isEn ? (article.excerpt_en ?? article.excerpt) : article.excerpt}
           </p>
         </div>
       </Link>

@@ -4,6 +4,8 @@ import { formatDate } from '@/lib/articles';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { headers, cookies } from 'next/headers';
+import { isValidLocale } from '@/lib/i18n/dictionaries';
 
 const ANALYST_EN: Record<string, string> = {
   '이준혁': 'Maren Cole',
@@ -59,8 +61,21 @@ const CATEGORY_COLORS: Record<string, string> = {
   '뉴스': 'bg-slate-100 text-slate-600',
 };
 
+const CATEGORY_EN: Record<string, string> = {
+  'AI': 'AI',
+  'IT': 'IT',
+  '비트코인': 'Bitcoin',
+  '경제': 'Economy',
+  '뉴스': 'News',
+};
+
 export default async function NewsSlugPage({ params }: Props) {
   const { slug } = await params;
+  const h = await headers();
+  const c = await cookies();
+  const locale = h.get('x-locale') ?? c.get('NEXT_LOCALE')?.value ?? 'ko';
+  const isEn = isValidLocale(locale) && locale === 'en';
+
   const article = await getCachedArticle(slug);
   if (!article) notFound();
 
@@ -72,11 +87,11 @@ export default async function NewsSlugPage({ params }: Props) {
     <div className="max-w-3xl mx-auto">
       {/* 브레드크럼 */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">
-        <Link href="/" className="hover:text-indigo-500 transition-colors">홈</Link>
+        <Link href="/" className="hover:text-indigo-500 transition-colors">{isEn ? 'Home' : '홈'}</Link>
         <span>›</span>
-        <Link href="/news" className="hover:text-indigo-500 transition-colors">뉴스</Link>
+        <Link href="/news" className="hover:text-indigo-500 transition-colors">{isEn ? 'News' : '뉴스'}</Link>
         <span>›</span>
-        <span className="text-slate-600 truncate">{article.title}</span>
+        <span className="text-slate-600 truncate">{isEn ? (article.title_en ?? article.title) : article.title}</span>
       </nav>
 
       {/* 기사 */}
@@ -86,16 +101,22 @@ export default async function NewsSlugPage({ params }: Props) {
 
         <div className="p-6 md:p-8">
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-3">
-            {article.title}
+            {isEn ? (article.title_en ?? article.title) : article.title}
           </h1>
           <div className="flex items-center justify-end gap-3 mb-6 text-xs text-slate-400">
             {article.analyst && (
-              <span className="font-medium text-slate-500">{article.analyst} 기자</span>
+              <span className="font-medium text-slate-500">
+                {isEn ? `by ${ANALYST_EN[article.analyst] ?? article.analyst}` : `${article.analyst} 기자`}
+              </span>
             )}
             <time>{formatDate(article.date)}</time>
           </div>
 
-          {article.markdown_content ? (
+          {isEn && article.markdown_content_en ? (
+            <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
+              {article.markdown_content_en}
+            </MarkdownRenderer>
+          ) : article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
               {article.markdown_content.replace(/^\s*#{1,6}[^\n]*\n?/, '')}
             </MarkdownRenderer>
@@ -113,7 +134,7 @@ export default async function NewsSlugPage({ params }: Props) {
         <section className="mt-10">
           <div className="flex items-center gap-2.5 mb-4">
             <span className="w-1 h-5 bg-indigo-500 rounded-full" />
-            <h2 className="text-base font-black text-slate-800">관련 뉴스</h2>
+            <h2 className="text-base font-black text-slate-800">{isEn ? 'Related News' : '관련 뉴스'}</h2>
           </div>
           <div className="flex flex-col gap-2">
             {related.map(a => (
@@ -122,7 +143,7 @@ export default async function NewsSlugPage({ params }: Props) {
                 href={`/news/${a.slug}`}
                 className="flex items-start justify-between gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl hover:text-indigo-600 hover:border-indigo-200 hover:shadow-sm transition-all group"
               >
-                <span className="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 line-clamp-2 leading-snug flex-1">{a.title}</span>
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 line-clamp-2 leading-snug flex-1">{isEn ? (a.title_en ?? a.title) : a.title}</span>
                 <time className="text-xs text-slate-400 flex-shrink-0 mt-0.5">{formatDate(a.date)}</time>
               </Link>
             ))}

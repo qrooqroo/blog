@@ -150,9 +150,11 @@ export default async function HomePage() {
                 <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
                   <AhnLabASECWidget locale={locale} />
                 </Suspense>
-                <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
-                  <RaonSecureWidget locale={locale} />
-                </Suspense>
+                {locale === 'ko' && (
+                  <Suspense fallback={<div className="bg-white border border-slate-200 rounded-xl p-4 animate-pulse h-64" />}>
+                    <RaonSecureWidget locale={locale} />
+                  </Suspense>
+                )}
               </WidgetCarousel>
             </div>
           </div>

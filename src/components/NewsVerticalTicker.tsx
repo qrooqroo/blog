@@ -6,6 +6,7 @@ import Link from 'next/link';
 interface Article {
   id: number;
   title: string;
+  title_en?: string | null;
   slug: string;
 }
 
@@ -48,7 +49,7 @@ export default function NewsVerticalTicker({ articles, locale = 'ko' }: { articl
           transition: transitioning ? 'transform 0.6s ease, opacity 0.4s ease' : 'none',
         }}
       >
-        {current.title}
+        {locale === 'en' ? (current.title_en ?? current.title) : current.title}
       </Link>
 
       {/* 다음 항목: 아래에서 위로 올라오며 등장 */}
@@ -59,7 +60,7 @@ export default function NewsVerticalTicker({ articles, locale = 'ko' }: { articl
           className="absolute inset-0 flex items-center text-sm font-semibold text-slate-700 truncate"
           style={{ animation: 'slideUpIn 0.6s ease forwards' }}
         >
-          {next.title}
+          {locale === 'en' ? (next.title_en ?? next.title) : next.title}
         </Link>
       )}
     </div>

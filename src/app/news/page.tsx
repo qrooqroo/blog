@@ -4,9 +4,19 @@ import { getAllNews } from '@/lib/news';
 import NewsSlider from '@/components/NewsSlider';
 import NewsCategoryTabs from '@/components/NewsCategoryTabs';
 import { Article } from '@/types';
+import { headers, cookies } from 'next/headers';
+import { isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
+
+async function getLocale() {
+  const h = await headers();
+  const c = await cookies();
+  const raw = h.get('x-locale') ?? c.get('NEXT_LOCALE')?.value ?? defaultLocale;
+  return isValidLocale(raw) ? raw : defaultLocale;
+}
 
 export default async function NewsPage() {
-  const articles = await getAllNews();
+  const [articles, locale] = await Promise.all([getAllNews(), getLocale()]);
+  const isEn = locale === 'en';
 
   const sliderArticles = articles.slice(0, 5);
   const sliderIds = new Set(sliderArticles.map(a => a.id));
@@ -23,14 +33,16 @@ export default async function NewsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-black text-slate-900">뉴스</h1>
+      <h1 className="text-2xl font-black text-slate-900">{isEn ? 'News' : '뉴스'}</h1>
 
       {articles.length === 0 ? (
-        <p className="text-sm text-slate-400 py-16 text-center">아직 작성된 글이 없습니다.</p>
+        <p className="text-sm text-slate-400 py-16 text-center">
+          {isEn ? 'No articles yet.' : '아직 작성된 글이 없습니다.'}
+        </p>
       ) : (
         <div className="space-y-8">
-          <NewsSlider articles={sliderArticles} />
-          <NewsCategoryTabs byCategory={byCategory} allArticles={tabArticles} />
+          <NewsSlider articles={sliderArticles} isEn={isEn} />
+          <NewsCategoryTabs byCategory={byCategory} allArticles={tabArticles} isEn={isEn} />
         </div>
       )}
     </div>
