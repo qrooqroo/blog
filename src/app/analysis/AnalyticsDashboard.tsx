@@ -10,7 +10,7 @@ interface Stats {
   topDocs: { slug: string; title: string; views: number; avg_sec: number }[];
   catStats: { category: string; cat_slug: string; views: number }[];
   referrers: { referrer: string; visits: number }[];
-  dailyTrend: { day: string; humans: number; bots: number }[];
+  dailyTrend: { day: string; humans: number; bots: number; unique_ips: number }[];
   recentViews: { slug: string; title: string; ip: string; referrer: string; duration: number; user_agent: string; created_at: string }[];
   days: number;
 }
@@ -150,17 +150,53 @@ export default function AnalyticsDashboard() {
         {dailyTrend.length === 0 ? (
           <p className="text-slate-400 text-sm">데이터 없음</p>
         ) : (
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={220}>
             <LineChart data={dailyTrend} margin={{ right: 16 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="day" tick={{ fontSize: 11 }} tickFormatter={d => d.slice(5)} />
+              <XAxis dataKey="day" tick={{ fontSize: 11 }} tickFormatter={d => String(d).slice(5, 10).replace('-', '/')} />
               <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip />
+              <Tooltip formatter={(v: number, name: string) => [v.toLocaleString(), name]} />
               <Legend />
-              <Line type="monotone" dataKey="humans" name="사람" stroke="#6366f1" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="unique_ips" name="순방문자" stroke="#10b981" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="humans" name="페이지뷰" stroke="#6366f1" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="bots" name="봇" stroke="#e2e8f0" strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
             </LineChart>
           </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* 날짜별 접속자 테이블 */}
+      <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">날짜별 접속자 수</h3>
+        {dailyTrend.length === 0 ? (
+          <p className="text-slate-400 text-sm">데이터 없음</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="text-slate-400 border-b border-slate-100">
+                  <th className="text-left pb-2 font-medium">날짜</th>
+                  <th className="text-right pb-2 font-medium">순방문자</th>
+                  <th className="text-right pb-2 font-medium">페이지뷰</th>
+                  <th className="text-right pb-2 font-medium">봇</th>
+                  <th className="text-right pb-2 font-medium">뷰/방문자</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...dailyTrend].reverse().map(row => (
+                  <tr key={row.day} className="border-b border-slate-50 hover:bg-slate-50">
+                    <td className="py-1.5 font-medium text-slate-700">{String(row.day).slice(0, 10)}</td>
+                    <td className="py-1.5 text-right font-bold text-emerald-600">{Number(row.unique_ips).toLocaleString()}</td>
+                    <td className="py-1.5 text-right text-indigo-600">{Number(row.humans).toLocaleString()}</td>
+                    <td className="py-1.5 text-right text-slate-400">{Number(row.bots).toLocaleString()}</td>
+                    <td className="py-1.5 text-right text-slate-500">
+                      {row.unique_ips > 0 ? (Number(row.humans) / Number(row.unique_ips)).toFixed(1) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

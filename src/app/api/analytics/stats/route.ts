@@ -74,9 +74,10 @@ export async function GET(req: NextRequest) {
     // 일별 트렌드
     sql`
       SELECT
-        DATE(created_at AT TIME ZONE 'Asia/Seoul') AS day,
-        COUNT(*) FILTER (WHERE NOT is_bot)  AS humans,
-        COUNT(*) FILTER (WHERE is_bot)      AS bots
+        DATE(created_at AT TIME ZONE 'Asia/Seoul')          AS day,
+        COUNT(*) FILTER (WHERE NOT is_bot)                  AS humans,
+        COUNT(*) FILTER (WHERE is_bot)                      AS bots,
+        COUNT(DISTINCT ip) FILTER (WHERE NOT is_bot)        AS unique_ips
       FROM page_views
       WHERE created_at >= ${since} AND ${notLocal}
       GROUP BY 1
