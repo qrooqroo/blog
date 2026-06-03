@@ -176,13 +176,14 @@ export default async function WikiPage({ params }: Props) {
     );
   }
 
-  const [article, allArticles, allNews] = await Promise.all([
-    findArticle(slug),
+  // findArticle을 먼저 단독 실행 — 콜드 스타트 시 커넥션 경합으로 인한 간헐적 404 방지
+  const article = await findArticle(slug);
+  if (!article) notFound();
+
+  const [allArticles, allNews] = await Promise.all([
     getPublishedArticles(),
     getAllNews(),
   ]);
-
-  if (!article) notFound();
 
   const categoryInfo = await getCategoryInfo(article.category);
   const categoryId = categoryInfo?.id ?? null;

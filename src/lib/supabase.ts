@@ -1,10 +1,13 @@
 import postgres from 'postgres';
 
+const isSupabase = process.env.DATABASE_URL?.includes('supabase');
+
 const sql = postgres(process.env.DATABASE_URL!, {
-  max: 10,
+  max: isSupabase ? 1 : 10,       // 서버리스: 인스턴스당 1개면 충분
   idle_timeout: 30,
   connect_timeout: 10,
-  ssl: process.env.DATABASE_URL?.includes('supabase') ? 'require' : false,
+  ssl: isSupabase ? 'require' : false,
+  prepare: isSupabase ? false : true, // PgBouncer transaction 모드는 prepared statement 미지원
 });
 
 // ── Supabase 쿼리 빌더 호환 레이어 ──────────────────────────────

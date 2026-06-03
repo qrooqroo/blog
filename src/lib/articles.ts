@@ -88,8 +88,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
   }
 
   // 뷰에 없거나 에러인 경우 documents 테이블 직접 조회
-  // (뷰 JOIN 조건에서 누락된 문서도 포함)
-  const { data } = await supabase
+  // (뷰 JOIN 조건 누락 또는 콜드 스타트 커넥션 실패 재시도 포함)
+  const { data, error } = await supabase
     .from('documents')
     .select('*')
     .eq('slug', decoded)
