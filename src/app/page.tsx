@@ -22,6 +22,7 @@ import TheHackerNewsWidget from '@/components/TheHackerNewsWidget';
 import BleepingComputerWidget from '@/components/BleepingComputerWidget';
 import AhnLabASECWidget from '@/components/AhnLabASECWidget';
 import RaonSecureWidget from '@/components/RaonSecureWidget';
+import XFeedWidget from '@/components/XFeedWidget';
 import HNAILaunchWidget from '@/components/HNAILaunchWidget';
 import LlmLeaderboardWidget from '@/components/LlmLeaderboardWidget';
 import AiLabNewsWidget from '@/components/AiLabNewsWidget';
@@ -158,6 +159,9 @@ export default async function HomePage() {
               </WidgetCarousel>
             </div>
           </div>
+
+          {/* X 피드 */}
+          <XFeedWidget locale={locale} />
 
         </div>
       </main>
