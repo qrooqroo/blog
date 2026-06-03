@@ -25,14 +25,14 @@ export default function AdUnit({ slot, className = '' }: Props) {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {}
 
-    // unfilled 상태가 되면 래퍼를 숨겨 빈 공간 제거
     const ins = insRef.current;
     const wrap = wrapRef.current;
     if (!ins || !wrap) return;
 
+    // filled 상태가 될 때만 래퍼를 표시 — 빈 공간 깜빡임 없음
     const observer = new MutationObserver(() => {
-      if (ins.getAttribute('data-ad-status') === 'unfilled') {
-        wrap.style.display = 'none';
+      if (ins.getAttribute('data-ad-status') === 'filled') {
+        wrap.style.display = 'block';
       }
     });
     observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
@@ -40,7 +40,7 @@ export default function AdUnit({ slot, className = '' }: Props) {
   }, []);
 
   return (
-    <div ref={wrapRef} className={`overflow-hidden text-center ${className}`}>
+    <div ref={wrapRef} style={{ display: 'none' }} className={`overflow-hidden text-center ${className}`}>
       <ins
         ref={insRef}
         className="adsbygoogle"
