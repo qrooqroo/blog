@@ -25,7 +25,7 @@ export default async function WikiLayout({ children }: { children: React.ReactNo
       />
       <NavigationSpinner />
       <SiteNav locale={locale} />
-      <main className="max-w-5xl mx-auto px-4 py-10">
+      <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
         {children}
       </main>
       <Footer />
