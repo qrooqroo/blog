@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import sql from '@/lib/supabase';
 
-const BASE = 'https://aiinsightnote.com';
+const BASE = 'https://www.aiinsightnote.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [articles, categories, newsItems, insights, papers] = await Promise.all([

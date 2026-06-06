@@ -10,7 +10,7 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aiinsightnote.com'),
+  metadataBase: new URL('https://www.aiinsightnote.com'),
   title: {
     default: 'AI Insight Note',
     template: '%s | AI Insight Note',
