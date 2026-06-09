@@ -179,6 +179,7 @@ export default async function WikiPage({ params }: Props) {
   // findArticle을 먼저 단독 실행 — 콜드 스타트 시 커넥션 경합으로 인한 간헐적 404 방지
   const article = await findArticle(slug);
   if (!article) notFound();
+  if (article.is_internal && !isLocal) notFound();
 
   const [allArticles, allNews] = await Promise.all([
     getPublishedArticles(),

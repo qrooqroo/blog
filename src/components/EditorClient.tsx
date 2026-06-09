@@ -120,6 +120,7 @@ export default function EditorClient({ article }: Props) {
   const [saving,      setSaving]      = useState(false);
   const [publishing,  setPublishing]  = useState(false);
   const [published,   setPublished]   = useState(article?.published ?? false);
+  const [isInternal,  setIsInternal]  = useState(article?.is_internal ?? false);
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [dbCategories, setDbCategories] = useState<string[]>([]);
 
@@ -178,7 +179,7 @@ export default function EditorClient({ article }: Props) {
         const res = await fetch(`/api/articles/${article!.id}?table=${table}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, title_ko: titleKo || null, title_en: titleEn || null, category, excerpt, content: html, markdown_content: content, ...(image ? { image } : {}) }),
+          body: JSON.stringify({ title, title_ko: titleKo || null, title_en: titleEn || null, category, excerpt, content: html, markdown_content: content, is_internal: isInternal, ...(image ? { image } : {}) }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -193,7 +194,7 @@ export default function EditorClient({ article }: Props) {
         const res = await fetch('/api/publish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, slug, category, excerpt, content: html, markdown_content: content, date, ...(image ? { image } : {}) }),
+          body: JSON.stringify({ title, slug, category, excerpt, content: html, markdown_content: content, date, is_internal: isInternal, ...(image ? { image } : {}) }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -399,6 +400,17 @@ export default function EditorClient({ article }: Props) {
               />
             </div>
           )}
+
+          {/* 내부 문서 여부 */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isInternal}
+              onChange={e => setIsInternal(e.target.checked)}
+              className="w-4 h-4 accent-indigo-600"
+            />
+            <span className="text-sm text-slate-600">회사 내부 문서</span>
+          </label>
 
           {/* 이미지 */}
           <div className="space-y-1.5">

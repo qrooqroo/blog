@@ -1,7 +1,8 @@
 import Script from 'next/script';
 import Footer from '@/components/Footer';
 import NavigationSpinner from '@/components/NavigationSpinner';
-import SiteNav from '@/components/SiteNav';
+import HomeSiteNav from '@/components/HomeSiteNav';
+import SiteHeader from '@/components/SiteHeader';
 import { headers, cookies } from 'next/headers';
 import { isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
 
@@ -24,8 +25,11 @@ export default async function NewsLayout({ children }: { children: React.ReactNo
         strategy="afterInteractive"
       />
       <NavigationSpinner />
-      <SiteNav locale={locale} />
+      <HomeSiteNav locale={locale} />
       <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
+        <div className="mb-8">
+          <SiteHeader locale={locale} id="site-header" />
+        </div>
         {children}
       </main>
       <Footer />

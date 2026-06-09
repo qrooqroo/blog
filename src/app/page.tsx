@@ -54,7 +54,7 @@ export default async function HomePage() {
       <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
         <div className="space-y-10">
           <div className="flex flex-col">
-            <SiteHeader locale={locale} />
+            <SiteHeader locale={locale} id="site-header" />
             <Suspense fallback={null}>
               <AiLabNewsWidget locale={locale} />
             </Suspense>

@@ -123,6 +123,12 @@ class QueryBuilder {
     return this;
   }
 
+  // 외부 공개용: is_internal = FALSE 인 문서만
+  publicOnly() {
+    this._wheres.push(`("is_internal" IS NULL OR "is_internal" = FALSE)`);
+    return this;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   then(resolve: (v: { data: any; error: { message: string; code?: string } | null }) => void) {
     return this._run().then(resolve);

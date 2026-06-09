@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
       FROM documents_with_category dwc
       JOIN documents d ON d.id = dwc.id
       WHERE (d.published IS NULL OR d.published = TRUE)
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
         AND (dwc.title ILIKE ${pattern} OR dwc.content ILIKE ${pattern})
       ORDER BY dwc.date DESC
       LIMIT 8

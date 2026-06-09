@@ -1,9 +1,10 @@
 'use client';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useWidgetsVisible } from '@/lib/useWidgetsVisible';
 import { getDictionary, isValidLocale, defaultLocale } from '@/lib/i18n/dictionaries';
 
-export default function SiteHeader({ locale: localeProp }: { locale?: string }) {
+export default function SiteHeader({ locale: localeProp, id, className }: { locale?: string; id?: string; className?: string }) {
   const params = useParams<{ locale?: string }>();
   const rawLocale = localeProp ?? params?.locale ?? defaultLocale;
   const locale = isValidLocale(rawLocale) ? rawLocale : defaultLocale;
@@ -12,7 +13,10 @@ export default function SiteHeader({ locale: localeProp }: { locale?: string }) 
   const { visible, toggle } = useWidgetsVisible();
 
   return (
-    <div id="site-header" className="bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative">
+    <div
+      {...(id ? { id } : {})}
+      className={className ?? 'bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative'}
+    >
       {/* Left: Logo + Divider + Subtitle */}
       <div className="flex items-center gap-5 sm:gap-7 min-w-0">
         <div className="flex items-center flex-shrink-0">
@@ -84,9 +88,11 @@ export default function SiteHeader({ locale: localeProp }: { locale?: string }) 
           </svg>
         </div>
 
-        {/* Dot grid */}
-        <div
-          className="hidden md:block w-20 h-10 opacity-30"
+        {/* Dot grid → sitemap link */}
+        <Link
+          href="/sitemap.xml"
+          title="사이트맵"
+          className="hidden md:block w-20 h-10 opacity-30 hover:opacity-60 transition-opacity cursor-pointer"
           style={{
             backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)',
             backgroundSize: '8px 8px',

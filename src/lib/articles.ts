@@ -50,17 +50,17 @@ async function safeQuery(
 
 export async function getAllArticles(): Promise<Article[]> {
   return safeQuery(
-    async () => supabase.from('documents_with_category').select('*').order('date', { ascending: false }).order('id', { ascending: false }),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false }),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false })
+    async () => supabase.from('documents_with_category').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false }),
+    async () => supabase.from('documents').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false }),
+    async () => supabase.from('documents').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false })
   );
 }
 
 export async function getArticlesByCategory(category: Category): Promise<Article[]> {
   return safeQuery(
-    async () => supabase.from('documents_with_category').select('*').eq('category', category).order('date', { ascending: false }).order('id', { ascending: false }),
-    async () => supabase.from('documents').select('*').eq('category', category).order('date', { ascending: false }).order('id', { ascending: false }),
-    async () => supabase.from('documents').select('*').eq('category', category).order('date', { ascending: false }).order('id', { ascending: false })
+    async () => supabase.from('documents_with_category').select('*').publicOnly().eq('category', category).order('date', { ascending: false }).order('id', { ascending: false }),
+    async () => supabase.from('documents').select('*').publicOnly().eq('category', category).order('date', { ascending: false }).order('id', { ascending: false }),
+    async () => supabase.from('documents').select('*').publicOnly().eq('category', category).order('date', { ascending: false }).order('id', { ascending: false })
   );
 }
 
@@ -100,9 +100,9 @@ export async function getArticleBySlug(slug: string): Promise<Article | undefine
 
 export async function getFeaturedArticle(): Promise<Article | null> {
   const rows = await safeQuery(
-    async () => supabase.from('documents_with_category').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(1),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(1),
-    async () => supabase.from('documents').select('*').order('date', { ascending: false }).order('id', { ascending: false }).limit(1)
+    async () => supabase.from('documents_with_category').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false }).limit(1),
+    async () => supabase.from('documents').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false }).limit(1),
+    async () => supabase.from('documents').select('*').publicOnly().order('date', { ascending: false }).order('id', { ascending: false }).limit(1)
   );
   return rows[0] ?? null;
 }
@@ -111,6 +111,7 @@ export async function getRecentArticles(count = 9, imageOkOnly = false): Promise
   const applyFilter = (qb: ReturnType<typeof supabase.from>) => {
     if (imageOkOnly) qb.imageOkOnly();
     qb.publishedOnly();
+    qb.publicOnly();
     return qb;
   };
   return safeQuery(
@@ -128,7 +129,8 @@ export async function getPublishedArticles(): Promise<Article[]> {
       SELECT dwc.*
       FROM documents_with_category dwc
       JOIN documents d ON d.id = dwc.id
-      WHERE d.published IS NULL OR d.published = TRUE
+      WHERE (d.published IS NULL OR d.published = TRUE)
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
       ORDER BY dwc.date DESC, dwc.id DESC
     `;
     return await mergeTitleParts(rows);
@@ -137,6 +139,7 @@ export async function getPublishedArticles(): Promise<Article[]> {
       .from('documents')
       .select('*')
       .publishedOnly()
+      .publicOnly()
       .order('date', { ascending: false })
       .order('id', { ascending: false });
     return error ? [] : ((data ?? []) as Article[]);

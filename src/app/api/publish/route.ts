@@ -35,11 +35,12 @@ interface ArticlePayload {
   content: string;
   markdown_content: string;
   date: string;
+  is_internal?: boolean;
 }
 
 export async function POST(req: NextRequest) {
   const payload: ArticlePayload = await req.json();
-  const { title, slug, category, excerpt, content, markdown_content, date } = payload;
+  const { title, slug, category, excerpt, content, markdown_content, date, is_internal } = payload;
 
   if (!title || !slug || !content) {
     return NextResponse.json({ error: '제목, slug, 내용은 필수입니다.' }, { status: 400 });
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
   const title_en = fromTitle.en ?? fromContent.en ?? null;
 
   const insertData = isDocuments
-    ? { id: nextId, title, title_ko, title_en, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image, published: false }
+    ? { id: nextId, title, title_ko, title_en, slug, category_id: categoryId, excerpt: excerpt ?? '', content, markdown_content, date, image, published: false, is_internal: is_internal ?? false }
     : { id: nextId, title, slug, category, excerpt: excerpt ?? '', content, markdown_content, date, image };
 
   const { data, error } = await supabase

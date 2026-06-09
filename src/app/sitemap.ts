@@ -6,7 +6,7 @@ const BASE = 'https://www.aiinsightnote.com';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [articles, categories, newsItems, insights, papers] = await Promise.all([
     sql<{ slug: string; date: string }[]>`
-      SELECT slug, date FROM documents WHERE published = true ORDER BY date DESC
+      SELECT slug, date FROM documents WHERE published = true AND (is_internal IS NULL OR is_internal = FALSE) ORDER BY date DESC
     `,
     sql<{ slug: string }[]>`
       SELECT slug FROM categories ORDER BY slug

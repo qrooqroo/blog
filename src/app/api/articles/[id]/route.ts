@@ -24,7 +24,7 @@ async function getCategoryId(name: string): Promise<number | null> {
 export async function PUT(req: NextRequest, { params }: Props) {
   const { id } = await params;
   const table = getTable(req);
-  const { title, title_ko: inputKo, title_en: inputEn, category, excerpt, content, markdown_content, image } = await req.json();
+  const { title, title_ko: inputKo, title_en: inputEn, category, excerpt, content, markdown_content, image, is_internal } = await req.json();
 
   if (!title || !content) {
     return NextResponse.json({ error: '제목과 내용은 필수입니다.' }, { status: 400 });
@@ -50,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: Props) {
       title_ko = title_ko ?? fromTitle.ko ?? fromContent.ko ?? null;
       title_en = title_en ?? fromTitle.en ?? fromContent.en ?? null;
     }
-    updateData = { title, title_ko, title_en, category_id: categoryId, excerpt, content, markdown_content, ...(image ? { image } : {}) };
+    updateData = { title, title_ko, title_en, category_id: categoryId, excerpt, content, markdown_content, ...(image ? { image } : {}), ...(typeof is_internal === 'boolean' ? { is_internal } : {}) };
   } else {
     // news 테이블: 기존 category 텍스트 사용
     updateData = { title, category, excerpt, content, markdown_content, ...(image ? { image } : {}) };
@@ -72,10 +72,14 @@ export async function PATCH(req: NextRequest, { params }: Props) {
   const { id } = await params;
   const body = await req.json();
 
-  if (typeof body.published === 'boolean') {
+  const patch: Record<string, unknown> = {};
+  if (typeof body.published === 'boolean') patch.published = body.published;
+  if (typeof body.is_internal === 'boolean') patch.is_internal = body.is_internal;
+
+  if (Object.keys(patch).length > 0) {
     const { error } = await supabase
       .from('documents')
-      .update({ published: body.published })
+      .update(patch)
       .eq('id', Number(id));
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });

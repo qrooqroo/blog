@@ -73,13 +73,14 @@ export default async function CategoryPage({ params }: Props) {
       JOIN documents d ON d.id = dwc.id
       WHERE dwc.category_id = ANY(${allIds}::int[])
         AND (d.published IS NULL OR d.published = TRUE)
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
         ${imageFilter}
       ORDER BY dwc.date DESC, dwc.id DESC
     `;
     docs = await mergeTitleParts(rawDocs);
   } catch {
     // 폴백: documents 테이블 직접 조회
-    const q = supabase.from('documents').select('*').publishedOnly().in('category_id', allIds)
+    const q = supabase.from('documents').select('*').publishedOnly().publicOnly().in('category_id', allIds)
       .order('date', { ascending: false }).order('id', { ascending: false });
     if (!isLocal) q.imageOkOnly();
     const idRes = await q;

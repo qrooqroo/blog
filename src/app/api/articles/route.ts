@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
     const q = supabase.from(table).select('*');
     if (!isLocal) q.imageOkOnly();
     q.publishedOnly();
+    q.publicOnly();
     return q.order('date', { ascending: false }).order('id', { ascending: false }).range(from, to);
   };
 

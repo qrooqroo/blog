@@ -14,6 +14,7 @@ export interface Article {
   date: string;
   image: string;
   published?: boolean | null;
+  is_internal?: boolean | null;
   source_url?: string | null;
   analyst?: string | null;
   title_en?: string | null;
