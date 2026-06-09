@@ -75,11 +75,6 @@ export default function MatrixLoader() {
   return (
     <div className="fixed inset-0 z-[9999]" style={{ background: '#020814' }}>
       <canvas ref={canvasRef} className="absolute inset-0" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-mono tracking-widest" style={{ color: '#22d3ee88' }}>
-          Loading…
-        </span>
-      </div>
     </div>
   );
 }
