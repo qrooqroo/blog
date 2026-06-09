@@ -19,7 +19,7 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
     >
       {/* Left: Logo + Divider + Subtitle */}
       <div className="flex items-center gap-5 sm:gap-7 min-w-0">
-        <div className="flex items-center flex-shrink-0">
+        <Link href="/" className="flex items-center flex-shrink-0">
           <span
             className="font-black tracking-tight leading-none"
             style={{ fontSize: '1.6rem', color: '#4f46e5' }}
@@ -32,7 +32,7 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
           >
             INSIGHT NOTE
           </span>
-        </div>
+        </Link>
 
         <div className="hidden sm:block w-px h-7 bg-slate-200 flex-shrink-0" />
 
