@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import sql from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 const BASE = 'https://www.aiinsightnote.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
