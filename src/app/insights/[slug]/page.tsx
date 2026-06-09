@@ -4,9 +4,10 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { headers, cookies } from 'next/headers';
-import { getInsightBySlug } from '@/lib/insights';
+import { getInsightBySlug, getRecentInsights } from '@/lib/insights';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import AdUnit from '@/components/AdUnit';
+import InsightRelated from '@/components/InsightRelated';
 import { isValidLocale, defaultLocale, getDictionary } from '@/lib/i18n/dictionaries';
 
 const SITE_URL = 'https://aiinsightnote.com';
@@ -70,6 +71,9 @@ export default async function InsightPage({ params }: Props) {
 
   if (!insight) return notFound();
 
+  const recentInsights = await getRecentInsights(7);
+  const related = recentInsights.filter(i => i.slug !== slug).slice(0, 3);
+
   const isEn = locale === 'en';
   const title = (isEn && insight.title_en) ? insight.title_en : insight.title;
   const excerpt = (isEn && insight.excerpt_en) ? insight.excerpt_en : insight.excerpt;
@@ -102,6 +106,8 @@ export default async function InsightPage({ params }: Props) {
       </div>
 
       <AdUnit slot="6963385825" className="mt-6" />
+
+      <InsightRelated items={related} isEn={isEn} />
     </div>
   );
 }
