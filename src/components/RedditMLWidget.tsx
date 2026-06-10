@@ -12,10 +12,12 @@ async function fetchDevPosts(): Promise<DevPost[]> {
       fetch('https://dev.to/api/articles?tag=machinelearning&per_page=6&top=7', {
         headers: { 'User-Agent': 'aiinsightnote/1.0' },
         next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
       }),
       fetch('https://dev.to/api/articles?tag=ai&per_page=6&top=7', {
         headers: { 'User-Agent': 'aiinsightnote/1.0' },
         next: { revalidate: 300 },
+        signal: AbortSignal.timeout(5000),
       }),
     ]);
     const [mlData, aiData] = await Promise.all([

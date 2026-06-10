@@ -7,6 +7,7 @@ async function fetchBleepingComputer(): Promise<SecPost[]> {
   try {
     const res = await fetch('https://www.bleepingcomputer.com/feed/', {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
     const xml = await res.text();

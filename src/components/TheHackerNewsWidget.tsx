@@ -8,6 +8,7 @@ async function fetchTHN(): Promise<SecPost[]> {
   try {
     const res = await fetch('https://feeds.feedburner.com/TheHackersNews', {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
     const xml = await res.text();

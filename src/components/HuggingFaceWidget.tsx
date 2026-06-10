@@ -10,7 +10,7 @@ async function fetchTrendingModels(): Promise<HFModel[]> {
   try {
     const res = await fetch(
       'https://huggingface.co/api/models?sort=trendingScore&direction=-1&limit=7',
-      { next: { revalidate: 1800 } }
+      { next: { revalidate: 1800 }, signal: AbortSignal.timeout(5000) }
     );
     if (!res.ok) return [];
     return await res.json();

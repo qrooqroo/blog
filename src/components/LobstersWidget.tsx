@@ -8,6 +8,7 @@ async function fetchLobstersPosts(): Promise<LobstersPost[]> {
   try {
     const res = await fetch('https://lobste.rs/t/ai.rss', {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
     const xml = await res.text();

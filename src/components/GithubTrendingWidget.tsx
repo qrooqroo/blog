@@ -14,6 +14,7 @@ async function searchRepos(query: string): Promise<Repo[]> {
     {
       headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/vnd.github.v3+json' },
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
     }
   );
   if (!res.ok) return [];

@@ -8,7 +8,7 @@ async function fetchASEC(locale: string): Promise<SecPost[]> {
     const feedUrl = locale === 'en'
       ? 'https://asec.ahnlab.com/en/feed/'
       : 'https://asec.ahnlab.com/ko/feed/';
-    const res = await fetch(feedUrl, { next: { revalidate: 600 } });
+    const res = await fetch(feedUrl, { next: { revalidate: 600 }, signal: AbortSignal.timeout(5000) });
     if (!res.ok) return [];
     const xml = await res.text();
 
