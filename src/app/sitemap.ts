@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import sql from '@/lib/supabase';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const BASE = 'https://www.aiinsightnote.com';
 
@@ -13,24 +13,33 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${BASE}/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
 ];
 
+const QUERY_TIMEOUT = 8000;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
-    const [articles, categories, newsItems, insights, papers] = await Promise.all([
-      sql<{ slug: string; date: string }[]>`
-        SELECT slug, date FROM documents WHERE published = true AND (is_internal IS NULL OR is_internal = FALSE) ORDER BY date DESC
-      `,
-      sql<{ slug: string }[]>`
-        SELECT slug FROM categories ORDER BY slug
-      `,
-      sql<{ slug: string; date: string }[]>`
-        SELECT slug, date FROM news WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
-      `,
-      sql<{ slug: string; date: string }[]>`
-        SELECT slug, date FROM insights WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
-      `,
-      sql<{ slug: string; date: string }[]>`
-        SELECT slug, date FROM papers WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
-      `,
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('sitemap query timeout')), QUERY_TIMEOUT)
+    );
+
+    const [articles, categories, newsItems, insights, papers] = await Promise.race([
+      Promise.all([
+        sql<{ slug: string; date: string }[]>`
+          SELECT slug, date FROM documents WHERE published = true AND (is_internal IS NULL OR is_internal = FALSE) ORDER BY date DESC
+        `,
+        sql<{ slug: string }[]>`
+          SELECT slug FROM categories ORDER BY slug
+        `,
+        sql<{ slug: string; date: string }[]>`
+          SELECT slug, date FROM news WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
+        `,
+        sql<{ slug: string; date: string }[]>`
+          SELECT slug, date FROM insights WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
+        `,
+        sql<{ slug: string; date: string }[]>`
+          SELECT slug, date FROM papers WHERE (published IS NULL OR published = TRUE) ORDER BY date DESC
+        `,
+      ]),
+      timeoutPromise,
     ]);
 
     return [
