@@ -3,7 +3,6 @@ import { getNewsBySlug, getAllNews } from '@/lib/news';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import PublishButton from '@/components/PublishButton';
-import SiteHeader from '@/components/SiteHeader';
 import SearchBar from '@/components/SearchBar';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -136,7 +135,6 @@ export default async function WikiPage({ params }: Props) {
     const drafts = await getDraftArticles();
     return (
       <div className="space-y-6">
-        <SiteHeader />
         <SearchBar />
         <div className="flex items-center gap-2.5">
           <span className="w-1 h-5 bg-amber-500 rounded-full" />
