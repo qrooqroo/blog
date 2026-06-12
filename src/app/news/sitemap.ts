@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import sql from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
 const BASE = 'https://www.aiinsightnote.com';
