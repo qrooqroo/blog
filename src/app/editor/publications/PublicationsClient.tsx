@@ -243,9 +243,13 @@ function DaySection({ day }: { day: DayGroup }) {
 export default function PublicationsClient({
   days: initialDays,
   stats,
+  backHref = '/editor',
+  backLabel = '에디터',
 }: {
   days: DayGroup[];
   stats: { news: number; insights: number; papers: number };
+  backHref?: string;
+  backLabel?: string;
 }) {
   const [days] = useState(initialDays);
   const [filter, setFilter] = useState<'all' | Article['table']>('all');
@@ -277,8 +281,8 @@ export default function PublicationsClient({
       {/* 상단 바 */}
       <div className="sticky top-0 z-50 bg-white border-b border-slate-200 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
-          <Link href="/editor" className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
-            ← 에디터
+          <Link href={backHref} className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
+            ← {backLabel}
           </Link>
           <span className="text-slate-200">|</span>
           <span className="text-sm font-bold text-slate-700">발행 내역</span>
