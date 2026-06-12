@@ -1,5 +1,4 @@
 import sql from '@/lib/supabase';
-import postgres from 'postgres';
 import PublicationsClient from '@/app/editor/publications/PublicationsClient';
 import type { Article, BatchStat, BatchStatus, DayGroup } from '@/app/editor/publications/page';
 import type { Metadata } from 'next';
@@ -67,36 +66,11 @@ async function fetchBatchRuns(): Promise<Record<string, BatchStatus>> {
   }
 }
 
-async function fetchSupabaseIds(): Promise<Record<string, Set<number>>> {
-  try {
-    const supa = postgres(
-      'postgresql://postgres.guqtsvngervemiksrqgc:7Z0HTWrS4kuN58lf@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres',
-      { max: 1, ssl: 'require', prepare: false, connect_timeout: 5 }
-    );
-    const [sNews, sInsights, sPapers] = await Promise.all([
-      supa`SELECT id FROM news` as Promise<{id:number}[]>,
-      supa`SELECT id FROM insights` as Promise<{id:number}[]>,
-      supa`SELECT id FROM papers` as Promise<{id:number}[]>,
-    ]);
-    await supa.end();
-    return {
-      news:     new Set(sNews.map(r => r.id)),
-      insights: new Set(sInsights.map(r => r.id)),
-      papers:   new Set(sPapers.map(r => r.id)),
-    };
-  } catch {
-    return { news: new Set(), insights: new Set(), papers: new Set() };
-  }
-}
-
 async function fetchArticles(): Promise<Article[]> {
-  const [[news, insights, papers], supaIds] = await Promise.all([
-    Promise.all([
-      sql`SELECT id, title, slug, published, created_at FROM news ORDER BY created_at DESC LIMIT 500` as Promise<any[]>,
-      sql`SELECT id, title, slug, published, created_at FROM insights ORDER BY created_at DESC` as Promise<any[]>,
-      sql`SELECT id, title, slug, published, created_at FROM papers ORDER BY created_at DESC` as Promise<any[]>,
-    ]),
-    fetchSupabaseIds(),
+  const [news, insights, papers] = await Promise.all([
+    sql`SELECT id, title, slug, published, created_at FROM news ORDER BY created_at DESC LIMIT 200` as Promise<any[]>,
+    sql`SELECT id, title, slug, published, created_at FROM insights ORDER BY created_at DESC` as Promise<any[]>,
+    sql`SELECT id, title, slug, published, created_at FROM papers ORDER BY created_at DESC` as Promise<any[]>,
   ]);
 
   const toKst = (iso: string) => {
@@ -105,6 +79,7 @@ async function fetchArticles(): Promise<Article[]> {
     return d.toISOString().slice(0, 10);
   };
 
+  // 운영환경에서는 Supabase가 메인 DB이므로 synced는 항상 true
   const map = (rows: any[], table: Article['table']): Article[] =>
     rows.map(r => ({
       id: r.id,
@@ -114,7 +89,7 @@ async function fetchArticles(): Promise<Article[]> {
       published: r.published ?? true,
       created_at: r.created_at,
       kst_date: toKst(r.created_at),
-      synced: supaIds[table]?.has(r.id) ?? false,
+      synced: true,
     }));
 
   return [
