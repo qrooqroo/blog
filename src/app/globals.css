@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/* ── 페이지 로더 오버레이 (JS 없이 즉시 표시, 캔버스 아래 배경) ─ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: #020814;
+  background-image: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34,211,238,0.07) 0%, transparent 100%);
+  z-index: 9998;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+html.pg-loaded body::before {
+  opacity: 0;
+}
+
 /* ── 전역 리셋 (unlayered) ───────────────────────────────── */
 * { box-sizing: border-box; }
 body { -webkit-font-smoothing: antialiased; }
@@ -17,6 +32,22 @@ body { -webkit-font-smoothing: antialiased; }
   overflow: hidden;
 }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ── 시세 배지 (코스피/코스닥/환율 인라인 표시) ────────────── */
+/* 한국 금융 뉴스 스타일: 괄호, 배경 없음, 상승=빨강 하락=파랑 */
+.market-badge {
+  display: inline;
+  font-size: 0.82em;
+  font-weight: 600;
+  margin-left: 1px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+  user-select: none;
+  letter-spacing: -0.01em;
+}
+.market-badge-up   { color: #e12b2b; }
+.market-badge-down { color: #1155cc; }
 
 /* ── 컴포넌트 스타일 (@layer components > @layer base) ───── */
 /*    Tailwind 레이어 우선순위: utilities > components > base  */

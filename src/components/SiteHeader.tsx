@@ -16,6 +16,7 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
     <div
       {...(id ? { id } : {})}
       className={className ?? 'bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative'}
+      style={{ userSelect: 'none' }}
     >
       {/* Left: Logo + Divider + Subtitle */}
       <div className="flex items-center gap-5 sm:gap-7 min-w-0">
@@ -71,11 +72,13 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
 
         {/* Decorative icons (md 이상에서만) */}
         <div className="hidden md:flex items-center gap-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
+          <Link href="/wiki" title="위키" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="hover:stroke-indigo-400 transition-colors">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </Link>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             <polyline points="8 11 11 14 16 9"/>

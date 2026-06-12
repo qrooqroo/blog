@@ -1,9 +1,33 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, Suspense } from 'react';
 
 const CHAR_POOL = '01001011010010110100101001010110100101101001011010010101001011010011010100110101001101001100110001100011000110101010011';
+
+function drawFrame(
+  ctx: CanvasRenderingContext2D,
+  drops: number[],
+  colColors: string[],
+  fontSize: number,
+  w: number,
+  h: number,
+) {
+  ctx.fillStyle = 'rgba(2, 8, 20, 0.07)';
+  ctx.fillRect(0, 0, w, h);
+  ctx.font = `${fontSize}px 'Courier New', monospace`;
+  for (let i = 0; i < drops.length; i++) {
+    const y = drops[i] * fontSize;
+    if (y >= 0 && y < h) {
+      ctx.fillStyle = colColors[i];
+      ctx.fillText(CHAR_POOL[Math.floor(Math.random() * CHAR_POOL.length)], i * fontSize, y);
+    }
+    if (drops[i] * fontSize > h && Math.random() > 0.975) {
+      drops[i] = Math.floor(Math.random() * -30);
+    }
+    drops[i]++;
+  }
+}
 
 function Spinner() {
   const [loading, setLoading]   = useState(false);
@@ -38,7 +62,7 @@ function Spinner() {
     return () => document.removeEventListener('click', handleClick, true);
   }, [pathname]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!loading) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -54,21 +78,25 @@ function Spinner() {
 
     const fontSize = 14;
     const cols     = Math.floor(canvas.width / fontSize);
-
     const totalRows = Math.floor(canvas.height / fontSize);
+
     const drops = Array.from({ length: cols }, () =>
       Math.random() < 0.5
-        ? Math.floor(Math.random() * totalRows)          // already in view
-        : Math.floor(Math.random() * -totalRows)         // falling in from top
+        ? Math.floor(Math.random() * totalRows)
+        : Math.floor(Math.random() * -totalRows)
     );
 
-    // Column colors: cyan dominant, blue and indigo as accents
     const colColors = Array.from({ length: cols }, () => {
       const r = Math.random();
-      if (r > 0.88) return '#818cf8'; // indigo-400
-      if (r > 0.68) return '#60a5fa'; // blue-400
-      return '#22d3ee';               // cyan-400
+      if (r > 0.88) return '#818cf8';
+      if (r > 0.68) return '#60a5fa';
+      return '#22d3ee';
     });
+
+    // Draw initial frame before first browser paint so canvas is never blank
+    ctx.fillStyle = '#020814';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
 
     let frameId: number;
     let lastTime = 0;
@@ -77,27 +105,7 @@ function Spinner() {
       frameId = requestAnimationFrame(draw);
       if (now - lastTime < 40) return;
       lastTime = now;
-
-      ctx.fillStyle = 'rgba(2, 8, 20, 0.07)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.font = `${fontSize}px 'Courier New', monospace`;
-
-      for (let i = 0; i < drops.length; i++) {
-        const ch = CHAR_POOL[Math.floor(Math.random() * CHAR_POOL.length)];
-        const x  = i * fontSize;
-        const y  = drops[i] * fontSize;
-
-        if (y >= 0 && y < canvas.height) {
-          ctx.fillStyle = colColors[i];
-          ctx.fillText(ch, x, y);
-        }
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = Math.floor(Math.random() * -30);
-        }
-        drops[i]++;
-      }
+      drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
     };
 
     frameId = requestAnimationFrame(draw);

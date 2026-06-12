@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useEffect, useRef, useState } from 'react';
 
 const CHAR_POOL = '01001011010010110100101001010110100101101001011010010101001011010011010100110101001101001100110001100011000110101010011';
 
@@ -21,15 +21,15 @@ function drawFrame(
       ctx.fillStyle = colColors[i];
       ctx.fillText(CHAR_POOL[Math.floor(Math.random() * CHAR_POOL.length)], i * fontSize, y);
     }
-    if (drops[i] * fontSize > h && Math.random() > 0.975) {
-      drops[i] = Math.floor(Math.random() * -30);
-    }
+    if (drops[i] * fontSize > h && Math.random() > 0.975) drops[i] = Math.floor(Math.random() * -30);
     drops[i]++;
   }
 }
 
-export default function MatrixLoader() {
+export default function PageLoader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [visible, setVisible] = useState(true);
+  const [fading, setFading] = useState(false);
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -38,16 +38,15 @@ export default function MatrixLoader() {
     if (!ctx) return;
 
     const setSize = () => {
-      canvas.width  = window.innerWidth;
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     setSize();
     window.addEventListener('resize', setSize);
 
     const fontSize = 14;
-    const cols     = Math.floor(canvas.width / fontSize);
+    const cols = Math.floor(canvas.width / fontSize);
     const totalRows = Math.floor(canvas.height / fontSize);
-
     const drops = Array.from({ length: cols }, () =>
       Math.random() < 0.5
         ? Math.floor(Math.random() * totalRows)
@@ -60,36 +59,53 @@ export default function MatrixLoader() {
       return '#22d3ee';
     });
 
-    // Draw initial frame before first browser paint so canvas is never blank
     ctx.fillStyle = '#020814';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
 
     let frameId: number;
     let lastTime = 0;
-
     const draw = (now: number) => {
       frameId = requestAnimationFrame(draw);
       if (now - lastTime < 40) return;
       lastTime = now;
       drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
     };
-
     frameId = requestAnimationFrame(draw);
+
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', setSize);
     };
   }, []);
 
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFading(true), 700);
+    const hideTimer = setTimeout(() => {
+      setVisible(false);
+      document.documentElement.classList.add('pg-loaded');
+    }, 1200);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  if (!visible) return null;
+
   return (
-    <div className="fixed inset-0 z-[9999]" style={{ background: '#020814' }}>
-      {/* CSS fallback: visible through transparent canvas before JS hydrates */}
-      <div
-        className="absolute inset-0 animate-pulse"
-        style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34,211,238,0.07) 0%, transparent 100%)' }}
-      />
-      <canvas ref={canvasRef} className="absolute inset-0" />
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: '#020814',
+        opacity: fading ? 0 : 1,
+        transition: 'opacity 0.5s ease',
+        pointerEvents: fading ? 'none' : 'auto',
+      }}
+    >
+      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0 }} />
     </div>
   );
 }
