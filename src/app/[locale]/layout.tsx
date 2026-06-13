@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import Footer from '@/components/Footer';
 import NavigationSpinner from '@/components/NavigationSpinner';
 import HomeSiteNav from '@/components/HomeSiteNav';
@@ -28,12 +27,6 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <>
-      <Script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4600038940266134"
-        crossOrigin="anonymous"
-        strategy="afterInteractive"
-      />
       <NavigationSpinner />
       <HomeSiteNav locale={locale} />
       <main className="max-w-5xl mx-auto px-4 py-10">

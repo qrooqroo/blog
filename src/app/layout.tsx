@@ -34,6 +34,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale}>
+      <head>
+        {/* AdSense: <Script> 컴포넌트 대신 순수 script 태그로 삽입해야 data-nscript 경고 없이 head 태그로 인정됨 */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4600038940266134"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
         <PageLoader />
         <MarketHighlighter />
