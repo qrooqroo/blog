@@ -1,5 +1,5 @@
-import { getArticleBySlug, getPublishedArticles, getDraftArticles, formatDate } from '@/lib/articles';
-import { getNewsBySlug, getAllNews } from '@/lib/news';
+import { getArticleBySlug, getRelatedArticles, getDraftArticles, formatDate } from '@/lib/articles';
+import { getNewsBySlug, getRelatedNews } from '@/lib/news';
 import { supabase } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import PublishButton from '@/components/PublishButton';
@@ -11,6 +11,8 @@ import AdUnit from '@/components/AdUnit';
 import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 import { headers } from 'next/headers';
 import PageTracker from '@/components/PageTracker';
+
+export const revalidate = 3600;
 
 interface CategoryInfo {
   id: number;
@@ -179,18 +181,13 @@ export default async function WikiPage({ params }: Props) {
   if (!article) notFound();
   if (article.is_internal && !isLocal) notFound();
 
-  const [allArticles, allNews] = await Promise.all([
-    getPublishedArticles(),
-    getAllNews(),
+  const [categoryInfo, relatedDocs, relatedNews] = await Promise.all([
+    getCategoryInfo(article.category),
+    getRelatedArticles(article.category, article.slug, 3),
+    getRelatedNews(article.category, article.slug, 3),
   ]);
 
-  const categoryInfo = await getCategoryInfo(article.category);
-  const categoryId = categoryInfo?.id ?? null;
-
-  const pool = [...allArticles, ...allNews];
-  const related = pool
-    .filter(a => a.category === article.category && a.slug !== article.slug)
-    .slice(0, 3);
+  const related = [...relatedDocs, ...relatedNews].slice(0, 3);
 
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 

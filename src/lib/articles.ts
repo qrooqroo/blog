@@ -157,3 +157,32 @@ export async function getDraftArticles(limit = 9): Promise<Article[]> {
   return error ? [] : ((data ?? []) as Article[]);
 }
 
+export async function getRelatedArticles(category: string, excludeSlug: string, limit = 3): Promise<Article[]> {
+  try {
+    const rows = await sql<Article[]>`
+      SELECT dwc.id, dwc.title, dwc.slug, dwc.category, dwc.image, dwc.date,
+             dwc.excerpt, d.title_ko, d.title_en
+      FROM documents_with_category dwc
+      JOIN documents d ON d.id = dwc.id
+      WHERE dwc.category = ${category}
+        AND dwc.slug != ${excludeSlug}
+        AND (d.published IS NULL OR d.published = TRUE)
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
+      ORDER BY dwc.date DESC, dwc.id DESC
+      LIMIT ${limit}
+    `;
+    return rows;
+  } catch {
+    const { data } = await supabase
+      .from('documents_with_category')
+      .select('id, title, slug, category, excerpt, date, image')
+      .eq('category', category)
+      .neq('slug', excludeSlug)
+      .publishedOnly()
+      .publicOnly()
+      .order('date', { ascending: false })
+      .limit(limit);
+    return (data ?? []) as Article[];
+  }
+}
+

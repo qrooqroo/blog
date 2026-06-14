@@ -4,6 +4,7 @@ import sql from '@/lib/supabase';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 
+type RecentDoc = { title: string; slug: string; category_name: string | null };
 type SubCategory = { name: string; slug: string; doc_count: number };
 type Category = {
   id: number;
@@ -27,6 +28,18 @@ const PALETTE: Record<string, { grad: string; accent: string; badge: string; chi
   'emerging-tech':       { grad: 'from-fuchsia-50 to-pink-50',    accent: 'border-l-fuchsia-400', badge: 'bg-fuchsia-100 text-fuchsia-700',chip: 'bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200', arrow: 'text-fuchsia-500' },
 };
 const DEFAULT_P = { grad: 'from-slate-50 to-gray-50', accent: 'border-l-slate-300', badge: 'bg-slate-100 text-slate-600', chip: 'bg-slate-50 text-slate-500 border-slate-200', arrow: 'text-slate-400' };
+
+async function getRecentDocs(): Promise<RecentDoc[]> {
+  return sql<RecentDoc[]>`
+    SELECT d.title, d.slug, c.name as category_name
+    FROM documents d
+    LEFT JOIN categories c ON c.id = d.category_id
+    WHERE d.published = true
+      AND (d.is_internal IS NULL OR d.is_internal = FALSE)
+    ORDER BY d.id DESC
+    LIMIT 10
+  `;
+}
 
 async function getCategories(): Promise<Category[]> {
   const parents = await sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
@@ -72,7 +85,7 @@ async function getCategories(): Promise<Category[]> {
 }
 
 export default async function WikiPage() {
-  const categories = await getCategories();
+  const [categories, recentDocs] = await Promise.all([getCategories(), getRecentDocs()]);
   const active  = categories.filter(c => c.total_docs > 0);
   const empty   = categories.filter(c => c.total_docs === 0);
   const totalDocs = active.reduce((s, c) => s + c.total_docs, 0);
@@ -80,6 +93,31 @@ export default async function WikiPage() {
   return (
     <div className="space-y-8">
       <SearchBar />
+
+      {/* 최근 등록 문서 */}
+      {recentDocs.length > 0 && (
+        <div>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">최근 등록</h2>
+          <div className="flex flex-col divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white overflow-hidden">
+            {recentDocs.map(doc => (
+              <Link
+                key={doc.slug}
+                href={`/wiki/${doc.slug}`}
+                className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors group"
+              >
+                <span className="text-sm text-slate-700 group-hover:text-indigo-600 transition-colors font-medium truncate">
+                  {doc.title}
+                </span>
+                {doc.category_name && (
+                  <span className="ml-3 flex-shrink-0 text-xs text-slate-400">
+                    {doc.category_name}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 헤더 */}
       <div className="flex items-end justify-between">
