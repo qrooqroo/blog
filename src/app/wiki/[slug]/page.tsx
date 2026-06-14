@@ -11,6 +11,7 @@ import AdUnit from '@/components/AdUnit';
 import { parseTitleParts, resolveDisplayKo } from '@/lib/title-parser';
 import { headers } from 'next/headers';
 import PageTracker from '@/components/PageTracker';
+import { cache } from 'react';
 
 export const revalidate = 3600;
 
@@ -21,7 +22,7 @@ interface CategoryInfo {
   parent?: { id: number; name: string; slug: string } | null;
 }
 
-async function getCategoryInfo(name: string): Promise<CategoryInfo | null> {
+const getCategoryInfo = cache(async (name: string): Promise<CategoryInfo | null> => {
   const { data } = await supabase
     .from('categories')
     .select('id, name, slug, parent_id')
@@ -38,15 +39,15 @@ async function getCategoryInfo(name: string): Promise<CategoryInfo | null> {
     .single();
 
   return { id: data.id, name: data.name, slug: data.slug, parent: parent ?? null };
-}
+});
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-async function findArticle(slug: string) {
+const findArticle = cache(async (slug: string) => {
   return (await getArticleBySlug(slug)) ?? (await getNewsBySlug(slug));
-}
+});
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;

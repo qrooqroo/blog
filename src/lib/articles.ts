@@ -76,26 +76,24 @@ export async function getArticleById(id: number): Promise<Article | undefined> {
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   const decoded = decodeURIComponent(slug);
 
-  // 뷰에서 먼저 조회 (카테고리 정보 포함)
-  const { data: viewData, error: viewError } = await supabase
-    .from('documents_with_category')
-    .select('*')
-    .eq('slug', decoded)
-    .limit(1);
-
-  if (!viewError && viewData?.[0]) {
-    return (await mergeTitleParts([viewData[0] as Article]))[0];
+  try {
+    const [row] = await sql<Article[]>`
+      SELECT d.*, c.name as category, d.title_ko, d.title_en
+      FROM documents d
+      LEFT JOIN categories c ON c.id = d.category_id
+      WHERE d.slug = ${decoded}
+        AND (d.published IS NULL OR d.published = TRUE)
+      LIMIT 1
+    `;
+    return row;
+  } catch {
+    const { data } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('slug', decoded)
+      .limit(1);
+    return (data as Article[] | null)?.[0];
   }
-
-  // 뷰에 없거나 에러인 경우 documents 테이블 직접 조회
-  // (뷰 JOIN 조건 누락 또는 콜드 스타트 커넥션 실패 재시도 포함)
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('slug', decoded)
-    .limit(1);
-
-  return (data as Article[] | null)?.[0];
 }
 
 export async function getFeaturedArticle(): Promise<Article | null> {
