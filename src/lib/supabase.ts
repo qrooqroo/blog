@@ -4,8 +4,8 @@ const isSupabase = process.env.DATABASE_URL?.includes('supabase');
 
 const sql = postgres(process.env.DATABASE_URL!, {
   max: isSupabase ? 1 : 10,       // 서버리스: 인스턴스당 1개면 충분
-  idle_timeout: 30,
-  connect_timeout: 10,
+  idle_timeout: 60,
+  connect_timeout: 30,            // Vercel 콜드 스타트 시 Supabase TCP 연결에 최대 30초 허용
   ssl: isSupabase ? 'require' : false,
   prepare: isSupabase ? false : true, // PgBouncer transaction 모드는 prepared statement 미지원
 });

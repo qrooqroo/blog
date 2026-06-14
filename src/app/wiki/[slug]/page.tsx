@@ -1,6 +1,6 @@
 import { getArticleBySlug, getRelatedArticles, getDraftArticles, formatDate } from '@/lib/articles';
 import { getNewsBySlug, getRelatedNews } from '@/lib/news';
-import { supabase } from '@/lib/supabase';
+import { supabase, sql } from '@/lib/supabase';
 import ArticleCard from '@/components/ArticleCard';
 import PublishButton from '@/components/PublishButton';
 import SearchBar from '@/components/SearchBar';
@@ -23,22 +23,30 @@ interface CategoryInfo {
 }
 
 const getCategoryInfo = cache(async (name: string): Promise<CategoryInfo | null> => {
-  const { data } = await supabase
-    .from('categories')
-    .select('id, name, slug, parent_id')
-    .eq('name', name)
-    .single();
-  if (!data) return null;
-
-  if (!data.parent_id) return { id: data.id, name: data.name, slug: data.slug, parent: null };
-
-  const { data: parent } = await supabase
-    .from('categories')
-    .select('id, name, slug')
-    .eq('id', data.parent_id)
-    .single();
-
-  return { id: data.id, name: data.name, slug: data.slug, parent: parent ?? null };
+  try {
+    type Row = { id: number; name: string; slug: string; parent_id: number | null; parent_name: string | null; parent_slug: string | null };
+    const [row] = await sql<Row[]>`
+      SELECT c.id, c.name, c.slug, c.parent_id,
+             p.name AS parent_name, p.slug AS parent_slug
+      FROM categories c
+      LEFT JOIN categories p ON p.id = c.parent_id
+      WHERE c.name = ${name}
+      LIMIT 1
+    `;
+    if (!row) return null;
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      parent: row.parent_id ? { id: row.parent_id, name: row.parent_name!, slug: row.parent_slug! } : null,
+    };
+  } catch {
+    const { data } = await supabase.from('categories').select('id, name, slug, parent_id').eq('name', name).single();
+    if (!data) return null;
+    if (!data.parent_id) return { id: data.id, name: data.name, slug: data.slug, parent: null };
+    const { data: parent } = await supabase.from('categories').select('id, name, slug').eq('id', data.parent_id).single();
+    return { id: data.id, name: data.name, slug: data.slug, parent: parent ?? null };
+  }
 });
 
 interface Props {
