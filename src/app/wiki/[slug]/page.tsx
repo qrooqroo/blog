@@ -53,9 +53,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-const findArticle = cache(async (slug: string) => {
+async function findArticle(slug: string) {
   return (await getArticleBySlug(slug)) ?? (await getNewsBySlug(slug));
-});
+}
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
