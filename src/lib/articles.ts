@@ -76,24 +76,25 @@ export async function getArticleById(id: number): Promise<Article | undefined> {
 export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
   const decoded = decodeURIComponent(slug);
 
-  try {
-    const [row] = await sql<Article[]>`
-      SELECT d.*, c.name as category, d.title_ko, d.title_en
-      FROM documents d
-      LEFT JOIN categories c ON c.id = d.category_id
-      WHERE d.slug = ${decoded}
-        AND (d.published IS NULL OR d.published = TRUE)
-      LIMIT 1
-    `;
-    return row;
-  } catch {
-    const { data } = await supabase
-      .from('documents')
-      .select('*')
-      .eq('slug', decoded)
-      .limit(1);
-    return (data as Article[] | null)?.[0];
+  // 뷰에서 먼저 조회 (카테고리 정보 포함)
+  const { data: viewData, error: viewError } = await supabase
+    .from('documents_with_category')
+    .select('*')
+    .eq('slug', decoded)
+    .limit(1);
+
+  if (!viewError && viewData?.[0]) {
+    return (await mergeTitleParts([viewData[0] as Article]))[0];
   }
+
+  // 뷰 실패 시 documents 직접 조회
+  const { data } = await supabase
+    .from('documents')
+    .select('*')
+    .eq('slug', decoded)
+    .limit(1);
+
+  return (data as Article[] | null)?.[0];
 }
 
 export async function getFeaturedArticle(): Promise<Article | null> {
