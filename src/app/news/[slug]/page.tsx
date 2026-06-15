@@ -20,6 +20,16 @@ interface Props {
 
 const getCachedArticle = cache((slug: string) => getNewsBySlug(slug));
 
+const THIN_CONTENT_THRESHOLD = 300;
+
+function isThinContent(article: { content?: string | null; markdown_content?: string | null; excerpt?: string | null }): boolean {
+  const len = Math.max(
+    (article.content ?? '').length,
+    (article.markdown_content ?? '').length,
+  );
+  return len < THIN_CONTENT_THRESHOLD;
+}
+
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const article = await getCachedArticle(slug);
@@ -31,11 +41,13 @@ export async function generateMetadata({ params }: Props) {
   const imageUrl = article.image?.startsWith('http')
     ? article.image
     : `https://www.aiinsightnote.com${article.image ?? ''}`;
+  const thin = isThinContent(article);
 
   return {
     title,
     description,
     alternates: { canonical },
+    ...(thin ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title,
       description,
@@ -84,8 +96,39 @@ export default async function NewsSlugPage({ params }: Props) {
 
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
 
+  const canonical = `https://www.aiinsightnote.com/news/${slug}`;
+  const imageUrl = article.image?.startsWith('http')
+    ? article.image
+    : article.image ? `https://www.aiinsightnote.com${article.image}` : undefined;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: isEn ? (article.title_en ?? article.title) : article.title,
+    description: (article.excerpt ?? '').trim().slice(0, 160) || article.title,
+    datePublished: article.date,
+    dateModified: article.date,
+    url: canonical,
+    ...(imageUrl ? { image: [imageUrl] } : {}),
+    author: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    inLanguage: isEn ? 'en' : 'ko',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  };
+
   return (
     <div className="max-w-3xl mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* 브레드크럼 */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">
         <Link href="/" className="hover:text-indigo-500 transition-colors">{isEn ? 'Home' : '홈'}</Link>

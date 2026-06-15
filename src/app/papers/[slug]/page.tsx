@@ -46,8 +46,35 @@ export default async function PaperPage({ params }: Props) {
 
   if (!paper) return notFound();
 
+  const canonical = `https://www.aiinsightnote.com/papers/${slug}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ScholarlyArticle',
+    headline: paper.title,
+    description: paper.excerpt ?? paper.content.slice(0, 160).replace(/\n/g, ' '),
+    datePublished: paper.date,
+    dateModified: paper.date,
+    url: canonical,
+    author: paper.analyst
+      ? [{ '@type': 'Person', name: paper.analyst }]
+      : [{ '@type': 'Organization', name: 'AI Insight Note', url: 'https://www.aiinsightnote.com' }],
+    publisher: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    ...(paper.tags?.length > 0 ? { keywords: paper.tags.join(', ') } : {}),
+    ...(paper.arxiv_id ? { sameAs: `https://arxiv.org/abs/${paper.arxiv_id}` } : {}),
+    inLanguage: 'ko',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link href="/papers" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors block">
         ← 논문 분석으로
       </Link>

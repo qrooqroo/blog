@@ -79,8 +79,36 @@ export default async function InsightPage({ params }: Props) {
   const excerpt = (isEn && insight.excerpt_en) ? insight.excerpt_en : insight.excerpt;
   const content = (isEn && insight.content_en) ? insight.content_en : insight.content;
 
+  const canonical = `https://www.aiinsightnote.com/insights/${slug}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description: excerpt?.slice(0, 160) ?? title,
+    datePublished: insight.date,
+    dateModified: insight.date,
+    url: canonical,
+    ...(insight.image ? { image: [insight.image] } : {}),
+    author: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    inLanguage: isEn ? 'en' : 'ko',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link href="/insights" className="text-sm text-slate-400 hover:text-indigo-600 transition-colors block mb-4">
         {dict.pages.insights.back}
       </Link>

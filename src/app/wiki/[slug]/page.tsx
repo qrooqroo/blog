@@ -197,11 +197,43 @@ export default async function WikiPage({ params }: Props) {
   ]);
 
   const related = [...relatedDocs, ...relatedNews].slice(0, 3);
-
   const tagColor = CATEGORY_COLORS[article.category] ?? 'bg-slate-100 text-slate-600';
+
+  const canonical = `https://www.aiinsightnote.com/wiki/${slug}`;
+  const imageUrl = article.image
+    ? (article.image.startsWith('http') ? article.image : `https://www.aiinsightnote.com${article.image}`)
+    : undefined;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title_ko ?? article.title,
+    alternativeHeadline: article.title_en,
+    description: (article.excerpt ?? '').trim().slice(0, 160) || article.title,
+    datePublished: article.date,
+    dateModified: article.date,
+    url: canonical,
+    ...(imageUrl ? { image: [imageUrl] } : {}),
+    author: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'AI Insight Note',
+      url: 'https://www.aiinsightnote.com',
+    },
+    articleSection: article.category,
+    inLanguage: 'ko',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageTracker slug={slug} />
       {/* 브레드크럼 */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-6 flex-wrap">

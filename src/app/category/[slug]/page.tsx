@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { supabase } from '@/lib/supabase';
@@ -22,6 +23,25 @@ type Cat = {
 function collectDescendants(rootId: number, allCats: Cat[]): number[] {
   const children = allCats.filter(c => c.parent_id === rootId);
   return children.flatMap(c => [c.id, ...collectDescendants(c.id, allCats)]);
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const { data } = await supabase.from('categories').select('id, name, slug, excerpt').eq('slug', slug).single();
+  if (!data) return {};
+
+  const hasExcerpt = (data.excerpt ?? '').trim().length > 20;
+  const title = `${data.name} | AI Insight Note`;
+  const description = hasExcerpt
+    ? data.excerpt.slice(0, 155)
+    : `${data.name} 분야의 위키 문서 모음입니다.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `https://www.aiinsightnote.com/category/${slug}` },
+    ...(!hasExcerpt ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 export default async function CategoryPage({ params }: Props) {
