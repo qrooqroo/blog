@@ -43,7 +43,7 @@ async function getRecentDocs(): Promise<RecentDoc[]> {
         AND (d.is_internal IS NULL OR d.is_internal = FALSE)
       ORDER BY d.id DESC
       LIMIT 10
-    `, 6000, []);
+    `, 5000, []);
   } catch {
     return [];
   }
@@ -51,34 +51,34 @@ async function getRecentDocs(): Promise<RecentDoc[]> {
 
 async function getCategories(): Promise<Category[]> {
   try {
-  // 부모 카테고리 + 자식 카테고리 문서 수를 단일 JOIN으로 집계 (N+1 서브쿼리 제거)
-  const parents = await withTimeout(sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
-    SELECT
-      p.id, p.name, p.slug, p.excerpt,
-      COUNT(DISTINCT d.id)::int as total_docs
-    FROM categories p
-    LEFT JOIN categories c2 ON c2.id = p.id OR c2.parent_id = p.id
-    LEFT JOIN documents d
-      ON d.category_id = c2.id
-      AND d.published = true
-      AND (d.is_internal IS NULL OR d.is_internal = FALSE)
-    WHERE p.parent_id IS NULL
-    GROUP BY p.id, p.name, p.slug, p.excerpt
-    ORDER BY total_docs DESC NULLS LAST, p.name
-  `, 6000, []);
-
-  const children = await withTimeout(sql<{ id: number; name: string; slug: string; parent_id: number; doc_count: number }[]>`
-    SELECT c.id, c.name, c.slug, c.parent_id,
-      COUNT(d.id)::int as doc_count
-    FROM categories c
-    LEFT JOIN documents d
-      ON d.category_id = c.id
-      AND d.published = true
-      AND (d.is_internal IS NULL OR d.is_internal = FALSE)
-    WHERE c.parent_id IS NOT NULL
-    GROUP BY c.id, c.name, c.slug, c.parent_id
-    ORDER BY doc_count DESC
-  `, 6000, []);
+  const [parents, children] = await Promise.all([
+    withTimeout(sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
+      SELECT
+        p.id, p.name, p.slug, p.excerpt,
+        COUNT(DISTINCT d.id)::int as total_docs
+      FROM categories p
+      LEFT JOIN categories c2 ON c2.id = p.id OR c2.parent_id = p.id
+      LEFT JOIN documents d
+        ON d.category_id = c2.id
+        AND d.published = true
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
+      WHERE p.parent_id IS NULL
+      GROUP BY p.id, p.name, p.slug, p.excerpt
+      ORDER BY total_docs DESC NULLS LAST, p.name
+    `, 5000, []),
+    withTimeout(sql<{ id: number; name: string; slug: string; parent_id: number; doc_count: number }[]>`
+      SELECT c.id, c.name, c.slug, c.parent_id,
+        COUNT(d.id)::int as doc_count
+      FROM categories c
+      LEFT JOIN documents d
+        ON d.category_id = c.id
+        AND d.published = true
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
+      WHERE c.parent_id IS NOT NULL
+      GROUP BY c.id, c.name, c.slug, c.parent_id
+      ORDER BY doc_count DESC
+    `, 5000, []),
+  ]);
 
   const childMap = new Map<number, SubCategory[]>();
   for (const c of children) {
