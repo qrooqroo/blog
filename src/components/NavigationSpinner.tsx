@@ -44,6 +44,13 @@ function Spinner() {
     }
   }, [pathname, searchParams]);
 
+  // 최대 8초 후 강제 해제 — 서버 렌더링 지연으로 pathname이 늦게 업데이트될 때 방지
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => setLoading(false), 8000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const anchor = (e.target as HTMLElement).closest('a');

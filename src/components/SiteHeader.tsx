@@ -16,7 +16,6 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
     <div
       {...(id ? { id } : {})}
       className={className ?? 'bg-white rounded-xl border border-slate-200 px-6 sm:px-10 py-5 flex items-center justify-between overflow-hidden relative'}
-      style={{ userSelect: 'none' }}
     >
       {/* Left: Logo + Divider + Subtitle */}
       <div className="flex items-center gap-5 sm:gap-7 min-w-0">

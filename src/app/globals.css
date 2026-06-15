@@ -17,7 +17,19 @@ html.pg-loaded body::before {
 
 /* ── 전역 리셋 (unlayered) ───────────────────────────────── */
 * { box-sizing: border-box; }
-body { -webkit-font-smoothing: antialiased; }
+body {
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+/* 실제 읽기·복사가 필요한 콘텐츠 영역만 선택 허용 */
+.prose, .prose-ai, article,
+input, textarea, select, [contenteditable] {
+  user-select: text;
+}
+/* 마우스 클릭으로 생기는 focus outline 제거 (키보드 탐색은 유지) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
 
 .line-clamp-2 {
   display: -webkit-box;
