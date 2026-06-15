@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 import sql from '@/lib/supabase';
 import Link from 'next/link';
@@ -30,18 +30,23 @@ const PALETTE: Record<string, { grad: string; accent: string; badge: string; chi
 const DEFAULT_P = { grad: 'from-slate-50 to-gray-50', accent: 'border-l-slate-300', badge: 'bg-slate-100 text-slate-600', chip: 'bg-slate-50 text-slate-500 border-slate-200', arrow: 'text-slate-400' };
 
 async function getRecentDocs(): Promise<RecentDoc[]> {
-  return sql<RecentDoc[]>`
-    SELECT d.title, d.slug, c.name as category_name
-    FROM documents d
-    LEFT JOIN categories c ON c.id = d.category_id
-    WHERE d.published = true
-      AND (d.is_internal IS NULL OR d.is_internal = FALSE)
-    ORDER BY d.id DESC
-    LIMIT 10
-  `;
+  try {
+    return await sql<RecentDoc[]>`
+      SELECT d.title, d.slug, c.name as category_name
+      FROM documents d
+      LEFT JOIN categories c ON c.id = d.category_id
+      WHERE d.published = true
+        AND (d.is_internal IS NULL OR d.is_internal = FALSE)
+      ORDER BY d.id DESC
+      LIMIT 10
+    `;
+  } catch {
+    return [];
+  }
 }
 
 async function getCategories(): Promise<Category[]> {
+  try {
   const parents = await sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
     SELECT
       p.id, p.name, p.slug, p.excerpt,
@@ -82,6 +87,9 @@ async function getCategories(): Promise<Category[]> {
     ...p,
     sub_categories: (childMap.get(p.id) ?? []).sort((a, b) => b.doc_count - a.doc_count),
   }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function WikiPage() {

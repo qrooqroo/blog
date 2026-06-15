@@ -270,32 +270,36 @@ export default async function WikiPage({ params }: Props) {
             );
           })()}
 
-          {article.excerpt && article.excerpt.trim() && (
-            <div className="mb-8 rounded-xl border border-slate-200 overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-                <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">참고 링크</span>
+          {(() => {
+            const linkLines = (article.excerpt ?? '').split('\n').map(l => l.trim()).filter(l => /^https?:\/\/.+/.test(l));
+            if (!linkLines.length) return null;
+            return (
+              <div className="mb-8 rounded-xl border border-slate-200 overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-400">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">참고 링크</span>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {linkLines.map((url, i) => (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors group">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-300 flex-shrink-0 group-hover:text-indigo-400 transition-colors">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                      </svg>
+                      <span className="text-sm text-indigo-600 group-hover:text-indigo-800 truncate transition-colors">
+                        {url}
+                      </span>
+                    </a>
+                  ))}
+                </div>
               </div>
-              <div className="divide-y divide-slate-100">
-                {article.excerpt.split('\n').filter(l => l.trim()).map((url, i) => (
-                  <a key={i} href={url.trim()} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition-colors group">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-300 flex-shrink-0 group-hover:text-indigo-400 transition-colors">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                      <polyline points="15 3 21 3 21 9"/>
-                      <line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
-                    <span className="text-sm text-indigo-600 group-hover:text-indigo-800 truncate transition-colors">
-                      {url.trim()}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
