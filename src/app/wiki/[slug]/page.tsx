@@ -62,37 +62,35 @@ export async function generateMetadata({ params }: Props) {
   const article = await findArticle(slug);
   if (!article) return {};
 
+  const headersList = await headers();
+  const locale = headersList.get('x-locale') ?? 'ko';
+  const isEn = locale === 'en';
+
   const categoryInfo = await getCategoryInfo(article.category);
-
-  // 제목: 한국어+영어 병기 (title_ko / title_en 있는 경우)
-  const titleKo = article.title_ko || article.title;
-  const titleEn = article.title_en && article.title_en !== titleKo ? ` (${article.title_en})` : '';
-  const fullTitle = `${titleKo}${titleEn}`;
-
-  // 카테고리 breadcrumb
   const parentName = categoryInfo?.parent?.name;
+
+  const titleKo = article.title_ko || article.title;
+  const titleEnVal = article.title_en ?? titleKo;
+
+  // locale에 따라 표시 제목·설명 분기
+  const displayTitle = isEn ? titleEnVal : titleKo;
   const categoryBreadcrumb = parentName
     ? `${parentName} > ${article.category}`
     : article.category;
+  const pageTitle = `${displayTitle} - ${categoryBreadcrumb} | AI Insight Note`;
 
-  const pageTitle = `${fullTitle} - ${categoryBreadcrumb} | AI Insight Note`;
-
-  // 설명: excerpt 우선, 없으면 키워드 중심 자동 생성
-  const rawExcerpt = (article.excerpt ?? '').trim();
-  const autoDesc = `${fullTitle}의 개념과 원리를 정리한 위키 문서입니다. ${article.category}${parentName ? ` · ${parentName}` : ''} 분야의 핵심 내용을 학습하세요.`;
+  const rawExcerpt = isEn
+    ? (article.excerpt_en ?? article.excerpt ?? '').trim()
+    : (article.excerpt ?? '').trim();
+  const autoDesc = isEn
+    ? `A wiki article on ${titleEnVal}. Learn the concepts and principles of ${article.category}${parentName ? ` · ${parentName}` : ''}.`
+    : `${titleKo}의 개념과 원리를 정리한 위키 문서입니다. ${article.category}${parentName ? ` · ${parentName}` : ''} 분야의 핵심 내용을 학습하세요.`;
   const description = rawExcerpt.length > 20
     ? rawExcerpt.slice(0, 155) + (rawExcerpt.length > 155 ? '…' : '')
     : autoDesc;
 
-  // 키워드: 제목(한/영) + 카테고리 계층
-  const keywords = [
-    titleKo,
-    article.title_en,
-    article.category,
-    parentName,
-    'AI Insight Note',
-    '위키',
-  ].filter(Boolean).join(', ');
+  const keywords = [titleKo, titleEnVal, article.category, parentName, 'AI Insight Note', 'wiki']
+    .filter(Boolean).join(', ');
 
   const canonical = `https://www.aiinsightnote.com/wiki/${slug}`;
   const imageUrl = article.image
@@ -109,9 +107,9 @@ export async function generateMetadata({ params }: Props) {
       description,
       url: canonical,
       siteName: 'AI Insight Note',
-      images: [{ url: imageUrl, width: 800, height: 400, alt: fullTitle }],
+      images: [{ url: imageUrl, width: 800, height: 400, alt: displayTitle }],
       type: 'article' as const,
-      locale: 'ko_KR',
+      locale: isEn ? 'en_US' : 'ko_KR',
     },
     twitter: {
       card: 'summary_large_image' as const,
@@ -137,8 +135,13 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default async function WikiPage({ params }: Props) {
   const { slug } = await params;
-  const host = (await headers()).get('host') ?? '';
+  const headersList = await headers();
+  const host = headersList.get('host') ?? '';
   const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const locale = headersList.get('x-locale') ?? cookieStore.get('NEXT_LOCALE')?.value ?? 'ko';
+  const isEn = locale === 'en';
 
   // ── 초안 목록 페이지 (localhost 전용) ──
   if (slug === 'drafts') {
@@ -286,6 +289,17 @@ export default async function WikiPage({ params }: Props) {
           </div>
 
           {(() => {
+            // 영문 locale이고 영문 콘텐츠가 있으면 영문 제목 표시
+            if (isEn && article.title_en) {
+              return (
+                <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-5">
+                  {article.title_en}
+                  <span className="block text-base font-medium text-slate-400 mt-1">
+                    {article.title_ko ?? article.title}
+                  </span>
+                </h1>
+              );
+            }
             const parts = article.title_ko && article.title_en
               ? { ko: article.title_ko, en: article.title_en }
               : parseTitleParts(article.title);
@@ -312,7 +326,9 @@ export default async function WikiPage({ params }: Props) {
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                   </svg>
-                  <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">참고 링크</span>
+                  <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">
+                    {isEn ? 'References' : '참고 링크'}
+                  </span>
                 </div>
                 <div className="divide-y divide-slate-100">
                   {linkLines.map((url, i) => (
@@ -333,7 +349,12 @@ export default async function WikiPage({ params }: Props) {
             );
           })()}
 
-          {article.markdown_content ? (
+          {/* 영문 콘텐츠: locale=en이고 content_en이 있으면 영문 표시, 없으면 한국어 */}
+          {isEn && article.content_en ? (
+            <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
+              {article.content_en.replace(/^\s*#{1,6}[^\n]*\n?/, '')}
+            </MarkdownRenderer>
+          ) : article.markdown_content ? (
             <MarkdownRenderer className="prose text-slate-700 text-[0.95rem]">
               {article.markdown_content.replace(/^\s*#{1,6}[^\n]*\n?/, '')}
             </MarkdownRenderer>

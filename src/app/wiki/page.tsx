@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import sql from '@/lib/supabase';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
   title: '위키 | AI Insight Note',
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-type RecentDoc = { title: string; slug: string; category_name: string | null };
+type RecentDoc = { title: string; title_en: string | null; slug: string; category_name: string | null };
 type SubCategory = { name: string; slug: string; doc_count: number };
 type Category = {
   id: number;
@@ -50,7 +51,7 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
 async function getRecentDocs(): Promise<RecentDoc[]> {
   try {
     return await withTimeout(sql<RecentDoc[]>`
-      SELECT d.title, d.slug, c.name as category_name
+      SELECT d.title, d.title_en, d.slug, c.name as category_name
       FROM documents d
       LEFT JOIN categories c ON c.id = d.category_id
       WHERE d.published = true
@@ -110,6 +111,12 @@ async function getCategories(): Promise<Category[]> {
 }
 
 export default async function WikiPage() {
+  const headersList = await headers();
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const locale = headersList.get('x-locale') ?? cookieStore.get('NEXT_LOCALE')?.value ?? 'ko';
+  const isEn = locale === 'en';
+
   const [categories, recentDocs] = await Promise.all([getCategories(), getRecentDocs()]);
   const active  = categories.filter(c => c.total_docs > 0);
   const empty   = categories.filter(c => c.total_docs === 0);
@@ -122,7 +129,9 @@ export default async function WikiPage() {
       {/* 최근 등록 문서 */}
       {recentDocs.length > 0 && (
         <div>
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">최근 등록</h2>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">
+            {isEn ? 'Recently Added' : '최근 등록'}
+          </h2>
           <div className="flex flex-col divide-y divide-slate-100 rounded-xl border border-slate-100 bg-white overflow-hidden">
             {recentDocs.map(doc => (
               <Link
@@ -131,7 +140,7 @@ export default async function WikiPage() {
                 className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition-colors group"
               >
                 <span className="text-sm text-slate-700 group-hover:text-indigo-600 transition-colors font-medium truncate">
-                  {doc.title}
+                  {isEn && doc.title_en ? doc.title_en : doc.title}
                 </span>
                 {doc.category_name && (
                   <span className="ml-3 flex-shrink-0 text-xs text-slate-400">
@@ -147,16 +156,20 @@ export default async function WikiPage() {
       {/* 헤더 */}
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-black text-slate-800 tracking-tight">카테고리</h2>
+          <h2 className="text-lg font-black text-slate-800 tracking-tight">
+            {isEn ? 'Categories' : '카테고리'}
+          </h2>
           <p className="text-sm text-slate-400 mt-0.5">
-            {totalDocs.toLocaleString()}개 문서 · {active.length}개 카테고리
+            {isEn
+              ? `${totalDocs.toLocaleString()} articles · ${active.length} categories`
+              : `${totalDocs.toLocaleString()}개 문서 · ${active.length}개 카테고리`}
           </p>
         </div>
         <Link
           href="/wiki/all"
           className="text-xs text-slate-400 hover:text-indigo-500 transition-colors"
         >
-          전체 목록 →
+          {isEn ? 'View all →' : '전체 목록 →'}
         </Link>
       </div>
 

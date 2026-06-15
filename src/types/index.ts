@@ -19,5 +19,6 @@ export interface Article {
   analyst?: string | null;
   title_en?: string | null;
   excerpt_en?: string | null;
+  content_en?: string | null;
   markdown_content_en?: string | null;
 }
