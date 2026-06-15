@@ -1,8 +1,22 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import sql from '@/lib/supabase';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
+
+export const metadata: Metadata = {
+  title: '위키 | AI Insight Note',
+  description: '컴퓨터 과학, AI, 블록체인, 보안, 수학 등 IT 전문 용어와 개념을 정리한 기술 위키 데이터베이스.',
+  alternates: { canonical: 'https://www.aiinsightnote.com/wiki' },
+  openGraph: {
+    type: 'website',
+    url: 'https://www.aiinsightnote.com/wiki',
+    title: '위키 | AI Insight Note',
+    description: '컴퓨터 과학, AI, 블록체인, 보안, 수학 등 IT 전문 용어와 개념을 정리한 기술 위키 데이터베이스.',
+    siteName: 'AI Insight Note',
+  },
+};
 
 type RecentDoc = { title: string; slug: string; category_name: string | null };
 type SubCategory = { name: string; slug: string; doc_count: number };

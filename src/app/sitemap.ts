@@ -11,6 +11,8 @@ const staticRoutes: MetadataRoute.Sitemap = [
   { url: `${BASE}/insights`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
   { url: `${BASE}/papers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
   { url: `${BASE}/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+  { url: `${BASE}/about`, lastModified: new Date('2026-06-15'), changeFrequency: 'monthly', priority: 0.5 },
+  { url: `${BASE}/privacy`, lastModified: new Date('2026-06-15'), changeFrequency: 'monthly', priority: 0.4 },
 ];
 
 const QUERY_TIMEOUT = 8000;

@@ -176,6 +176,36 @@ export default async function HomePage() {
           </div>
 
 
+          {/* 사이트 소개 */}
+          <div className="bg-white rounded-xl border border-slate-100 px-6 py-5">
+            <h2 className="text-sm font-bold text-slate-700 mb-3">
+              {locale === 'en' ? 'About AI Insight Note' : 'AI Insight Note 소개'}
+            </h2>
+            <p className="text-sm text-slate-500 leading-relaxed mb-4">
+              {locale === 'en'
+                ? 'AI Insight Note is a technical blog covering artificial intelligence, machine learning, blockchain, semiconductors, robotics, and other frontier technologies with in-depth editorial analysis. Original content is published daily across four sections.'
+                : 'AI Insight Note는 인공지능, 머신러닝, 블록체인, 반도체, 로보틱스 등 첨단 기술을 편집자 관점의 심층 분석으로 다루는 기술 블로그입니다. 매일 업데이트되는 네 가지 오리지널 콘텐츠 섹션으로 구성됩니다.'}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { href: '/insights', icon: '💡', label: locale === 'en' ? 'Insights' : '인사이트', desc: locale === 'en' ? 'Deep-dive analysis' : '심층 분석 칼럼' },
+                { href: '/papers',   icon: '📄', label: locale === 'en' ? 'Papers' : '논문 분석', desc: locale === 'en' ? 'AI paper reviews' : 'AI 논문 리뷰' },
+                { href: '/news',     icon: '📰', label: locale === 'en' ? 'News' : '뉴스', desc: locale === 'en' ? 'Daily tech news' : '매일 기술 뉴스' },
+                { href: '/wiki',     icon: '📚', label: locale === 'en' ? 'Wiki' : '위키', desc: locale === 'en' ? 'IT knowledge base' : 'IT 지식 베이스' },
+              ].map(item => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="flex flex-col items-center gap-1 p-3 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 transition-colors text-center"
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="text-xs font-bold text-slate-700">{item.label}</span>
+                  <span className="text-xs text-slate-400">{item.desc}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
         </div>
       </main>
       <Footer />
