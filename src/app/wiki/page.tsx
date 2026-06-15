@@ -1,4 +1,4 @@
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 import sql from '@/lib/supabase';
 import Link from 'next/link';
