@@ -136,8 +136,26 @@ export default async function HomePage() {
   const locale = isValidLocale(raw) ? raw : defaultLocale;
   const isEn = locale === 'en';
 
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AI Insight Note',
+    url: 'https://www.aiinsightnote.com',
+    description: 'AI·ML, 블록체인, 반도체, 로보틱스 분야의 최신 논문 분석, 심층 인사이트, 기술 뉴스를 매일 자체 발행하는 기술 블로그.',
+    inLanguage: ['ko', 'en'],
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: 'https://www.aiinsightnote.com/wiki?q={search_term_string}' },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <Script
         async
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4600038940266134"
