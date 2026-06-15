@@ -129,6 +129,35 @@ async function LatestPapersSection({ locale }: { locale: string }) {
   );
 }
 
+// ── 스프링 코일 바인딩 ────────────────────────────────────────────
+function SpringCoils() {
+  return (
+    <div
+      className="flex items-center justify-around px-3 py-2.5"
+      style={{
+        background: 'linear-gradient(180deg, #EBE0C8 0%, #D6C89A 55%, #C8B87C 100%)',
+        borderBottom: '1px solid rgba(0,0,0,0.12)',
+      }}
+    >
+      {Array.from({ length: 28 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: '16px',
+            height: '22px',
+            borderRadius: '8px',
+            border: '2.5px solid #6A6A6A',
+            background:
+              'linear-gradient(140deg, #F2F2F2 0%, #D4D4D4 28%, #909090 58%, #C6C6C6 78%, #EBEBEB 100%)',
+            boxShadow:
+              '0 2px 4px rgba(0,0,0,0.28), inset 0 1px 2px rgba(255,255,255,0.55)',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── 홈 페이지 ─────────────────────────────────────────────────────
 export default async function HomePage() {
   const headersList = await headers();
@@ -164,8 +193,26 @@ export default async function HomePage() {
       />
       <NavigationSpinner />
       <HomeSiteNav locale={locale} />
-      <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
-        <div className="space-y-10">
+
+      {/* ── 책상 배경 + 스프링 노트 카드 ──────────────────────── */}
+      <div className="min-h-screen py-6 pb-24" style={{ background: '#C8C0B0' }}>
+        <div className="max-w-5xl mx-auto px-3 sm:px-4">
+          <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.16)' }}>
+
+            {/* 스프링 코일 */}
+            <SpringCoils />
+
+            {/* 노트 용지 */}
+            <div className="notebook-paper">
+              <main className="relative py-8 pb-16 pl-12 pr-4 sm:pl-16 sm:pr-6 md:pl-20 md:pr-8">
+
+                {/* 빨간 세로선 (왼쪽 여백선) */}
+                <div
+                  className="absolute inset-y-0 pointer-events-none"
+                  style={{ left: '36px', width: '1.5px', background: 'rgba(252,165,165,0.65)' }}
+                />
+
+                <div className="space-y-10">
 
           {/* 헤더 */}
           <SiteHeader locale={locale} id="site-header" />
@@ -295,8 +342,12 @@ export default async function HomePage() {
             </div>
           </WidgetsPanel>
 
-        </div>
-      </main>
+                </div>{/* space-y-10 */}
+              </main>
+            </div>{/* notebook-paper */}
+          </div>{/* rounded card */}
+        </div>{/* max-w-5xl container */}
+      </div>{/* desk background */}
       <Footer />
     </>
   );
