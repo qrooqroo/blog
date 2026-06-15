@@ -29,9 +29,13 @@ const PALETTE: Record<string, { grad: string; accent: string; badge: string; chi
 };
 const DEFAULT_P = { grad: 'from-slate-50 to-gray-50', accent: 'border-l-slate-300', badge: 'bg-slate-100 text-slate-600', chip: 'bg-slate-50 text-slate-500 border-slate-200', arrow: 'text-slate-400' };
 
+function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([p, new Promise<T>(r => setTimeout(() => r(fallback), ms))]);
+}
+
 async function getRecentDocs(): Promise<RecentDoc[]> {
   try {
-    return await sql<RecentDoc[]>`
+    return await withTimeout(sql<RecentDoc[]>`
       SELECT d.title, d.slug, c.name as category_name
       FROM documents d
       LEFT JOIN categories c ON c.id = d.category_id
@@ -39,7 +43,7 @@ async function getRecentDocs(): Promise<RecentDoc[]> {
         AND (d.is_internal IS NULL OR d.is_internal = FALSE)
       ORDER BY d.id DESC
       LIMIT 10
-    `;
+    `, 6000, []);
   } catch {
     return [];
   }
@@ -48,7 +52,7 @@ async function getRecentDocs(): Promise<RecentDoc[]> {
 async function getCategories(): Promise<Category[]> {
   try {
   // 부모 카테고리 + 자식 카테고리 문서 수를 단일 JOIN으로 집계 (N+1 서브쿼리 제거)
-  const parents = await sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
+  const parents = await withTimeout(sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
     SELECT
       p.id, p.name, p.slug, p.excerpt,
       COUNT(DISTINCT d.id)::int as total_docs
@@ -61,9 +65,9 @@ async function getCategories(): Promise<Category[]> {
     WHERE p.parent_id IS NULL
     GROUP BY p.id, p.name, p.slug, p.excerpt
     ORDER BY total_docs DESC NULLS LAST, p.name
-  `;
+  `, 6000, []);
 
-  const children = await sql<{ id: number; name: string; slug: string; parent_id: number; doc_count: number }[]>`
+  const children = await withTimeout(sql<{ id: number; name: string; slug: string; parent_id: number; doc_count: number }[]>`
     SELECT c.id, c.name, c.slug, c.parent_id,
       COUNT(d.id)::int as doc_count
     FROM categories c
@@ -74,7 +78,7 @@ async function getCategories(): Promise<Category[]> {
     WHERE c.parent_id IS NOT NULL
     GROUP BY c.id, c.name, c.slug, c.parent_id
     ORDER BY doc_count DESC
-  `;
+  `, 6000, []);
 
   const childMap = new Map<number, SubCategory[]>();
   for (const c of children) {
