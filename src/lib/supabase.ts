@@ -8,6 +8,9 @@ const sql = postgres(process.env.DATABASE_URL!, {
   connect_timeout: 10,
   ssl: isSupabase ? 'require' : false,
   prepare: isSupabase ? false : true, // PgBouncer transaction 모드는 prepared statement 미지원
+  connection: {
+    statement_timeout: 8000, // 쿼리당 최대 8초 (Vercel 함수 10초 제한 이내)
+  },
 });
 
 // ── Supabase 쿼리 빌더 호환 레이어 ──────────────────────────────

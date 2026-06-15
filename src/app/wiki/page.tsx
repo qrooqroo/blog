@@ -47,20 +47,19 @@ async function getRecentDocs(): Promise<RecentDoc[]> {
 
 async function getCategories(): Promise<Category[]> {
   try {
+  // 부모 카테고리 + 자식 카테고리 문서 수를 단일 JOIN으로 집계 (N+1 서브쿼리 제거)
   const parents = await sql<{ id: number; name: string; slug: string; excerpt: string | null; total_docs: number }[]>`
     SELECT
       p.id, p.name, p.slug, p.excerpt,
-      (
-        SELECT COUNT(d.id)::int
-        FROM documents d
-        WHERE d.published = true
-          AND (d.is_internal IS NULL OR d.is_internal = FALSE)
-          AND d.category_id IN (
-            SELECT id FROM categories WHERE id = p.id OR parent_id = p.id
-          )
-      ) as total_docs
+      COUNT(DISTINCT d.id)::int as total_docs
     FROM categories p
+    LEFT JOIN categories c2 ON c2.id = p.id OR c2.parent_id = p.id
+    LEFT JOIN documents d
+      ON d.category_id = c2.id
+      AND d.published = true
+      AND (d.is_internal IS NULL OR d.is_internal = FALSE)
     WHERE p.parent_id IS NULL
+    GROUP BY p.id, p.name, p.slug, p.excerpt
     ORDER BY total_docs DESC NULLS LAST, p.name
   `;
 
