@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
 import { headers } from 'next/headers';
-import PageLoader from '@/components/PageLoader';
 import MarketHighlighter from '@/components/MarketHighlighter';
 import './globals.css';
 
@@ -43,7 +42,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className={`${notoSansKR.className} bg-slate-50 min-h-screen`}>
-        <PageLoader />
         <MarketHighlighter />
         {children}
       </body>

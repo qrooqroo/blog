@@ -1,2 +1,1 @@
-import MatrixLoader from '@/components/MatrixLoader';
-export default function Loading() { return <MatrixLoader />; }
+export default function Loading() { return null; }

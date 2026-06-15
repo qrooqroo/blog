@@ -1,20 +1,5 @@
 @import "tailwindcss";
 
-/* ── 페이지 로더 오버레이 (JS 없이 즉시 표시, 캔버스 아래 배경) ─ */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: #020814;
-  background-image: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(34,211,238,0.07) 0%, transparent 100%);
-  z-index: 9998;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-html.pg-loaded body::before {
-  opacity: 0;
-}
-
 /* ── 전역 리셋 (unlayered) ───────────────────────────────── */
 * { box-sizing: border-box; }
 body {
