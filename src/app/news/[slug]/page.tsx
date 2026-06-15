@@ -35,8 +35,15 @@ export async function generateMetadata({ params }: Props) {
   const article = await getCachedArticle(slug);
   if (!article) return {};
 
-  const title = `${article.title} | AI Insight Note`;
-  const description = (article.excerpt ?? '').trim().slice(0, 155) || article.title;
+  const h = await headers();
+  const c = await cookies();
+  const locale = h.get('x-locale') ?? c.get('NEXT_LOCALE')?.value ?? 'ko';
+  const isEn = isValidLocale(locale) && locale === 'en';
+
+  const displayTitle = isEn ? (article.title_en ?? article.title) : article.title;
+  const displayExcerpt = isEn ? (article.excerpt_en ?? article.excerpt) : article.excerpt;
+  const title = `${displayTitle} | AI Insight Note`;
+  const description = (displayExcerpt ?? '').trim().slice(0, 155) || displayTitle;
   const canonical = `https://www.aiinsightnote.com/news/${slug}`;
   const imageUrl = article.image?.startsWith('http')
     ? article.image
@@ -46,16 +53,23 @@ export async function generateMetadata({ params }: Props) {
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        'ko': canonical,
+        'en': canonical,
+        'x-default': canonical,
+      },
+    },
     ...(thin ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title,
       description,
       url: canonical,
       siteName: 'AI Insight Note',
-      images: [{ url: imageUrl, width: 800, height: 400, alt: article.title }],
+      images: [{ url: imageUrl, width: 800, height: 400, alt: displayTitle }],
       type: 'article' as const,
-      locale: 'ko_KR',
+      locale: isEn ? 'en_US' : 'ko_KR',
     },
     twitter: {
       card: 'summary_large_image' as const,

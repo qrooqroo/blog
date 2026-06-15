@@ -42,7 +42,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: { absolute: `${title} | AI Insight Note` },
     description,
     keywords: insight.tags ?? [],
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: {
+        'ko': url,
+        'en': url,
+        'x-default': url,
+      },
+    },
     openGraph: {
       type: 'article',
       url,

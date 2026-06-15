@@ -101,7 +101,14 @@ export async function generateMetadata({ params }: Props) {
     title: pageTitle,
     description,
     keywords,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        'ko': canonical,
+        'en': canonical,
+        'x-default': canonical,
+      },
+    },
     openGraph: {
       title: pageTitle,
       description,
