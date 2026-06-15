@@ -1,54 +1,47 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useLayoutEffect, useRef, useState, Suspense } from 'react';
-
-const CHAR_POOL = '01001011010010110100101001010110100101101001011010010101001011010011010100110101001101001100110001100011000110101010011';
-
-function drawFrame(
-  ctx: CanvasRenderingContext2D,
-  drops: number[],
-  colColors: string[],
-  fontSize: number,
-  w: number,
-  h: number,
-) {
-  ctx.fillStyle = 'rgba(2, 8, 20, 0.07)';
-  ctx.fillRect(0, 0, w, h);
-  ctx.font = `${fontSize}px 'Courier New', monospace`;
-  for (let i = 0; i < drops.length; i++) {
-    const y = drops[i] * fontSize;
-    if (y >= 0 && y < h) {
-      ctx.fillStyle = colColors[i];
-      ctx.fillText(CHAR_POOL[Math.floor(Math.random() * CHAR_POOL.length)], i * fontSize, y);
-    }
-    if (drops[i] * fontSize > h && Math.random() > 0.975) {
-      drops[i] = Math.floor(Math.random() * -30);
-    }
-    drops[i]++;
-  }
-}
+import { useEffect, useRef, useState, Suspense } from 'react';
 
 function Spinner() {
   const [loading, setLoading]   = useState(false);
+  const [width, setWidth]       = useState(0);
   const pathname                = usePathname();
   const searchParams            = useSearchParams();
   const prevPath                = useRef(pathname + searchParams.toString());
-  const canvasRef               = useRef<HTMLCanvasElement>(null);
+  const animFrameRef            = useRef<number>(0);
+  const timeoutRef              = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const current = pathname + searchParams.toString();
     if (current !== prevPath.current) {
       setLoading(false);
+      setWidth(0);
       prevPath.current = current;
     }
   }, [pathname, searchParams]);
 
-  // 최대 8초 후 강제 해제 — 서버 렌더링 지연으로 pathname이 늦게 업데이트될 때 방지
+  // 5초 안전망 타임아웃
   useEffect(() => {
     if (!loading) return;
-    const timer = setTimeout(() => setLoading(false), 8000);
+    const timer = setTimeout(() => {
+      setLoading(false);
+      setWidth(0);
+    }, 5000);
     return () => clearTimeout(timer);
+  }, [loading]);
+
+  // width 애니메이션: 0 → 85% (느리게), 완료 시 100% → hide
+  useEffect(() => {
+    if (!loading) return;
+    let current = 0;
+    const tick = () => {
+      current = Math.min(current + (85 - current) * 0.04, 84);
+      setWidth(current);
+      animFrameRef.current = requestAnimationFrame(tick);
+    };
+    animFrameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animFrameRef.current);
   }, [loading]);
 
   useEffect(() => {
@@ -64,73 +57,29 @@ function Spinner() {
       ) return;
       if (href.split('?')[0] === pathname) return;
       setLoading(true);
+      setWidth(0);
     };
     document.addEventListener('click', handleClick, true);
     return () => document.removeEventListener('click', handleClick, true);
   }, [pathname]);
 
-  useLayoutEffect(() => {
-    if (!loading) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const setSize = () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    setSize();
-    window.addEventListener('resize', setSize);
-
-    const fontSize = 14;
-    const cols     = Math.floor(canvas.width / fontSize);
-    const totalRows = Math.floor(canvas.height / fontSize);
-
-    const drops = Array.from({ length: cols }, () =>
-      Math.random() < 0.5
-        ? Math.floor(Math.random() * totalRows)
-        : Math.floor(Math.random() * -totalRows)
-    );
-
-    const colColors = Array.from({ length: cols }, () => {
-      const r = Math.random();
-      if (r > 0.88) return '#818cf8';
-      if (r > 0.68) return '#60a5fa';
-      return '#22d3ee';
-    });
-
-    // Draw initial frame before first browser paint so canvas is never blank
-    ctx.fillStyle = '#020814';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
-
-    let frameId: number;
-    let lastTime = 0;
-
-    const draw = (now: number) => {
-      frameId = requestAnimationFrame(draw);
-      if (now - lastTime < 40) return;
-      lastTime = now;
-      drawFrame(ctx, drops, colColors, fontSize, canvas.width, canvas.height);
-    };
-
-    frameId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', setSize);
-    };
-  }, [loading]);
-
   if (!loading) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-[9999]" style={{ background: '#020814' }}>
-        <canvas ref={canvasRef} className="absolute inset-0" />
-      </div>
-    </>
+    <div
+      className="fixed top-0 left-0 right-0 z-[9999]"
+      style={{ height: '3px', pointerEvents: 'none' }}
+    >
+      <div
+        style={{
+          height: '100%',
+          width: `${width}%`,
+          background: 'linear-gradient(90deg, #6366f1, #22d3ee)',
+          transition: 'width 0.1s linear',
+          boxShadow: '0 0 8px rgba(99,102,241,0.8)',
+        }}
+      />
+    </div>
   );
 }
 
