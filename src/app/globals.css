@@ -30,17 +30,6 @@ input, textarea, select, [contenteditable] {
 }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* ── 스프링 노트 배경 (홈 전용) ─────────────────────────── */
-.notebook-paper {
-  background-color: #FEFCE8;
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 31px,
-    #BAE6FD 31px,
-    #BAE6FD 32px
-  );
-}
-
 /* ── 시세 배지 (코스피/코스닥/환율 인라인 표시) ────────────── */
 /* 한국 금융 뉴스 스타일: 괄호, 배경 없음, 상승=빨강 하락=파랑 */
 .market-badge {

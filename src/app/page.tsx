@@ -129,85 +129,6 @@ async function LatestPapersSection({ locale }: { locale: string }) {
   );
 }
 
-// ── 스프링 코일 바인딩 ────────────────────────────────────────────
-function SpringCoils({ count = 20 }: { count?: number }) {
-  return (
-    <div
-      style={{ position: 'relative', height: '50px', background: '#FEFCE8', borderBottom: '1.5px solid #BAE6FD' }}
-    >
-      <div
-        style={{ position: 'absolute', left: '8px', right: '8px', top: 0, bottom: 0, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}
-      >
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} style={{ position: 'relative', width: '14px', height: '44px', flexShrink: 0 }}>
-
-            {/* 링 내부 — 속이 빈 어두운 공간 */}
-            <div style={{
-              position: 'absolute', top: '2px', left: '0', width: '14px', height: '40px',
-              borderRadius: '7px',
-              border: '2.5px solid #3C3C3C',
-              background: '#222',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.55)',
-              zIndex: 1,
-            }} />
-
-            {/* 종이 가림막 */}
-            <div style={{
-              position: 'absolute', top: '17px', bottom: '12px', left: '-8px', right: '-8px',
-              background: '#FEFCE8',
-              zIndex: 3,
-            }} />
-
-            {/* 구멍 — 종이 뒤로 연결되는 어두운 홀 */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '8px', height: '10px',
-              borderRadius: '4px',
-              background: '#111',
-              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.9)',
-              zIndex: 4,
-            }} />
-
-            {/* 상단 호 — 종이 앞으로 나온 금속 와이어 */}
-            <div style={{
-              position: 'absolute', top: '2px', left: '0', width: '14px', height: '19px',
-              borderRadius: '7px 7px 0 0',
-              border: '2.5px solid #3C3C3C',
-              borderBottom: 'none',
-              background: 'linear-gradient(160deg, #FFFFFF 0%, #E8E8E8 18%, #C4C4C4 36%, #787878 54%, #B0B0B0 72%, #DCDCDC 86%, #F5F5F5 100%)',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.45), inset 0 2px 3px rgba(255,255,255,0.85)',
-              zIndex: 5,
-            }} />
-
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── 섹션별 노트 카드 ──────────────────────────────────────────────
-function NotebookCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="rounded-2xl overflow-hidden"
-      style={{ boxShadow: '0 6px 28px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.12)' }}
-    >
-      <SpringCoils />
-      <div className="notebook-paper">
-        <div className="relative py-6 pb-8 pl-12 pr-4 sm:pl-16 sm:pr-6">
-          <div
-            className="absolute inset-y-0 pointer-events-none"
-            style={{ left: '36px', width: '1.5px', background: 'rgba(252,165,165,0.65)' }}
-          />
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── 홈 페이지 ─────────────────────────────────────────────────────
 export default async function HomePage() {
   const headersList = await headers();
@@ -243,49 +164,41 @@ export default async function HomePage() {
       />
       <NavigationSpinner />
       <HomeSiteNav locale={locale} />
-
-      {/* ── 책상 배경 ────────────────────────────────────────────── */}
-      <main className="min-h-screen py-6 pb-24" style={{ background: '#C8C0B0' }}>
-        <div className="max-w-5xl mx-auto px-3 sm:px-4 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 py-10 pb-16">
+        <div className="space-y-10">
 
           {/* 헤더 */}
           <SiteHeader locale={locale} id="site-header" />
 
-          {/* 인사이트 슬라이더 — 노트 카드 */}
-          <NotebookCard>
-            <Suspense fallback={<div className="h-64 bg-white/60 rounded-xl animate-pulse" />}>
-              <InsightSliderSection locale={locale} />
-            </Suspense>
-          </NotebookCard>
+          {/* 인사이트 슬라이더 — 자체 원본 콘텐츠 */}
+          <Suspense fallback={<div className="h-64 bg-white border border-slate-200 rounded-xl animate-pulse" />}>
+            <InsightSliderSection locale={locale} />
+          </Suspense>
 
-          {/* 최신 기술 뉴스 — 노트 카드 */}
-          <NotebookCard>
-            <Suspense fallback={
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {[1,2,3,4,5,6,7,8].map(i => (
-                  <div key={i} className="bg-white/60 rounded-xl p-3.5 h-20 animate-pulse" />
-                ))}
-              </div>
-            }>
-              <LatestNewsSection locale={locale} />
-            </Suspense>
-          </NotebookCard>
+          {/* 최신 기술 뉴스 — 자체 DB */}
+          <Suspense fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[1,2,3,4,5,6,7,8].map(i => (
+                <div key={i} className="bg-white border border-slate-100 rounded-xl p-3.5 h-20 animate-pulse" />
+              ))}
+            </div>
+          }>
+            <LatestNewsSection locale={locale} />
+          </Suspense>
 
-          {/* 최신 논문 분석 — 노트 카드 */}
-          <NotebookCard>
-            <Suspense fallback={
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {[1,2,3].map(i => (
-                  <div key={i} className="bg-white/60 rounded-xl p-4 h-28 animate-pulse" />
-                ))}
-              </div>
-            }>
-              <LatestPapersSection locale={locale} />
-            </Suspense>
-          </NotebookCard>
+          {/* 최신 논문 분석 — 자체 DB */}
+          <Suspense fallback={
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {[1,2,3].map(i => (
+                <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 h-28 animate-pulse" />
+              ))}
+            </div>
+          }>
+            <LatestPapersSection locale={locale} />
+          </Suspense>
 
           {/* 사이트 소개 */}
-          <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 px-6 py-5 shadow-sm">
+          <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 px-6 py-5">
             <h2 className="text-sm font-bold text-slate-700 mb-2">
               {isEn ? 'About AI Insight Note' : 'AI Insight Note 소개'}
             </h2>
