@@ -173,61 +173,44 @@ export default async function WikiPage() {
         </Link>
       </div>
 
-      {/* 카테고리 카드 그리드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* 카테고리 트리 */}
+      <div className="space-y-5">
         {active.map(cat => {
           const p = PALETTE[cat.slug] ?? DEFAULT_P;
-          const topSubs = cat.sub_categories.filter(s => s.doc_count > 0).slice(0, 6);
+          const subs = cat.sub_categories.filter(s => s.doc_count > 0).slice(0, 8);
 
           return (
-            <Link
-              key={cat.id}
-              href={`/category/${cat.slug}`}
-              className={`group relative bg-gradient-to-br ${p.grad} rounded-2xl border border-white border-l-4 ${p.accent} shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col gap-3 overflow-hidden`}
-            >
-              {/* 배경 장식 원 */}
-              <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-white/30 pointer-events-none" />
-              <div className="absolute -right-2 -bottom-4 w-12 h-12 rounded-full bg-white/20 pointer-events-none" />
+            <div key={cat.id} className="flex flex-col items-start">
+              {/* 대메뉴 노드 */}
+              <Link
+                href={`/category/${cat.slug}`}
+                className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-br ${p.grad} border border-white border-l-4 ${p.accent} shadow-sm px-4 py-2.5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
+              >
+                <span className="font-black text-slate-800 text-sm">{cat.name}</span>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.badge}`}>{cat.total_docs}</span>
+              </Link>
 
-              {/* 상단: 이름 + 문서 수 */}
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-black text-slate-800 text-base leading-snug group-hover:text-slate-900 transition-colors">
-                  {cat.name}
-                </h3>
-                <span className={`flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${p.badge}`}>
-                  {cat.total_docs}
-                </span>
-              </div>
-
-              {/* 설명 */}
-              {cat.excerpt && (
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                  {cat.excerpt}
-                </p>
-              )}
-
-              {/* 하위 카테고리 칩 */}
-              {topSubs.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
-                  {topSubs.map(sub => (
-                    <span
-                      key={sub.slug}
-                      className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border ${p.chip} font-medium`}
-                    >
-                      {sub.name}
-                      {sub.doc_count > 0 && (
-                        <span className="opacity-60">{sub.doc_count}</span>
-                      )}
-                    </span>
+              {/* 소메뉴 노드들 — 아래로 */}
+              {subs.length > 0 && (
+                <div className="mt-1 ml-4 pl-5 border-l border-slate-200 flex flex-col gap-2 py-1.5">
+                  {subs.map(sub => (
+                    <div key={sub.slug} className="relative flex items-center">
+                      {/* 수평 꺾임선 */}
+                      <div className="absolute -left-5 top-1/2 w-5 h-px bg-slate-200" />
+                      <Link
+                        href={`/category/${sub.slug}`}
+                        className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border ${p.chip} hover:shadow-sm transition-all whitespace-nowrap`}
+                      >
+                        {sub.name}
+                        {sub.doc_count > 0 && (
+                          <span className="ml-1.5 font-normal opacity-50">{sub.doc_count}</span>
+                        )}
+                      </Link>
+                    </div>
                   ))}
                 </div>
               )}
-
-              {/* hover 화살표 */}
-              <span className={`absolute bottom-4 right-5 text-xs font-semibold ${p.arrow} opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200`}>
-                보기 →
-              </span>
-            </Link>
+            </div>
           );
         })}
       </div>

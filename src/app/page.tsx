@@ -130,30 +130,82 @@ async function LatestPapersSection({ locale }: { locale: string }) {
 }
 
 // ── 스프링 코일 바인딩 ────────────────────────────────────────────
-function SpringCoils() {
+function SpringCoils({ count = 22 }: { count?: number }) {
   return (
     <div
-      className="flex items-center justify-around px-3 py-2.5"
-      style={{
-        background: 'linear-gradient(180deg, #EBE0C8 0%, #D6C89A 55%, #C8B87C 100%)',
-        borderBottom: '1px solid rgba(0,0,0,0.12)',
-      }}
+      className="relative"
+      style={{ height: '52px', background: '#FEFCE8', borderBottom: '1.5px solid #BAE6FD' }}
     >
-      {Array.from({ length: 28 }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: '16px',
-            height: '22px',
-            borderRadius: '8px',
-            border: '2.5px solid #6A6A6A',
-            background:
-              'linear-gradient(140deg, #F2F2F2 0%, #D4D4D4 28%, #909090 58%, #C6C6C6 78%, #EBEBEB 100%)',
-            boxShadow:
-              '0 2px 4px rgba(0,0,0,0.28), inset 0 1px 2px rgba(255,255,255,0.55)',
-          }}
-        />
-      ))}
+      <div
+        className="absolute inset-x-3 flex justify-around"
+        style={{ top: 0, bottom: 0, alignItems: 'center' }}
+      >
+        {Array.from({ length: count }).map((_, i) => (
+          <div key={i} style={{ position: 'relative', width: '16px', height: '46px', flexShrink: 0 }}>
+
+            {/* 코일 링 전체 (종이 뒤) */}
+            <div style={{
+              position: 'absolute', top: '2px', left: '1px', width: '14px', height: '42px',
+              borderRadius: '8px',
+              border: '2.5px solid #5A5A5A',
+              background: 'linear-gradient(135deg, #E0E0E0 0%, #B8B8B8 28%, #727272 55%, #B0B0B0 75%, #E4E4E4 100%)',
+              zIndex: 1,
+            }} />
+
+            {/* 종이 가림막 (코일 중간을 덮음) */}
+            <div style={{
+              position: 'absolute', top: '17px', bottom: '17px', left: '-6px', right: '-6px',
+              background: '#FEFCE8',
+              zIndex: 2,
+            }} />
+
+            {/* 구멍 (종이를 뚫고 배경이 보임) */}
+            <div style={{
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '10px', height: '12px',
+              borderRadius: '5px',
+              background: 'linear-gradient(180deg, #AEA898 0%, #BEB8AE 100%)',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)',
+              zIndex: 3,
+            }} />
+
+            {/* 코일 윗부분 (종이 앞) */}
+            <div style={{
+              position: 'absolute', top: '2px', left: '1px',
+              width: '14px', height: '19px',
+              borderRadius: '8px 8px 0 0',
+              border: '2.5px solid #5A5A5A',
+              borderBottom: 'none',
+              background: 'linear-gradient(135deg, #F4F4F4 0%, #D8D8D8 28%, #8C8C8C 55%, #C8C8C8 78%, #F2F2F2 100%)',
+              boxShadow: '0 3px 7px rgba(0,0,0,0.32), inset 0 1px 3px rgba(255,255,255,0.7)',
+              zIndex: 4,
+            }} />
+
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── 섹션별 노트 카드 ──────────────────────────────────────────────
+function NotebookCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ boxShadow: '0 6px 28px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.12)' }}
+    >
+      <SpringCoils />
+      <div className="notebook-paper">
+        <div className="relative py-6 pb-8 pl-12 pr-4 sm:pl-16 sm:pr-6">
+          <div
+            className="absolute inset-y-0 pointer-events-none"
+            style={{ left: '36px', width: '1.5px', background: 'rgba(252,165,165,0.65)' }}
+          />
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -194,58 +246,48 @@ export default async function HomePage() {
       <NavigationSpinner />
       <HomeSiteNav locale={locale} />
 
-      {/* ── 책상 배경 + 스프링 노트 카드 ──────────────────────── */}
-      <div className="min-h-screen py-6 pb-24" style={{ background: '#C8C0B0' }}>
-        <div className="max-w-5xl mx-auto px-3 sm:px-4">
-          <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.16)' }}>
-
-            {/* 스프링 코일 */}
-            <SpringCoils />
-
-            {/* 노트 용지 */}
-            <div className="notebook-paper">
-              <main className="relative py-8 pb-16 pl-12 pr-4 sm:pl-16 sm:pr-6 md:pl-20 md:pr-8">
-
-                {/* 빨간 세로선 (왼쪽 여백선) */}
-                <div
-                  className="absolute inset-y-0 pointer-events-none"
-                  style={{ left: '36px', width: '1.5px', background: 'rgba(252,165,165,0.65)' }}
-                />
-
-                <div className="space-y-10">
+      {/* ── 책상 배경 ────────────────────────────────────────────── */}
+      <main className="min-h-screen py-6 pb-24" style={{ background: '#C8C0B0' }}>
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 space-y-6">
 
           {/* 헤더 */}
           <SiteHeader locale={locale} id="site-header" />
 
-          {/* 인사이트 슬라이더 — 자체 원본 콘텐츠 */}
-          <Suspense fallback={<div className="h-64 bg-white border border-slate-200 rounded-xl animate-pulse" />}>
-            <InsightSliderSection locale={locale} />
-          </Suspense>
+          {/* 인사이트 슬라이더 — 노트 카드 */}
+          <NotebookCard>
+            <Suspense fallback={<div className="h-64 bg-white/60 rounded-xl animate-pulse" />}>
+              <InsightSliderSection locale={locale} />
+            </Suspense>
+          </NotebookCard>
 
-          {/* 최신 기술 뉴스 — 자체 DB */}
-          <Suspense fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {[1,2,3,4,5,6,7,8].map(i => (
-                <div key={i} className="bg-white border border-slate-100 rounded-xl p-3.5 h-20 animate-pulse" />
-              ))}
-            </div>
-          }>
-            <LatestNewsSection locale={locale} />
-          </Suspense>
+          {/* 최신 기술 뉴스 — 노트 카드 */}
+          <NotebookCard>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[1,2,3,4,5,6,7,8].map(i => (
+                  <div key={i} className="bg-white/60 rounded-xl p-3.5 h-20 animate-pulse" />
+                ))}
+              </div>
+            }>
+              <LatestNewsSection locale={locale} />
+            </Suspense>
+          </NotebookCard>
 
-          {/* 최신 논문 분석 — 자체 DB */}
-          <Suspense fallback={
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {[1,2,3].map(i => (
-                <div key={i} className="bg-white border border-slate-200 rounded-xl p-4 h-28 animate-pulse" />
-              ))}
-            </div>
-          }>
-            <LatestPapersSection locale={locale} />
-          </Suspense>
+          {/* 최신 논문 분석 — 노트 카드 */}
+          <NotebookCard>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="bg-white/60 rounded-xl p-4 h-28 animate-pulse" />
+                ))}
+              </div>
+            }>
+              <LatestPapersSection locale={locale} />
+            </Suspense>
+          </NotebookCard>
 
           {/* 사이트 소개 */}
-          <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 px-6 py-5">
+          <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 px-6 py-5 shadow-sm">
             <h2 className="text-sm font-bold text-slate-700 mb-2">
               {isEn ? 'About AI Insight Note' : 'AI Insight Note 소개'}
             </h2>
@@ -342,12 +384,8 @@ export default async function HomePage() {
             </div>
           </WidgetsPanel>
 
-                </div>{/* space-y-10 */}
-              </main>
-            </div>{/* notebook-paper */}
-          </div>{/* rounded card */}
-        </div>{/* max-w-5xl container */}
-      </div>{/* desk background */}
+        </div>
+      </main>
       <Footer />
     </>
   );
