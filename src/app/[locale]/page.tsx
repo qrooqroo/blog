@@ -151,13 +151,13 @@ export default async function LocaleHomePage({ params }: Props) {
         <p className="text-sm text-slate-500 leading-relaxed mb-4">
           {isEn
             ? 'A technical blog publishing daily original analysis on AI, machine learning, blockchain, semiconductors, and robotics — covering the latest research papers, industry insights, and tech news.'
-            : 'AI·ML, 블록체인, 반도체, 로보틱스 분야의 최신 논문 분석, 심층 인사이트, 기술 뉴스를 매일 자체 발행하는 기술 블로그입니다.'}
+            : 'AI·ML, 블록체인, 반도체, 로보틱스 분야의 최신 논문 분석, 심층 인사이트, 기술 뉴스 블로그입니다.'}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {[
             { href: `/${locale}/insights`, label: isEn ? 'Insights' : '인사이트', desc: isEn ? 'Deep-dive analysis' : '심층 분석 칼럼' },
             { href: `/${locale}/papers`,   label: isEn ? 'Papers' : '논문 분석',  desc: isEn ? 'AI paper reviews'  : 'AI 논문 리뷰' },
-            { href: `/${locale}/news`,     label: isEn ? 'News' : '뉴스',         desc: isEn ? 'Daily tech news'   : '매일 기술 뉴스' },
+            { href: `/${locale}/news`,     label: isEn ? 'News' : '기사',         desc: isEn ? 'Daily tech news'   : 'AI 뉴스' },
             { href: `/${locale}/wiki`,     label: isEn ? 'Wiki' : '위키',         desc: isEn ? 'IT knowledge base' : 'IT 지식 베이스' },
           ].map(item => (
             <Link
