@@ -93,20 +93,22 @@ function makePreset(): Body[] {
   const sunTilt = THREE.MathUtils.degToRad(7.25);
   return [
     {
-      id: 'sun', name: '태양', mass: Ms, radius: 2.5, color: '#FFD060', isStar: true,
+      // 태양 시각 크기: 실제 비율(21.86)은 수성 궤도보다 커서 시각적으로 1.5로 고정
+      id: 'sun', name: '태양', mass: Ms, radius: 1.5, color: '#FFD060', isStar: true,
       pos: new THREE.Vector3(0, 0, 0), vel: new THREE.Vector3(0, 0, 0),
       rotSpeed: 0.5, tilt: sunTilt, spinAxis: spinAxis(sunTilt), trail: [],
     },
-    // 실제 AU 거리 · 실제 태양 질량 비율 사용
-    // 공전 주기: 수성 88일, 금성 225일, 지구 365일, 화성 687일, 목성 11.9년, 토성 29.5년, 천왕성 84년, 해왕성 165년
-    planet('mercury', '수성',   1.659e-7, 0.28, '#9E9E9E',  0.387,  3.0,   0.03),
-    planet('venus',   '금성',   2.448e-6, 0.55, '#E8D080',  0.723,  2.0, 177.4),
-    planet('earth',   '지구',   3.003e-6, 0.65, '#4FA3D9',  1.000,  4.0,  23.5),
-    planet('mars',    '화성',   3.227e-7, 0.38, '#C1440E',  1.524,  3.5,  25.2),
-    planet('jupiter', '목성',   9.543e-4, 1.5,  '#C88B3A',  5.203,  9.0,   3.1),
-    planet('saturn',  '토성',   2.857e-4, 1.15, '#E8D5A3',  9.537,  7.5,  26.7),
-    planet('uranus',  '천왕성', 4.365e-5, 0.8,  '#7DE8E8', 19.190,  5.5,  97.8),
-    planet('neptune', '해왕성', 5.149e-5, 0.75, '#4169E1', 30.070,  5.0,  28.3),
+    // 행성 시각 반지름: 실제 비율 적용 (지구=0.200 기준, scale=3.139e-5 scene/km)
+    // 공전 거리: 실제 AU · 공전 주기: 수성 88일, 금성 225일, 지구 365일, 화성 687일
+    //           목성 11.9년, 토성 29.5년, 천왕성 84년, 해왕성 165년
+    planet('mercury', '수성',   1.659e-7, 0.077, '#9E9E9E',  0.387,  3.0,   0.03),
+    planet('venus',   '금성',   2.448e-6, 0.190, '#E8D080',  0.723,  2.0, 177.4),
+    planet('earth',   '지구',   3.003e-6, 0.200, '#4FA3D9',  1.000,  4.0,  23.5),
+    planet('mars',    '화성',   3.227e-7, 0.106, '#C1440E',  1.524,  3.5,  25.2),
+    planet('jupiter', '목성',   9.543e-4, 2.244, '#C88B3A',  5.203,  9.0,   3.1),
+    planet('saturn',  '토성',   2.857e-4, 1.892, '#E8D5A3',  9.537,  7.5,  26.7),
+    planet('uranus',  '천왕성', 4.365e-5, 0.802, '#7DE8E8', 19.190,  5.5,  97.8),
+    planet('neptune', '해왕성', 5.149e-5, 0.777, '#4169E1', 30.070,  5.0,  28.3),
   ];
 }
 
