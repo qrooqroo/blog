@@ -130,56 +130,54 @@ async function LatestPapersSection({ locale }: { locale: string }) {
 }
 
 // ── 스프링 코일 바인딩 ────────────────────────────────────────────
-function SpringCoils({ count = 22 }: { count?: number }) {
+function SpringCoils({ count = 20 }: { count?: number }) {
   return (
     <div
-      className="relative"
-      style={{ height: '52px', background: '#FEFCE8', borderBottom: '1.5px solid #BAE6FD' }}
+      style={{ position: 'relative', height: '50px', background: '#FEFCE8', borderBottom: '1.5px solid #BAE6FD' }}
     >
       <div
-        className="absolute inset-x-3 flex justify-around"
-        style={{ top: 0, bottom: 0, alignItems: 'center' }}
+        style={{ position: 'absolute', left: '8px', right: '8px', top: 0, bottom: 0, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}
       >
         {Array.from({ length: count }).map((_, i) => (
-          <div key={i} style={{ position: 'relative', width: '16px', height: '46px', flexShrink: 0 }}>
+          <div key={i} style={{ position: 'relative', width: '14px', height: '44px', flexShrink: 0 }}>
 
-            {/* 코일 링 전체 (종이 뒤) */}
+            {/* 링 내부 — 속이 빈 어두운 공간 */}
             <div style={{
-              position: 'absolute', top: '2px', left: '1px', width: '14px', height: '42px',
-              borderRadius: '8px',
-              border: '2.5px solid #5A5A5A',
-              background: 'linear-gradient(135deg, #E0E0E0 0%, #B8B8B8 28%, #727272 55%, #B0B0B0 75%, #E4E4E4 100%)',
+              position: 'absolute', top: '2px', left: '0', width: '14px', height: '40px',
+              borderRadius: '7px',
+              border: '2.5px solid #3C3C3C',
+              background: '#222',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.55)',
               zIndex: 1,
             }} />
 
-            {/* 종이 가림막 (코일 중간을 덮음) */}
+            {/* 종이 가림막 */}
             <div style={{
-              position: 'absolute', top: '17px', bottom: '17px', left: '-6px', right: '-6px',
+              position: 'absolute', top: '17px', bottom: '12px', left: '-8px', right: '-8px',
               background: '#FEFCE8',
-              zIndex: 2,
-            }} />
-
-            {/* 구멍 (종이를 뚫고 배경이 보임) */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '10px', height: '12px',
-              borderRadius: '5px',
-              background: 'linear-gradient(180deg, #AEA898 0%, #BEB8AE 100%)',
-              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.35)',
               zIndex: 3,
             }} />
 
-            {/* 코일 윗부분 (종이 앞) */}
+            {/* 구멍 — 종이 뒤로 연결되는 어두운 홀 */}
             <div style={{
-              position: 'absolute', top: '2px', left: '1px',
-              width: '14px', height: '19px',
-              borderRadius: '8px 8px 0 0',
-              border: '2.5px solid #5A5A5A',
-              borderBottom: 'none',
-              background: 'linear-gradient(135deg, #F4F4F4 0%, #D8D8D8 28%, #8C8C8C 55%, #C8C8C8 78%, #F2F2F2 100%)',
-              boxShadow: '0 3px 7px rgba(0,0,0,0.32), inset 0 1px 3px rgba(255,255,255,0.7)',
+              position: 'absolute', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '8px', height: '10px',
+              borderRadius: '4px',
+              background: '#111',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.9)',
               zIndex: 4,
+            }} />
+
+            {/* 상단 호 — 종이 앞으로 나온 금속 와이어 */}
+            <div style={{
+              position: 'absolute', top: '2px', left: '0', width: '14px', height: '19px',
+              borderRadius: '7px 7px 0 0',
+              border: '2.5px solid #3C3C3C',
+              borderBottom: 'none',
+              background: 'linear-gradient(160deg, #FFFFFF 0%, #E8E8E8 18%, #C4C4C4 36%, #787878 54%, #B0B0B0 72%, #DCDCDC 86%, #F5F5F5 100%)',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.45), inset 0 2px 3px rgba(255,255,255,0.85)',
+              zIndex: 5,
             }} />
 
           </div>
