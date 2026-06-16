@@ -16,6 +16,9 @@
     "@anthropic-ai/sdk": "^0.95.1",
     "@aws-sdk/client-s3": "^3.1052.0",
     "@aws-sdk/s3-request-presigner": "^3.1052.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/rapier": "^2.2.0",
     "@supabase/supabase-js": "^2.105.4",
     "lightweight-charts": "^5.2.0",
     "mermaid": "^11.15.0",
@@ -28,6 +31,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "simple-icons": "^16.21.0",
+    "three": "^0.184.0",
     "tsx": "^4.21.0",
     "twitter-api-v2": "^1.29.0"
   },

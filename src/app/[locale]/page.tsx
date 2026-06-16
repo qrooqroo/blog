@@ -145,9 +145,6 @@ export default async function LocaleHomePage({ params }: Props) {
 
       {/* 사이트 소개 */}
       <div className="bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100 px-6 py-5">
-        <h2 className="text-sm font-bold text-slate-700 mb-2">
-          {isEn ? 'About AI Insight Note' : 'AI Insight Note 소개'}
-        </h2>
         <p className="text-sm text-slate-500 leading-relaxed mb-4">
           {isEn
             ? 'A technical blog publishing daily original analysis on AI, machine learning, blockchain, semiconductors, and robotics — covering the latest research papers, industry insights, and tech news.'

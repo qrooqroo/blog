@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['172.17.235.232', '10.255.255.254', 'localhost'],
   reactStrictMode: false,
+  transpilePackages: ['@dimforge/rapier3d-compat', '@react-three/rapier'],
   turbopack: {
     root: __dirname,
   },
