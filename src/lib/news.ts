@@ -2,7 +2,7 @@ import { supabase, sql } from './supabase';
 import { Article } from '@/types';
 export { isNewsCategory, tableFor } from './table-utils';
 
-const NEWS_LIST_COLS = 'id, slug, title, title_en, title_ko, excerpt, excerpt_en, category, image, date, published';
+const NEWS_LIST_COLS = 'id, slug, title, title_en, excerpt, excerpt_en, category, image, date, published';
 
 export async function getAllNews(): Promise<Article[]> {
   const { data } = await supabase
