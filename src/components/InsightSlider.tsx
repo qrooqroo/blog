@@ -40,13 +40,20 @@ export default function InsightSlider({ insights, locale = 'ko' }: { insights: I
             className="absolute inset-0 transition-opacity duration-700"
             style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
           >
-            {ins.image && <img src={ins.image} alt="" className="w-full h-full object-cover" />}
+            {ins.image && (
+              <img
+                src={ins.image}
+                alt=""
+                className="w-full h-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           </div>
         ))}
 
         <Link
-          href={`/${locale}/insights/${item.slug}`}
+          href={`/insights/${item.slug}`}
           className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-8 group"
         >
           <h2 className="text-xl md:text-2xl font-black text-white leading-tight mb-2 group-hover:text-indigo-300 transition-colors line-clamp-2">
@@ -96,7 +103,12 @@ export default function InsightSlider({ insights, locale = 'ko' }: { insights: I
               }`}
             >
               {ins.image && (
-                <img src={ins.image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                <img
+                  src={ins.image}
+                  alt=""
+                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0 bg-slate-100"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
               )}
               <p className={`text-sm font-semibold leading-snug line-clamp-2 transition-colors ${
                 isActive ? 'text-indigo-600' : 'text-slate-700'
