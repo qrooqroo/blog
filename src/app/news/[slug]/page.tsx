@@ -8,6 +8,8 @@ import { headers, cookies } from 'next/headers';
 import { isValidLocale } from '@/lib/i18n/dictionaries';
 import AdUnit from '@/components/AdUnit';
 
+export const maxDuration = 25; // 부하 시 행을 300초→25초로 캡: 함수 동시성 빠르게 회복
+
 const ANALYST_EN: Record<string, string> = {
   '이준혁': 'Maren Cole',
   '박서연': 'Zoe Strand',

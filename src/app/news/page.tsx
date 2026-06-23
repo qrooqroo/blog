@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 25; // 부하 시 행을 300초→25초로 캡: 함수 동시성 빠르게 회복
 
 import { getAllNews } from '@/lib/news';
 import NewsSlider from '@/components/NewsSlider';
