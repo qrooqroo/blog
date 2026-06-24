@@ -122,7 +122,7 @@ export default async function InsightPage({ params }: Props) {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-black text-slate-900 leading-snug">{title}</h1>
+        <h1 className="text-2xl font-black text-slate-900 leading-snug select-text">{title}</h1>
       </div>
 
       {insight.image && (
@@ -131,7 +131,7 @@ export default async function InsightPage({ params }: Props) {
         </div>
       )}
 
-      <p className="text-base text-slate-600 leading-relaxed border-l-4 border-indigo-200 pl-4 italic">
+      <p className="text-base text-slate-600 leading-relaxed border-l-4 border-indigo-200 pl-4 italic select-text">
         {excerpt}
       </p>
 
