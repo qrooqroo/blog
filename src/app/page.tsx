@@ -9,7 +9,6 @@ import HomeSiteNav from '@/components/HomeSiteNav';
 import Footer from '@/components/Footer';
 import { getAllInsights } from '@/lib/insights';
 import { getRecentPapers } from '@/lib/papers';
-import { getRecentNews } from '@/lib/news';
 import SiteHeader from '@/components/SiteHeader';
 import InsightSlider from '@/components/InsightSlider';
 import MarketBar from '@/components/MarketBar';
@@ -37,56 +36,6 @@ async function InsightSliderSection({ locale }: { locale: string }) {
   const insights = await getAllInsights();
   if (insights.length === 0) return null;
   return <InsightSlider insights={insights.slice(0, 6)} locale={locale} />;
-}
-
-// ── 최신 기술 뉴스 (자체 DB) ──────────────────────────────────────
-async function LatestNewsSection({ locale }: { locale: string }) {
-  const news = await getRecentNews(8);
-  const isEn = locale === 'en';
-  if (news.length === 0) return null;
-
-  return (
-    <section>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-black text-slate-800">
-          {isEn ? 'Latest Tech News' : '최신 기술 뉴스'}
-        </h2>
-        <Link href="/news" className="text-xs text-slate-400 hover:text-indigo-500 transition-colors">
-          {isEn ? 'View all →' : '전체 보기 →'}
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {news.map(item => {
-          const title = (isEn && item.title_en) ? item.title_en : item.title;
-          return (
-            <Link
-              key={item.id}
-              href={`/news/${item.slug}`}
-              className="group flex items-start gap-3 bg-white border border-slate-100 rounded-xl p-3.5 hover:border-indigo-200 hover:shadow-sm transition-all"
-            >
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt=""
-                  className="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-slate-100"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-lg bg-indigo-50 flex-shrink-0 flex items-center justify-center text-indigo-300 text-xs font-bold">
-                  AI
-                </div>
-              )}
-              <div className="min-w-0 flex flex-col gap-1">
-                <p className="text-sm font-semibold text-slate-800 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
-                  {title}
-                </p>
-                <p className="text-xs text-slate-400">{item.category}</p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
 }
 
 // ── 최신 논문 분석 (자체 DB) ──────────────────────────────────────
@@ -139,13 +88,8 @@ export default async function HomePage() {
     '@type': 'WebSite',
     name: 'AI Insight Note',
     url: 'https://www.aiinsightnote.com',
-    description: 'AI·ML, 블록체인, 반도체, 로보틱스 분야의 최신 논문 분석, 심층 인사이트, 기술 뉴스를 매일 자체 발행하는 기술 블로그.',
+    description: 'Claude·GPT·Gemini 등 LLM 모델·API 가격 비교와, AI·반도체·로보틱스 분야의 심층 인사이트·논문 분석을 제공하는 기술 사이트.',
     inLanguage: ['ko', 'en'],
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: { '@type': 'EntryPoint', urlTemplate: 'https://www.aiinsightnote.com/wiki?q={search_term_string}' },
-      'query-input': 'required name=search_term_string',
-    },
   };
 
   return (
@@ -173,16 +117,27 @@ export default async function HomePage() {
             <InsightSliderSection locale={locale} />
           </Suspense>
 
-          {/* 최신 기술 뉴스 — 자체 DB */}
-          <Suspense fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {[1,2,3,4,5,6,7,8].map(i => (
-                <div key={i} className="bg-white border border-slate-100 rounded-xl p-3.5 h-20 animate-pulse" />
-              ))}
+          {/* LLM 모델·API 비교 허브 — 핵심 도구 */}
+          <Link
+            href="/compare"
+            className="group block rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white px-6 py-5 hover:border-indigo-300 hover:shadow-sm transition-all"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  {isEn ? 'LLM Model & API Price Comparison' : 'LLM 모델·API 가격·성능 비교'}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500 leading-relaxed">
+                  {isEn
+                    ? 'Compare context windows and per-token pricing across Claude, GPT, and Gemini — and calculate your monthly cost.'
+                    : 'Claude·GPT·Gemini의 컨텍스트와 토큰당 가격을 한눈에 비교하고, 월 비용까지 계산해 보세요.'}
+                </p>
+              </div>
+              <span className="flex-shrink-0 text-sm font-bold text-indigo-500 group-hover:translate-x-0.5 transition-transform">
+                {isEn ? 'Open →' : '비교하기 →'}
+              </span>
             </div>
-          }>
-            <LatestNewsSection locale={locale} />
-          </Suspense>
+          </Link>
 
           {/* 최신 논문 분석 — 자체 DB */}
           <Suspense fallback={
@@ -202,15 +157,14 @@ export default async function HomePage() {
             </h2>
             <p className="text-sm text-slate-500 leading-relaxed mb-4">
               {isEn
-                ? 'A technical blog publishing daily original analysis on AI, machine learning, blockchain, semiconductors, and robotics — covering the latest research papers, industry insights, and tech news.'
-                : 'AI·ML, 블록체인, 반도체, 로보틱스 분야의 최신 논문 분석, 심층 인사이트, 기술 뉴스 블로그입니다.'}
+                ? 'LLM model & API price comparison plus original deep-dive analysis and paper reviews across AI, semiconductors, and robotics.'
+                : 'LLM 모델·API 가격 비교와, AI·반도체·로보틱스 분야의 심층 인사이트·논문 분석을 제공합니다.'}
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
+                { href: '/compare',  label: isEn ? 'Compare' : '모델 비교', desc: isEn ? 'LLM price & specs' : 'LLM 가격·성능 비교' },
                 { href: '/insights', label: isEn ? 'Insights' : '인사이트', desc: isEn ? 'Deep-dive analysis' : '심층 분석 칼럼' },
                 { href: '/papers',   label: isEn ? 'Papers' : '논문 분석',  desc: isEn ? 'AI paper reviews'  : 'AI 논문 리뷰' },
-                { href: '/news',     label: isEn ? 'News' : '기사',         desc: isEn ? 'Daily tech news'   : 'AI 뉴스' },
-                { href: '/wiki',     label: isEn ? 'Wiki' : '위키',         desc: isEn ? 'IT knowledge base' : 'IT 지식 베이스' },
               ].map(item => (
                 <Link
                   key={item.href}

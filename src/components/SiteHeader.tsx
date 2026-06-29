@@ -69,25 +69,17 @@ export default function SiteHeader({ locale: localeProp, id, className }: { loca
           </button>
         )}
 
-        {/* Decorative icons (md 이상에서만) */}
-        <div className="hidden md:flex items-center gap-4">
-          <Link href="/wiki" title="위키" style={{ pointerEvents: 'auto', cursor: 'pointer' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="hover:stroke-indigo-400 transition-colors">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-              <line x1="12" y1="22.08" x2="12" y2="12"/>
-            </svg>
+        {/* 섹션 링크 */}
+        <div className="hidden md:flex items-center gap-5 text-sm font-semibold">
+          <Link href="/compare" title="LLM 모델·API 비교" className="text-slate-600 hover:text-indigo-600 transition-colors">
+            모델 비교
           </Link>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <polyline points="8 11 11 14 16 9"/>
-          </svg>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-            <line x1="2" y1="20" x2="22" y2="20"/>
-          </svg>
+          <Link href="/insights" title="인사이트" className="text-slate-600 hover:text-indigo-600 transition-colors">
+            인사이트
+          </Link>
+          <Link href="/papers" title="논문 분석" className="text-slate-600 hover:text-indigo-600 transition-colors">
+            논문
+          </Link>
         </div>
 
         {/* Dot grid → sitemap link */}

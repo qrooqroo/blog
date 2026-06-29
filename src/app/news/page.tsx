@@ -1,6 +1,11 @@
 export const dynamic = 'force-dynamic';
 export const maxDuration = 25; // 부하 시 행을 300초→25초로 캡: 함수 동시성 빠르게 회복
 
+// 자동 생성 뉴스 허브 — 저가치 콘텐츠로 분류돼 색인 제외 (사용자에겐 정상 노출)
+export const metadata = {
+  robots: { index: false, follow: true },
+};
+
 import { getAllNews } from '@/lib/news';
 import NewsSlider from '@/components/NewsSlider';
 import NewsCategoryTabs from '@/components/NewsCategoryTabs';

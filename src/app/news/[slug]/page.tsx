@@ -22,16 +22,6 @@ interface Props {
 
 const getCachedArticle = cache((slug: string) => getNewsBySlug(slug));
 
-const THIN_CONTENT_THRESHOLD = 300;
-
-function isThinContent(article: { content?: string | null; markdown_content?: string | null; excerpt?: string | null }): boolean {
-  const len = Math.max(
-    (article.content ?? '').length,
-    (article.markdown_content ?? '').length,
-  );
-  return len < THIN_CONTENT_THRESHOLD;
-}
-
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const article = await getCachedArticle(slug);
@@ -50,7 +40,6 @@ export async function generateMetadata({ params }: Props) {
   const imageUrl = article.image?.startsWith('http')
     ? article.image
     : `https://www.aiinsightnote.com${article.image ?? ''}`;
-  const thin = isThinContent(article);
 
   return {
     title,
@@ -63,7 +52,8 @@ export async function generateMetadata({ params }: Props) {
         'x-default': canonical,
       },
     },
-    ...(thin ? { robots: { index: false, follow: true } } : {}),
+    // 자동 생성 뉴스는 저가치 콘텐츠로 분류돼 전면 색인 제외 (사용자에겐 정상 노출)
+    robots: { index: false, follow: true },
     openGraph: {
       title,
       description,
